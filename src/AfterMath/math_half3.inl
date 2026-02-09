@@ -4,6 +4,8 @@
  * @note Optimized for 3D graphics, normals, colors with SSE optimization
  */
 
+#pragma once
+
 namespace AfterMath {
 
     // ============================================================================
@@ -205,29 +207,78 @@ namespace AfterMath {
 
     inline half half3::length() const noexcept
     {
-        float fx = float(x);
-        float fy = float(y);
-        float fz = float(z);
-        return half(std::sqrt(fx * fx + fy * fy + fz * fz));
+        double dx = double(float(x));
+        double dy = double(float(y));
+        double dz = double(float(z));
+        double len_sq = dx * dx + dy * dy + dz * dz;
+
+        if (len_sq > double(std::numeric_limits<float>::max()) * std::numeric_limits<float>::max()) {
+            return half(std::numeric_limits<float>::infinity());
+        }
+
+        return half(std::sqrt(len_sq));
     }
 
     inline half half3::length_sq() const noexcept
     {
-        float fx = float(x);
-        float fy = float(y);
-        float fz = float(z);
-        return half(fx * fx + fy * fy + fz * fz);
+        double fx = double(float(x));
+        double fy = double(float(y));
+        double fz = double(float(z));
+        double result = fx * fx + fy * fy + fz * fz;
+
+        if (result > double(std::numeric_limits<float>::max())) {
+            return half(std::numeric_limits<float>::infinity());
+        }
+
+        return half(result);
     }
 
     inline half3 half3::normalize() const noexcept
     {
-        half len = length();
+        double fx = double(float(x));
+        double fy = double(float(y));
+        double fz = double(float(z));
 
-        if (len.approximately_zero(Constants::Constants<float>::Epsilon * 10.0f))
+        double len_sq = fx * fx + fy * fy + fz * fz;
+
+        if (len_sq <= 0.0 || len_sq < double(std::numeric_limits<float>::denorm_min())) {
             return half3::zero();
+        }
 
-        half inv_len = half(1.0f) / len;
-        return half3(x * inv_len, y * inv_len, z * inv_len);
+        const double MAX_SAFE_LEN_SQ = double(std::numeric_limits<float>::max()) * 0.5;
+
+        if (len_sq > MAX_SAFE_LEN_SQ) {
+            double max_comp = std::max(std::abs(fx), std::max(std::abs(fy), std::abs(fz)));
+
+            if (max_comp <= 0.0) {
+                return half3::zero();
+            }
+
+            double scale = 1.0 / max_comp;
+            fx *= scale;
+            fy *= scale;
+            fz *= scale;
+
+            len_sq = fx * fx + fy * fy + fz * fz;
+        }
+
+        double len = std::sqrt(len_sq);
+
+        if (!std::isfinite(len) || len <= double(Constants::Constants<float>::Epsilon * 10.0f)) {
+            return half3::zero();
+        }
+
+        double inv_len = 1.0 / len;
+
+        if (!std::isfinite(inv_len)) {
+            return half3::zero();
+        }
+
+        return half3(
+            half(float(fx * inv_len)),
+            half(float(fy * inv_len)),
+            half(float(fz * inv_len))
+        );
     }
 
     inline half half3::dot(const half3& other) const noexcept
@@ -648,13 +699,54 @@ namespace AfterMath {
         return half3(lhs.x / rhs.x, lhs.y / rhs.y, lhs.z / rhs.z);
     }
 
+    inline half3 operator+(half3 vec, half scalar) noexcept
+    {
+        return half3(vec.x + scalar, vec.y + scalar, vec.z + scalar);
+    }
+
+    inline half3 operator+(half scalar, half3 vec) noexcept
+    {
+        return half3(scalar + vec.x, scalar + vec.y, scalar + vec.z);
+    }
+
+    inline half3 operator-(half3 vec, half scalar) noexcept
+    {
+        return half3(vec.x - scalar, vec.y - scalar, vec.z - scalar);
+    }
+
+    inline half3 operator-(half scalar, half3 vec) noexcept
+    {
+        return half3(scalar - vec.x, scalar - vec.y, scalar - vec.z);
+    }
+
+    inline half3 operator+(half3 vec, float scalar) noexcept
+    {
+        return half3(vec.x + scalar, vec.y + scalar, vec.z + scalar);
+    }
+
+    inline half3 operator+(float scalar, half3 vec) noexcept
+    {
+        return half3(scalar + vec.x, scalar + vec.y, scalar + vec.z);
+    }
+
+    inline half3 operator-(half3 vec, float scalar) noexcept
+    {
+        return half3(vec.x - scalar, vec.y - scalar, vec.z - scalar);
+    }
+
+    inline half3 operator-(float scalar, half3 vec) noexcept
+    {
+        return half3(scalar - vec.x, scalar - vec.y, scalar - vec.z);
+    }
+
     // ============================================================================
     // Global Mathematical Functions Implementation
     // ============================================================================
 
     inline half distance(const half3& a, const half3& b) noexcept
     {
-        return (b - a).length();
+        half3 diff = b - a;
+        return diff.length();
     }
 
     inline half distance_sq(const half3& a, const half3& b) noexcept
@@ -877,6 +969,82 @@ namespace AfterMath {
             return normal;
         }
         return fallback;
+    }
+
+    inline bool is_inf(const half3& vec) noexcept
+    {
+        return vec.is_inf();
+    }
+
+    inline bool is_negative_inf(const half3& vec) noexcept
+    {
+        return vec.is_negative_inf();
+    }
+
+    inline bool is_positive_inf(const half3& vec) noexcept
+    {
+        return vec.is_positive_inf();
+    }
+
+    inline bool is_negative(const half3& vec) noexcept
+    {
+        return vec.is_negative();
+    }
+
+    inline bool is_all_negative(const half3& vec) noexcept
+    {
+        return vec.is_all_negative();
+    }
+
+    inline bool is_positive(const half3& vec) noexcept
+    {
+        return vec.is_positive();
+    }
+
+    inline bool is_all_positive(const half3& vec) noexcept
+    {
+        return vec.is_all_positive();
+    }
+
+    inline bool is_nan(const half3& vec) noexcept
+    {
+        return vec.is_nan();
+    }
+
+    inline bool is_all_nan(const half3& vec) noexcept
+    {
+        return vec.is_all_nan();
+    }
+
+    inline bool is_finite(const half3& vec) noexcept
+    {
+        return vec.is_finite();
+    }
+
+    inline bool is_all_finite(const half3& vec) noexcept
+    {
+        return vec.is_all_finite();
+    }
+
+    inline bool is_zero(const half3& vec) noexcept
+    {
+        return vec.is_zero();
+    }
+
+    inline bool is_all_zero(const half3& vec) noexcept
+    {
+        return vec.is_all_zero();
+    }
+
+    // Дополнительные глобальные функции для полноты
+    inline bool is_positive_zero(const half3& vec) noexcept
+    {
+        return vec.x.is_positive_zero() || vec.y.is_positive_zero() || vec.z.is_positive_zero();
+    }
+
+    inline bool is_negative_zero(const half3& vec) noexcept
+    {
+        return vec.x.is_negative_zero() || vec.y.is_negative_zero() || vec.z.is_negative_zero();
     }
 
     // ============================================================================

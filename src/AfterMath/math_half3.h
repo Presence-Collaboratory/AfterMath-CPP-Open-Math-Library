@@ -961,6 +961,70 @@ namespace AfterMath
      */
     half3 operator/(half3 vec, float scalar) noexcept;
 
+    /**
+     * @brief Vector-scalar addition (half)
+     * @param vec Vector to add to
+     * @param scalar Scalar to add
+     * @return Result vector
+     */
+    half3 operator+(half3 vec, half scalar) noexcept;
+
+    /**
+     * @brief Scalar-vector addition (half)
+     * @param scalar Scalar to add
+     * @param vec Vector to add to
+     * @return Result vector
+     */
+    half3 operator+(half scalar, half3 vec) noexcept;
+
+    /**
+     * @brief Vector-scalar subtraction (half)
+     * @param vec Vector to subtract from
+     * @param scalar Scalar to subtract
+     * @return Result vector
+     */
+    half3 operator-(half3 vec, half scalar) noexcept;
+
+    /**
+     * @brief Scalar-vector subtraction (half)
+     * @param scalar Scalar to subtract from
+     * @param vec Vector to subtract
+     * @return Result vector
+     */
+    half3 operator-(half scalar, half3 vec) noexcept;
+
+    /**
+     * @brief Vector-scalar addition (float)
+     * @param vec Vector to add to
+     * @param scalar Scalar to add
+     * @return Result vector
+     */
+    half3 operator+(half3 vec, float scalar) noexcept;
+
+    /**
+     * @brief Scalar-vector addition (float)
+     * @param scalar Scalar to add
+     * @param vec Vector to add to
+     * @return Result vector
+     */
+    half3 operator+(float scalar, half3 vec) noexcept;
+
+    /**
+     * @brief Vector-scalar subtraction (float)
+     * @param vec Vector to subtract from
+     * @param scalar Scalar to subtract
+     * @return Result vector
+     */
+    half3 operator-(half3 vec, float scalar) noexcept;
+
+    /**
+     * @brief Scalar-vector subtraction (float)
+     * @param scalar Scalar to subtract from
+     * @param vec Vector to subtract
+     * @return Result vector
+     */
+    half3 operator-(float scalar, half3 vec) noexcept;
+
     // ============================================================================
     // Mixed Type Operators (half3 <-> float3)
     // ============================================================================
@@ -1332,6 +1396,83 @@ namespace AfterMath
      * @return Normalized vector or fallback if normalization fails
      */
     half3 ensure_normalized(const half3& normal, const half3& fallback = half3::unit_z()) noexcept;
+
+    /**
+     * @brief Check if any component of vector is infinity
+     * @param vec Vector to check
+     * @return True if any component is infinity
+     */
+    bool is_inf(const half3& vec) noexcept;
+
+    /**
+     * @brief Check if any component of vector is negative infinity
+     * @param vec Vector to check
+     * @return True if any component is negative infinity
+     */
+    bool is_negative_inf(const half3& vec) noexcept;
+
+    /**
+     * @brief Check if any component of vector is positive infinity
+     * @param vec Vector to check
+     * @return True if any component is positive infinity
+     */
+    bool is_positive_inf(const half3& vec) noexcept;
+
+    /**
+     * @brief Check if any component of vector is negative (including negative zero)
+     * @param vec Vector to check
+     * @return True if any component is negative
+     */
+    bool is_negative(const half3& vec) noexcept;
+
+    /**
+     * @brief Check if all components of vector are negative (including negative zero)
+     * @param vec Vector to check
+     * @return True if all components are negative
+     */
+    bool is_all_negative(const half3& vec) noexcept;
+
+    /**
+     * @brief Check if any component of vector is positive (excluding negative zero)
+     * @param vec Vector to check
+     * @return True if any component is positive
+     */
+    bool is_positive(const half3& vec) noexcept;
+
+    /**
+     * @brief Check if all components of vector are positive (excluding negative zero)
+     * @param vec Vector to check
+     * @return True if all components are positive
+     */
+    bool is_all_positive(const half3& vec) noexcept;
+
+    /**
+     * @brief Check if any components of vector are NaN
+     * @param vec Vector to check
+     * @return True if any components are NaN
+     */
+    bool is_nan(const half3& vec) noexcept;
+
+    /**
+     * @brief Check if all components of vector are NaN
+     * @param vec Vector to check
+     * @return True if all components are NaN
+     */
+    bool is_all_nan(const half3& vec) noexcept;
+
+    /**
+     * @brief Check if all components of vector are finite (not NaN and not infinity)
+     * @param vec Vector to check
+     * @return True if all components are finite
+     */
+    bool is_all_finite(const half3& vec) noexcept;
+
+    /**
+     * @brief Check if all components of vector are zero (positive or negative)
+     * @param vec Vector to check
+     * @return True if all components are zero
+     */
+    bool is_all_zero(const half3& vec) noexcept;
 
     // ============================================================================
     // Useful Constants

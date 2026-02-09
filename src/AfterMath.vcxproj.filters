@@ -141,6 +141,9 @@
     <ClInclude Include="Autotests\autotests_half2.h">
       <Filter>Autotests\Primitives\Vectors\Half</Filter>
     </ClInclude>
+    <ClInclude Include="Autotests\autotests_half3.h">
+      <Filter>Autotests\Primitives\Vectors\Half</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="AfterMath\math_aabb.inl">

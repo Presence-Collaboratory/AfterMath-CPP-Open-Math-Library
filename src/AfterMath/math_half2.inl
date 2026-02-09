@@ -4,6 +4,8 @@
  * @note Optimized for texture coordinates and memory-constrained applications
  */
 
+#pragma once
+
 namespace AfterMath {
 
     // ============================================================================
