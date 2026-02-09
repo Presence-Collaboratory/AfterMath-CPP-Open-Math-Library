@@ -1,3 +1,4 @@
+#include "math_half4.h"
 /**
  * @file math_half4.inl
  * @brief Implementation of 4-dimensional half-precision vector class
@@ -84,12 +85,30 @@ namespace AfterMath {
         return *this;
     }
 
+    inline half4& half4::operator+=(const half scalar) noexcept
+    {
+        x += scalar;
+        y += scalar;
+        z += scalar;
+        w += scalar;
+        return *this;
+    }
+
     inline half4& half4::operator-=(const half4& rhs) noexcept
     {
         x -= rhs.x;
         y -= rhs.y;
         z -= rhs.z;
         w -= rhs.w;
+        return *this;
+    }
+
+    inline half4& half4::operator-=(const half scalar) noexcept
+    {
+        x -= scalar;
+        y -= scalar;
+        z -= scalar;
+        w -= scalar;
         return *this;
     }
 
@@ -234,8 +253,28 @@ namespace AfterMath {
 
     inline half half4::length() const noexcept
     {
-        float len_sq = float(x) * float(x) + float(y) * float(y) +
-            float(z) * float(z) + float(w) * float(w);
+        double dx = double(float(x));
+        double dy = double(float(y));
+        double dz = double(float(z));
+        double dw = double(float(w));
+
+        double len_sq = dx * dx + dy * dy + dz * dz + dw * dw;
+
+        if (len_sq > 1e20)
+        {
+            double max_val = std::max(std::max(std::abs(dx), std::abs(dy)),
+                std::max(std::abs(dz), std::abs(dw)));
+            if (max_val > 0.0)
+            {
+                dx /= max_val;
+                dy /= max_val;
+                dz /= max_val;
+                dw /= max_val;
+                double scaled_len = (double)sqrt(dx * dx + dy * dy + dz * dz + dw * dw);
+                return half(scaled_len * max_val);
+            }
+        }
+
         return half(std::sqrt(len_sq));
     }
 
@@ -247,10 +286,41 @@ namespace AfterMath {
 
     inline half4 half4::normalize() const noexcept
     {
-        half len = length();
-        if (len > half(1e-3f)) {
-            return half4(x / len, y / len, z / len, w / len);
+        float fx = float(x);
+        float fy = float(y);
+        float fz = float(z);
+        float fw = float(w);
+
+        double len_sq = double(fx) * double(fx) + double(fy) * double(fy) +
+            double(fz) * double(fz) + double(fw) * double(fw);
+
+        if (len_sq > 1e-12)
+        {
+            double inv_len = 1.0 / std::sqrt(len_sq);
+
+            double max_component = std::max(std::max(std::abs(fx), std::abs(fy)),
+                std::max(std::abs(fz), std::abs(fw)));
+            double scaled_inv_len = inv_len * max_component;
+
+            if (scaled_inv_len > 65504.0)
+            {
+                double scale = 65504.0 / max_component;
+                return half4(
+                    half(fx * scale),
+                    half(fy * scale),
+                    half(fz * scale),
+                    half(fw * scale)
+                ).normalize();
+            }
+
+            return half4(
+                half(fx * inv_len),
+                half(fy * inv_len),
+                half(fz * inv_len),
+                half(fw * inv_len)
+            );
         }
+
         return half4::zero();
     }
 
@@ -315,7 +385,17 @@ namespace AfterMath {
 
     inline half4 half4::frac() const noexcept
     {
-        return half4(AfterMath::frac(x), AfterMath::frac(y), AfterMath::frac(z), AfterMath::frac(w));
+        auto frac_channel = [](half h) -> half {
+            float f = float(h);
+            return half(f - std::floor(f));
+        };
+
+        return half4(
+            frac_channel(x),
+            frac_channel(y),
+            frac_channel(z),
+            frac_channel(w)
+        );
     }
 
     inline half4 half4::saturate() const noexcept
@@ -359,31 +439,35 @@ namespace AfterMath {
 
     inline half4 half4::unpremultiply_alpha() const noexcept
     {
-        // Специальная обработка для alpha = 0
-        if (w.is_zero()) {
-            // Для alpha = 0, возвращаем исходные значения RGB
-            // Это стандартное поведение в графике - при alpha=0 RGB значения сохраняются
+        float fw = float(w);
+
+        if (fw == 0.0f)
+        {
             return *this;
         }
 
-        // Для очень маленьких alpha значений, используем безопасное деление
-        if (w < half(1e-6f)) {
-            // Используем минимальное безопасное значение alpha
-            float safe_alpha = std::max(float(w), 1e-6f);
+        if (std::abs(fw) < 1e-6f)
+        {
+            float safe_alpha = std::max(std::abs(fw), 1e-6f);
+            if (fw < 0.0f) safe_alpha = -safe_alpha;
+
             float inv_alpha = 1.0f / safe_alpha;
 
-            // Ограничиваем результат чтобы избежать переполнения
             return half4(
-                half(std::clamp(float(x) * inv_alpha, 0.0f, 1000.0f)),
-                half(std::clamp(float(y) * inv_alpha, 0.0f, 1000.0f)),
-                half(std::clamp(float(z) * inv_alpha, 0.0f, 1000.0f)),
+                half(std::clamp(float(x) * inv_alpha, -1000.0f, 1000.0f)),
+                half(std::clamp(float(y) * inv_alpha, -1000.0f, 1000.0f)),
+                half(std::clamp(float(z) * inv_alpha, -1000.0f, 1000.0f)),
                 w
             );
         }
 
-        // Нормальный случай: alpha достаточно большой
-        half inv_alpha = half(1.0f) / w;
-        return half4(x * inv_alpha, y * inv_alpha, z * inv_alpha, w);
+        float inv_alpha = 1.0f / fw;
+        return half4(
+            half(float(x) * inv_alpha),
+            half(float(y) * inv_alpha),
+            half(float(z) * inv_alpha),
+            w
+        );
     }
 
     inline half4 half4::grayscale() const noexcept
@@ -420,9 +504,15 @@ namespace AfterMath {
 
     inline half3 half4::project() const noexcept
     {
-        if (std::abs(float(w)) > 1e-6f) {
-            half inv_w = half(1.0f) / w;
-            return half3(x * inv_w, y * inv_w, z * inv_w);
+        float fw = float(w);
+        if (std::abs(fw) > 1e-12f)
+        {
+            float inv_w = 1.0f / fw;
+            return half3(
+                half(float(x) * inv_w),
+                half(float(y) * inv_w),
+                half(float(z) * inv_w)
+            );
         }
         return half3::zero();
     }
@@ -764,11 +854,7 @@ namespace AfterMath {
 
     inline bool half4::is_normal() const noexcept
     {
-        if (is_zero() || is_inf() || is_nan())
-        {
-            return false;
-        }
-        return true;
+        return x.is_normal() || y.is_normal() || z.is_normal() || w.is_normal();
     }
 
     inline bool half4::is_all_normal() const noexcept
@@ -785,9 +871,24 @@ namespace AfterMath {
         return lhs += rhs;
     }
 
+    inline half4 operator+(half4 lhs, const half scalar) noexcept
+    {
+        return lhs += scalar;
+    }
+
+    inline half4 operator+(const half scalar, half4 lhs) noexcept
+    {
+        return lhs += scalar;
+    }
+
     inline half4 operator-(half4 lhs, const half4& rhs) noexcept
     {
         return lhs -= rhs;
+    }
+
+    inline half4 operator-(half4 lhs, const half scalar) noexcept
+    {
+        return lhs -= scalar;
     }
 
     inline half4 operator*(half4 lhs, const half4& rhs) noexcept

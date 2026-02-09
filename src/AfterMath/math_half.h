@@ -171,7 +171,12 @@ namespace AfterMath
             return true;
         }
 
-        bool is_normal() const noexcept { return ((data & 0x7C00) != 0) && ((data & 0x7C00) != 0x7C00); }
+        bool is_normal() const noexcept
+        {
+            uint16_t bits = data;
+            uint16_t exp = (bits >> 10) & 0x1F;
+            return (exp >= 1) && (exp <= 30);
+        }
         bool is_positive() const noexcept { return (data & 0x7FFF) != 0 && (data & 0x8000) == 0; }
         bool is_negative() const noexcept { return (data & 0x8000) != 0; }
 
@@ -207,7 +212,7 @@ namespace AfterMath
         }
         static half max_value() noexcept { return half(0x7BFF); }
         static half min_value() noexcept { return half(0x0400); }
-        static half min_denormal_value() noexcept { return half(0x0001); }
+        static half min_denormal_value() noexcept { return half::from_bits(0x0001); }
         static half epsilon() noexcept { return half(0x1400); }
         static half lowest() noexcept { return half(0xFBFF); }
 
@@ -275,7 +280,7 @@ namespace AfterMath
             std::cout << "=== END COMPREHENSIVE DEBUG ===" << std::endl;
         }
 
-    private:
+    public:
         storage_type data;
 
         // Корректная конвертация float -> half

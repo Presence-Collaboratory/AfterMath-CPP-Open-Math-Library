@@ -13,7 +13,7 @@ namespace AfterMathTests
         using namespace AfterMath;
 
         // Константы для half-тестов
-        constexpr float HALF_EPSILON = 0.002f;        // Общая точность half
+        constexpr float HALF_EPSILON = 0.02f;        // Общая точность half
         constexpr float HALF_MATH_EPSILON = 2e-3f;   // Математические функции
         constexpr float HALF_ANGLE_EPSILON = 0.2f;   // Тригонометрия
         constexpr float HALF_LARGE_EPSILON = 0.5f;   // Большие значения

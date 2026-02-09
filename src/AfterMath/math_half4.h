@@ -86,7 +86,9 @@ namespace AfterMath
         // ============================================================================
 
         half4& operator+=(const half4& rhs) noexcept;
+        half4& operator+=(const half scalar) noexcept;
         half4& operator-=(const half4& rhs) noexcept;
+        half4& operator-=(const half scalar) noexcept;
         half4& operator*=(const half4& rhs) noexcept;
         half4& operator/=(const half4& rhs) noexcept;
         half4& operator*=(half scalar) noexcept;

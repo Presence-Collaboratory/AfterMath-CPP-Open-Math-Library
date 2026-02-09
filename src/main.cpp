@@ -8,6 +8,7 @@
 #include "Autotests/autotests_half.h"
 #include "Autotests/autotests_half2.h"
 #include "Autotests/autotests_half3.h"
+#include "Autotests/autotests_half4.h"
 
 #include "Autotests/autotests_float2x2.h"
 #include "Autotests/autotests_float3x3.h"
@@ -29,7 +30,8 @@ int main()
     
     //AfterMathTests::RunHalfTests();
     //AfterMathTests::RunHalf2Tests();
-    AfterMathTests::RunHalf3Tests();
+    //AfterMathTests::RunHalf3Tests();
+    AfterMathTests::RunHalf4Tests();
 
     //AfterMathTests::RunQuaternionTests();
     
