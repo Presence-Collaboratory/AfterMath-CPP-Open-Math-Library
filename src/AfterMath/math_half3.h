@@ -1,6 +1,5 @@
 ﻿// Description: 3-dimensional half-precision vector class with 
-//              comprehensive mathematical operations, SSE optimization,
-//              and HLSL compatibility
+//              comprehensive mathematical operations and HLSL compatibility
 // Author: NSDeathman, DeepSeek
 #pragma once
 
@@ -8,7 +7,7 @@
  * @file math_half3.h
  * @brief 3-dimensional half-precision vector class
  * @note Optimized for 3D graphics, normals, colors, and memory-constrained applications
- * @note Features SSE optimization and comprehensive HLSL compatibility
+ * @note Features comprehensive HLSL compatibility
  */
 
 #include <cmath>
@@ -23,9 +22,6 @@
 #include "math_half2.h"
 #include "math_float3.h"
 
-#include <xmmintrin.h>
-#include <pmmintrin.h>
-
 namespace AfterMath
 {
     /**
@@ -33,12 +29,11 @@ namespace AfterMath
      * @brief 3-dimensional half-precision vector with comprehensive mathematical operations
      *
      * Represents a 3D vector (x, y, z) using 16-bit half-precision floating point format.
-     * Features SSE optimization for performance-critical operations and comprehensive
-     * HLSL compatibility. Perfect for 3D graphics, normals, colors, and memory-constrained
-     * applications where full 32-bit precision is not required.
+     * Perfect for 3D graphics, normals, colors, and memory-constrained applications
+     * where full 32-bit precision is not required.
      *
      * @note Optimized for memory bandwidth and GPU data formats
-     * @note Provides seamless interoperability with float3 and comprehensive mathematical operations
+     * @note Provides seamless interoperability with float3 and comprehensive HLSL-like functions
      * @note Includes advanced color operations and geometric functions
      */
     class half3
@@ -53,1511 +48,494 @@ namespace AfterMath
         half z; ///< Z component of the vector
 
         // ============================================================================
-        // Constructors
+        // Constructors (основные конструкторы остаются в классе)
         // ============================================================================
 
-        /**
-         * @brief Default constructor (initializes to zero vector)
-         */
-        half3() noexcept;
-
-        /**
-         * @brief Construct from half components
-         * @param x X component
-         * @param y Y component
-         * @param z Z component
-         */
-        half3(half x, half y, half z) noexcept;
-
-        /**
-         * @brief Construct from scalar (all components set to same value)
-         * @param scalar Value for all components
-         */
-        explicit half3(half scalar) noexcept;
-
-        /**
-         * @brief Construct from float components
-         * @param x X component as float
-         * @param y Y component as float
-         * @param z Z component as float
-         */
-        half3(float x, float y, float z) noexcept;
-
-        /**
-         * @brief Construct from float scalar (all components set to same value)
-         * @param scalar Value for all components as float
-         */
-        explicit half3(float scalar) noexcept;
-
-        /**
-         * @brief Copy constructor
-         */
+        half3() noexcept : x(half::from_bits(0)), y(half::from_bits(0)), z(half::from_bits(0)) {}
+        half3(half x, half y, half z) noexcept : x(x), y(y), z(z) {}
+        explicit half3(half scalar) noexcept : x(scalar), y(scalar), z(scalar) {}
+        half3(float x, float y, float z) noexcept : x(x), y(y), z(z) {}
+        explicit half3(float scalar) noexcept : x(scalar), y(scalar), z(scalar) {}
         half3(const half3&) noexcept = default;
-
-        /**
-         * @brief Construct from half2 and z component
-         * @param vec 2D vector for x and y components
-         * @param z Z component
-         */
-        half3(const half2& vec, half z = half::from_bits(0)) noexcept;
-
-        /**
-         * @brief Construct from float3 (converts components to half precision)
-         * @param vec 32-bit floating point vector
-         */
-        half3(const float3& vec) noexcept;
-
-        /**
-         * @brief Construct from float2 and z component
-         * @param vec 2D vector for x and y components
-         * @param z Z component as float
-         */
-        half3(const float2& vec, float z = 0.0f) noexcept;
+        half3(const half2& vec, half z = half::from_bits(0)) noexcept : x(vec.x), y(vec.y), z(z) {}
+        half3(const float3& vec) noexcept : x(vec.x), y(vec.y), z(vec.z) {}
+        half3(const float2& vec, float z = 0.0f) noexcept : x(vec.x), y(vec.y), z(z) {}
 
         // ============================================================================
-        // Assignment Operators
+        // Assignment Operators (основные операторы присваивания)
         // ============================================================================
 
-        /**
-         * @brief Copy assignment operator
-         */
         half3& operator=(const half3&) noexcept = default;
-
-        /**
-         * @brief Assignment from float3 (converts components to half precision)
-         * @param vec 32-bit floating point vector
-         */
-        half3& operator=(const float3& vec) noexcept;
-
-        /**
-         * @brief Assignment from half scalar (sets all components to same value)
-         * @param scalar Value for all components
-         */
-        half3& operator=(half scalar) noexcept;
-
-        /**
-         * @brief Assignment from float scalar (sets all components to same value)
-         * @param scalar Value for all components as float
-         */
-        half3& operator=(float scalar) noexcept;
+        half3& operator=(const float3& vec) noexcept { x = vec.x; y = vec.y; z = vec.z; return *this; }
+        half3& operator=(half scalar) noexcept { x = y = z = scalar; return *this; }
+        half3& operator=(float scalar) noexcept { x = y = z = scalar; return *this; }
 
         // ============================================================================
-        // Compound Assignment Operators
+        // Compound Assignment Operators (составные операторы)
         // ============================================================================
 
-        /**
-         * @brief Compound addition assignment
-         * @param rhs Vector to add
-         * @return Reference to this object
-         */
-        half3& operator+=(const half3& rhs) noexcept;
-
-        /**
-         * @brief Compound subtraction assignment
-         * @param rhs Vector to subtract
-         * @return Reference to this object
-         */
-        half3& operator-=(const half3& rhs) noexcept;
-
-        /**
-         * @brief Compound multiplication assignment
-         * @param rhs Vector to multiply by
-         * @return Reference to this object
-         */
-        half3& operator*=(const half3& rhs) noexcept;
-
-        /**
-         * @brief Compound division assignment
-         * @param rhs Vector to divide by
-         * @return Reference to this object
-         */
-        half3& operator/=(const half3& rhs) noexcept;
-
-        /**
-         * @brief Compound scalar multiplication assignment (half)
-         * @param scalar Scalar to multiply by
-         * @return Reference to this object
-         */
-        half3& operator*=(half scalar) noexcept;
-
-        /**
-         * @brief Compound scalar multiplication assignment (float)
-         * @param scalar Scalar to multiply by
-         * @return Reference to this object
-         */
-        half3& operator*=(float scalar) noexcept;
-
-        /**
-         * @brief Compound scalar division assignment (half)
-         * @param scalar Scalar to divide by
-         * @return Reference to this object
-         */
-        half3& operator/=(half scalar) noexcept;
-
-        /**
-         * @brief Compound scalar division assignment (float)
-         * @param scalar Scalar to divide by
-         * @return Reference to this object
-         */
-        half3& operator/=(float scalar) noexcept;
+        half3& operator+=(const half3& rhs) noexcept { x += rhs.x; y += rhs.y; z += rhs.z; return *this; }
+        half3& operator-=(const half3& rhs) noexcept { x -= rhs.x; y -= rhs.y; z -= rhs.z; return *this; }
+        half3& operator*=(const half3& rhs) noexcept { x *= rhs.x; y *= rhs.y; z *= rhs.z; return *this; }
+        half3& operator/=(const half3& rhs) noexcept { x /= rhs.x; y /= rhs.y; z /= rhs.z; return *this; }
+        half3& operator*=(half scalar) noexcept { x *= scalar; y *= scalar; z *= scalar; return *this; }
+        half3& operator*=(float scalar) noexcept { x *= scalar; y *= scalar; z *= scalar; return *this; }
+        half3& operator/=(half scalar) noexcept { x /= scalar; y /= scalar; z /= scalar; return *this; }
+        half3& operator/=(float scalar) noexcept { x /= scalar; y /= scalar; z /= scalar; return *this; }
 
         // ============================================================================
-        // Unary Operators
+        // Unary Operators (унарные операторы)
         // ============================================================================
 
-        /**
-         * @brief Unary plus operator
-         * @return Positive vector
-         */
-        half3 operator+() const noexcept;
-
-        /**
-         * @brief Unary minus operator
-         * @return Negated vector
-         */
-        half3 operator-() const noexcept;
+        half3 operator+() const noexcept { return *this; }
+        half3 operator-() const noexcept { return half3(-x, -y, -z); }
 
         // ============================================================================
-        // Access Operators
+        // Access Operators (операторы доступа)
         // ============================================================================
 
-        /**
-         * @brief Access component by index
-         * @param index Component index (0 = x, 1 = y, 2 = z)
-         * @return Reference to component
-         */
-        half& operator[](int index) noexcept;
-
-        /**
-         * @brief Access component by index (const)
-         * @param index Component index (0 = x, 1 = y, 2 = z)
-         * @return Const reference to component
-         */
-        const half& operator[](int index) const noexcept;
+        half& operator[](int index) noexcept { return (&x)[index]; }
+        const half& operator[](int index) const noexcept { return (&x)[index]; }
 
         // ============================================================================
-        // Conversion Operators
+        // Conversion Operators (операторы преобразования)
         // ============================================================================
 
-        /**
-         * @brief Convert to float3 (promotes components to full precision)
-         * @return 32-bit floating point vector
-         */
-        explicit operator float3() const noexcept;
+        explicit operator float3() const noexcept { return float3(float(x), float(y), float(z)); }
 
         // ============================================================================
-        // Static Constructors
+        // Static Constructors (статические конструкторы)
         // ============================================================================
 
-        /**
-         * @brief Zero vector (0, 0, 0)
-         * @return Zero vector
-         */
-        static half3 zero() noexcept;
-
-        /**
-         * @brief One vector (1, 1, 1)
-         * @return One vector
-         */
-        static half3 one() noexcept;
-
-        /**
-         * @brief Unit X vector (1, 0, 0)
-         * @return Unit X vector
-         */
-        static half3 unit_x() noexcept;
-
-        /**
-         * @brief Unit Y vector (0, 1, 0)
-         * @return Unit Y vector
-         */
-        static half3 unit_y() noexcept;
-
-        /**
-         * @brief Unit Z vector (0, 0, 1)
-         * @return Unit Z vector
-         */
-        static half3 unit_z() noexcept;
-
-        /**
-         * @brief Forward vector (0, 0, 1) - common in 3D graphics
-         * @return Forward vector
-         */
-        static half3 forward() noexcept;
-
-        /**
-         * @brief Up vector (0, 1, 0) - common in 3D graphics
-         * @return Up vector
-         */
-        static half3 up() noexcept;
-
-        /**
-         * @brief Right vector (1, 0, 0) - common in 3D graphics
-         * @return Right vector
-         */
-        static half3 right() noexcept;
+        static half3 zero() noexcept { return half3(half::from_bits(0), half::from_bits(0), half::from_bits(0)); }
+        static half3 one() noexcept { return half3(half::from_bits(0x3C00), half::from_bits(0x3C00), half::from_bits(0x3C00)); }
+        static half3 unit_x() noexcept { return half3(half::from_bits(0x3C00), half::from_bits(0), half::from_bits(0)); }
+        static half3 unit_y() noexcept { return half3(half::from_bits(0), half::from_bits(0x3C00), half::from_bits(0)); }
+        static half3 unit_z() noexcept { return half3(half::from_bits(0), half::from_bits(0), half::from_bits(0x3C00)); }
+        static half3 forward() noexcept { return unit_z(); }
+        static half3 up() noexcept { return unit_y(); }
+        static half3 right() noexcept { return unit_x(); }
 
         // ============================================================================
-        // Mathematical Functions
+        // Swizzle Operations (swizzle-операции остаются в классе)
         // ============================================================================
 
-        /**
-         * @brief Compute Euclidean length (magnitude)
-         * @return Length of the vector
-         */
-        half length() const noexcept;
+        half2 xy() const noexcept { return half2(x, y); }
+        half2 xz() const noexcept { return half2(x, z); }
+        half2 yz() const noexcept { return half2(y, z); }
+        half2 yx() const noexcept { return half2(y, x); }
+        half2 zx() const noexcept { return half2(z, x); }
+        half2 zy() const noexcept { return half2(z, y); }
 
-        /**
-         * @brief Compute squared length (faster, useful for comparisons)
-         * @return Squared length of the vector
-         */
-        half length_sq() const noexcept;
+        half3 yxz() const noexcept { return half3(y, x, z); }
+        half3 zxy() const noexcept { return half3(z, x, y); }
+        half3 zyx() const noexcept { return half3(z, y, x); }
+        half3 xzy() const noexcept { return half3(x, z, y); }
 
-        /**
-         * @brief Normalize vector to unit length
-         * @return Normalized vector
-         * @note Returns zero vector if length is zero
-         */
-        half3 normalize() const noexcept;
-
-        /**
-         * @brief Compute dot product with another vector
-         * @param other Other vector
-         * @return Dot product result
-         */
-        half dot(const half3& other) const noexcept;
-
-        /**
-         * @brief Compute cross product with another vector
-         * @param other Other vector
-         * @return Cross product result
-         */
-        half3 cross(const half3& other) const noexcept;
-
-        /**
-         * @brief Compute distance to another point
-         * @param other Other point
-         * @return Euclidean distance
-         */
-        half distance(const half3& other) const noexcept;
-
-        /**
-         * @brief Compute squared distance to another point (faster)
-         * @param other Other point
-         * @return Squared Euclidean distance
-         */
-        half distance_sq(const half3& other) const noexcept;
+        // Color swizzles (цветовые swizzle)
+        half r() const noexcept { return x; }
+        half g() const noexcept { return y; }
+        half b() const noexcept { return z; }
+        half2 rg() const noexcept { return half2(x, y); }
+        half2 rb() const noexcept { return half2(x, z); }
+        half2 gb() const noexcept { return half2(y, z); }
+        half3 rgb() const noexcept { return *this; }
+        half3 bgr() const noexcept { return half3(z, y, x); }
+        half3 gbr() const noexcept { return half3(y, z, x); }
 
         // ============================================================================
-        // HLSL-like Functions
+        // Basic Checks (базовые проверки)
         // ============================================================================
 
-        /**
-         * @brief HLSL-like abs function (component-wise absolute value)
-         * @return Vector with absolute values of components
-         */
-        half3 abs() const noexcept;
-
-        /**
-         * @brief HLSL-like sign function (component-wise sign)
-         * @return Vector with signs of components (-1, 0, or 1)
-         */
-        half3 sign() const noexcept;
-
-        /**
-         * @brief HLSL-like floor function (component-wise floor)
-         * @return Vector with floored components
-         */
-        half3 floor() const noexcept;
-
-        /**
-         * @brief HLSL-like ceil function (component-wise ceiling)
-         * @return Vector with ceiling components
-         */
-        half3 ceil() const noexcept;
-
-        /**
-         * @brief HLSL-like round function (component-wise rounding)
-         * @return Vector with rounded components
-         */
-        half3 round() const noexcept;
-
-        /**
-         * @brief HLSL-like frac function (component-wise fractional part)
-         * @return Vector with fractional parts of components
-         */
-        half3 frac() const noexcept;
-
-        /**
-         * @brief HLSL-like saturate function (clamp components to [0, 1])
-         * @return Saturated vector
-         */
-        half3 saturate() const noexcept;
-
-        /**
-         * @brief HLSL-like step function (component-wise step)
-         * @param edge Edge value
-         * @return 1.0 if component >= edge, else 0.0
-         */
-        half3 step(half edge) const noexcept;
+        bool is_valid() const noexcept { return x.is_finite() && y.is_finite() && z.is_finite(); }
+        bool is_inf() const noexcept { return x.is_inf() || y.is_inf() || z.is_inf(); }
+        bool is_negative_inf() const noexcept { return x.is_negative_inf() || y.is_negative_inf() || z.is_negative_inf(); }
+        bool is_positive_inf() const noexcept { return x.is_positive_inf() || y.is_positive_inf() || z.is_positive_inf(); }
+        bool is_negative() const noexcept { return x.is_negative() || y.is_negative() || z.is_negative(); }
+        bool is_all_negative() const noexcept { return x.is_negative() && y.is_negative() && z.is_negative(); }
+        bool is_positive() const noexcept { return x.is_positive() || y.is_positive() || z.is_positive(); }
+        bool is_all_positive() const noexcept { return x.is_positive() && y.is_positive() && z.is_positive(); }
+        bool is_nan() const noexcept { return x.is_nan() || y.is_nan() || z.is_nan(); }
+        bool is_all_nan() const noexcept { return x.is_nan() && y.is_nan() && z.is_nan(); }
+        bool is_finite() const noexcept { return x.is_finite() || y.is_finite() || z.is_finite(); }
+        bool is_all_finite() const noexcept { return x.is_finite() && y.is_finite() && z.is_finite(); }
+        bool is_zero() const noexcept { return x.is_zero() || y.is_zero() || z.is_zero(); }
+        bool is_all_zero() const noexcept { return x.is_zero() && y.is_zero() && z.is_zero(); }
+        bool is_positive_zero() const noexcept { return x.is_positive_zero() || y.is_positive_zero() || z.is_positive_zero(); }
+        bool is_negative_zero() const noexcept { return x.is_negative_zero() || y.is_negative_zero() || z.is_negative_zero(); }
 
         // ============================================================================
-        // Geometric Operations
+        // Utility Methods (утилиты)
         // ============================================================================
 
-        /**
-         * @brief Compute reflection vector
-         * @param normal Surface normal (must be normalized)
-         * @return Reflected vector
-         */
-        half3 reflect(const half3& normal) const noexcept;
+        std::string to_string() const {
+            char buffer[64];
+            std::snprintf(buffer, sizeof(buffer), "(%.3f, %.3f, %.3f)", float(x), float(y), float(z));
+            return std::string(buffer);
+        }
 
-        /**
-         * @brief Compute refraction vector
-         * @param normal Surface normal (must be normalized)
-         * @param eta Ratio of indices of refraction
-         * @return Refracted vector
-         */
-        half3 refract(const half3& normal, half eta) const noexcept;
-
-        /**
-         * @brief Project vector onto another vector
-         * @param onto Vector to project onto
-         * @return Projected vector
-         */
-        half3 project(const half3& onto) const noexcept;
-
-        /**
-         * @brief Reject vector from another vector (component perpendicular)
-         * @param from Vector to reject from
-         * @return Rejected vector
-         */
-        half3 reject(const half3& from) const noexcept;
-
-        // ============================================================================
-        // Static Mathematical Functions (SSE Optimized where possible)
-        // ============================================================================
-
-        /**
-         * @brief Compute dot product of two vectors
-         * @param a First vector
-         * @param b Second vector
-         * @return Dot product result
-         */
-        static half dot(const half3& a, const half3& b) noexcept;
-
-        /**
-         * @brief Compute cross product of two vectors
-         * @param a First vector
-         * @param b Second vector
-         * @return Cross product result
-         */
-        static half3 cross(const half3& a, const half3& b) noexcept;
-
-        /**
-         * @brief Linear interpolation between two vectors
-         * @param a Start vector
-         * @param b End vector
-         * @param t Interpolation factor [0, 1]
-         * @return Interpolated vector
-         */
-        static half3 lerp(const half3& a, const half3& b, half t) noexcept;
-
-        /**
-         * @brief Linear interpolation between two vectors (float factor)
-         * @param a Start vector
-         * @param b End vector
-         * @param t Interpolation factor [0, 1] as float
-         * @return Interpolated vector
-         */
-        static half3 lerp(const half3& a, const half3& b, float t) noexcept;
-
-        /**
-         * @brief HLSL-like saturate function (clamp components to [0, 1])
-         * @param vec Vector to saturate
-         * @return Saturated vector
-         */
-        static half3 saturate(const half3& vec) noexcept;
-
-        /**
-         * @brief Component-wise minimum of two vectors
-         * @param a First vector
-         * @param b Second vector
-         * @return Component-wise minimum
-         */
-        static half3 min(const half3& a, const half3& b) noexcept;
-
-        /**
-         * @brief Component-wise maximum of two vectors
-         * @param a First vector
-         * @param b Second vector
-         * @return Component-wise maximum
-         */
-        static half3 max(const half3& a, const half3& b) noexcept;
-
-        /**
-         * @brief Compute reflection vector
-         * @param incident Incident vector
-         * @param normal Surface normal (must be normalized)
-         * @return Reflected vector
-         */
-        static half3 reflect(const half3& incident, const half3& normal) noexcept;
-
-        /**
-         * @brief Compute refraction vector
-         * @param incident Incident vector
-         * @param normal Surface normal (must be normalized)
-         * @param eta Ratio of indices of refraction
-         * @return Refracted vector
-         */
-        static half3 refract(const half3& incident, const half3& normal, half eta) noexcept;
-
-        // ============================================================================
-        // Color Operations
-        // ============================================================================
-
-        /**
-         * @brief Compute luminance using Rec. 709 weights
-         * @return Luminance value
-         * @note Uses weights: 0.2126*R + 0.7152*G + 0.0722*B
-         */
-        half luminance() const noexcept;
-
-        /**
-         * @brief Convert RGB to grayscale using luminance
-         * @return Grayscale color (RGB = luminance)
-         */
-        half3 rgb_to_grayscale() const noexcept;
-
-        /**
-         * @brief Apply gamma correction
-         * @param gamma Gamma value
-         * @return Gamma-corrected color
-         */
-        half3 gamma_correct(half gamma) const noexcept;
-
-        /**
-         * @brief Apply sRGB to linear conversion
-         * @return Linear color values
-         */
-        half3 srgb_to_linear() const noexcept;
-
-        /**
-         * @brief Apply linear to sRGB conversion
-         * @return sRGB color values
-         */
-        half3 linear_to_srgb() const noexcept;
-
-        // ============================================================================
-        // Swizzle Operations (HLSL style)
-        // ============================================================================
-
-        /**
-         * @brief Swizzle to (x, y)
-         * @return 2D vector with x and y components
-         */
-        half2 xy() const noexcept;
-
-        /**
-         * @brief Swizzle to (x, z)
-         * @return 2D vector with x and z components
-         */
-        half2 xz() const noexcept;
-
-        /**
-         * @brief Swizzle to (y, z)
-         * @return 2D vector with y and z components
-         */
-        half2 yz() const noexcept;
-
-        /**
-         * @brief Swizzle to (y, x)
-         * @return 2D vector with y and x components
-         */
-        half2 yx() const noexcept;
-
-        /**
-         * @brief Swizzle to (z, x)
-         * @return 2D vector with z and x components
-         */
-        half2 zx() const noexcept;
-
-        /**
-         * @brief Swizzle to (z, y)
-         * @return 2D vector with z and y components
-         */
-        half2 zy() const noexcept;
-
-        /**
-         * @brief Swizzle to (y, x, z)
-         * @return 3D vector with components rearranged
-         */
-        half3 yxz() const noexcept;
-
-        /**
-         * @brief Swizzle to (z, x, y)
-         * @return 3D vector with components rearranged
-         */
-        half3 zxy() const noexcept;
-
-        /**
-         * @brief Swizzle to (z, y, x)
-         * @return 3D vector with components rearranged
-         */
-        half3 zyx() const noexcept;
-
-        /**
-         * @brief Swizzle to (x, z, y)
-         * @return 3D vector with components rearranged
-         */
-        half3 xzy() const noexcept;
-
-        // Color swizzles
-        /**
-         * @brief Get red component (alias for x)
-         * @return Red component
-         */
-        half r() const noexcept;
-
-        /**
-         * @brief Get green component (alias for y)
-         * @return Green component
-         */
-        half g() const noexcept;
-
-        /**
-         * @brief Get blue component (alias for z)
-         * @return Blue component
-         */
-        half b() const noexcept;
-
-        /**
-         * @brief Get red and green components
-         * @return 2D vector with red and green components
-         */
-        half2 rg() const noexcept;
-
-        /**
-         * @brief Get red and blue components
-         * @return 2D vector with red and blue components
-         */
-        half2 rb() const noexcept;
-
-        /**
-         * @brief Get green and blue components
-         * @return 2D vector with green and blue components
-         */
-        half2 gb() const noexcept;
-
-        /**
-         * @brief Get RGB components (alias for this vector)
-         * @return RGB vector
-         */
-        half3 rgb() const noexcept;
-
-        /**
-         * @brief Get BGR components (components reversed)
-         * @return BGR vector
-         */
-        half3 bgr() const noexcept;
-
-        /**
-         * @brief Get GBR components (components rearranged)
-         * @return GBR vector
-         */
-        half3 gbr() const noexcept;
-
-        // ============================================================================
-        // Utility Methods
-        // ============================================================================
-
-        /**
-         * @brief Check if vector contains valid finite values
-         * @return True if all components are finite (not NaN or infinity)
-         */
-        bool is_valid() const noexcept;
-
-        /**
-         * @brief Check if vector is approximately equal to another
-         * @param other Vector to compare with
-         * @param epsilon Comparison tolerance
-         * @return True if vectors are approximately equal
-         */
-        bool approximately(const half3& other, float epsilon = Constants::Constants<float>::Epsilon) const noexcept;
-
-        /**
-         * @brief Check if vector is approximately zero
-         * @param epsilon Comparison tolerance
-         * @return True if vector length is approximately zero
-         */
-        bool approximately_zero(float epsilon = Constants::Constants<float>::Epsilon) const noexcept;
-
-        /**
-         * @brief Check if vector is normalized
-         * @param epsilon Comparison tolerance
-         * @return True if vector length is approximately 1.0
-         */
-        bool is_normalized(float epsilon = Constants::Constants<float>::Epsilon) const noexcept;
-
-        /**
-         * @brief Convert to string representation
-         * @return String in format "(x, y, z)"
-         */
-        std::string to_string() const;
-
-        /**
-         * @brief Get pointer to raw data
-         * @return Pointer to first component
-         */
-        const half* data() const noexcept;
-
-        /**
-         * @brief Get pointer to raw data (mutable)
-         * @return Pointer to first component
-         */
-        half* data() noexcept;
-
-        /**
-         * @brief Set x and y components from half2
-         * @param xy 2D vector for x and y components
-         */
-        void set_xy(const half2& xy) noexcept;
+        const half* data() const noexcept { return &x; }
+        half* data() noexcept { return &x; }
+        void set_xy(const half2& xy) noexcept { x = xy.x; y = xy.y; }
 
         // ============================================================================
         // Comparison Operators
         // ============================================================================
 
-        /**
-         * @brief Equality comparison
-         * @param rhs Vector to compare with
-         * @return True if vectors are approximately equal
-         */
-        bool operator==(const half3& rhs) const noexcept;
-
-        /**
-         * @brief Inequality comparison
-         * @param rhs Vector to compare with
-         * @return True if vectors are not approximately equal
-         */
-        bool operator!=(const half3& rhs) const noexcept;
-
-        /**
-         * @brief Check if any component is infinity
-         * @return True if any component is positive or negative infinity
-         */
-        bool is_inf() const noexcept
-        {
-            return x.is_inf() || y.is_inf() || z.is_inf();
+        bool operator==(const half3& rhs) const noexcept {
+            return approximately(x, rhs.x) && approximately(y, rhs.y) && approximately(z, rhs.z);
         }
 
-        /**
-         * @brief Check if any component is negative infinity
-         * @return True if any component is negative infinity
-         */
-        bool is_negative_inf() const noexcept
-        {
-            return x.is_negative_inf() || y.is_negative_inf() || z.is_negative_inf();
-        }
-
-        /**
-         * @brief Check if any component is positive infinity
-         * @return True if any component is positive infinity
-         */
-        bool is_positive_inf() const noexcept
-        {
-            return x.is_positive_inf() || y.is_positive_inf() || z.is_positive_inf();
-        }
-
-        /**
-         * @brief Check if any component is negative (including negative zero)
-         * @return True if any component is negative
-         */
-        bool is_negative() const noexcept
-        {
-            return x.is_negative() || y.is_negative() || z.is_negative();
-        }
-
-        /**
-         * @brief Check if all components are negative (including negative zero)
-         * @return True if all components are negative
-         */
-        bool is_all_negative() const noexcept
-        {
-            return x.is_negative() && y.is_negative() && z.is_negative();
-        }
-
-        /**
-         * @brief Check if any component is positive (excluding negative zero)
-         * @return True if any component is positive
-         */
-        bool is_positive() const noexcept
-        {
-            return x.is_positive() || y.is_positive() || z.is_positive();
-        }
-
-        /**
-         * @brief Check if all components are positive (excluding negative zero)
-         * @return True if all components are positive
-         */
-        bool is_all_positive() const noexcept
-        {
-            return x.is_positive() && y.is_positive() && z.is_positive();
-        }
-
-        /**
-         * @brief Check if any component is NaN (Not a Number)
-         * @return True if any component is NaN
-         */
-        bool is_nan() const noexcept
-        {
-            return x.is_nan() || y.is_nan() || z.is_nan();
-        }
-
-        /**
-         * @brief Check if all components are NaN
-         * @return True if all components are NaN
-         */
-        bool is_all_nan() const noexcept
-        {
-            return x.is_nan() && y.is_nan() && z.is_nan();
-        }
-
-        /**
-         * @brief Check if any component is finite (not NaN and not infinity)
-         * @return True if any component is finite
-         */
-        bool is_finite() const noexcept
-        {
-            return x.is_finite() || y.is_finite() || z.is_finite();
-        }
-
-        /**
-         * @brief Check if all components are finite (not NaN and not infinity)
-         * @return True if all components are finite
-         */
-        bool is_all_finite() const noexcept
-        {
-            return x.is_finite() && y.is_finite() && z.is_finite();
-        }
-
-        /**
-         * @brief Check if any component is zero (positive or negative)
-         * @return True if any component is zero
-         */
-        bool is_zero() const noexcept
-        {
-            return x.is_zero() || y.is_zero() || z.is_zero();
-        }
-
-        /**
-         * @brief Check if all components are zero (positive or negative)
-         * @return True if all components are zero
-         */
-        bool is_all_zero() const noexcept
-        {
-            return x.is_zero() && y.is_zero() && z.is_zero();
-        }
-
-        /**
-         * @brief Check if any component is positive zero
-         * @return True if any component is positive zero
-         */
-        bool is_positive_zero() const noexcept
-        {
-            return x.is_positive_zero() || y.is_positive_zero() || z.is_positive_zero();
-        }
-
-        /**
-         * @brief Check if any component is negative zero
-         * @return True if any component is negative zero
-         */
-        bool is_negative_zero() const noexcept
-        {
-            return x.is_negative_zero() || y.is_negative_zero() || z.is_negative_zero();
-        }
+        bool operator!=(const half3& rhs) const noexcept { return !(*this == rhs); }
     };
 
     // ============================================================================
-    // Binary Operators
+    // Binary Operators (бинарные операторы)
     // ============================================================================
 
-    /**
-     * @brief Vector addition
-     * @param lhs Left-hand side vector
-     * @param rhs Right-hand side vector
-     * @return Result of addition
-     */
-    half3 operator+(half3 lhs, const half3& rhs) noexcept;
+    inline half3 operator+(half3 lhs, const half3& rhs) noexcept { return lhs += rhs; }
+    inline half3 operator-(half3 lhs, const half3& rhs) noexcept { return lhs -= rhs; }
+    inline half3 operator*(half3 lhs, const half3& rhs) noexcept { return lhs *= rhs; }
+    inline half3 operator/(half3 lhs, const half3& rhs) noexcept { return lhs /= rhs; }
 
-    /**
-     * @brief Vector subtraction
-     * @param lhs Left-hand side vector
-     * @param rhs Right-hand side vector
-     * @return Result of subtraction
-     */
-    half3 operator-(half3 lhs, const half3& rhs) noexcept;
+    inline half3 operator*(half3 vec, half scalar) noexcept { return vec *= scalar; }
+    inline half3 operator*(half scalar, half3 vec) noexcept { return vec *= scalar; }
+    inline half3 operator/(half3 vec, half scalar) noexcept { return vec /= scalar; }
 
-    /**
-     * @brief Component-wise vector multiplication
-     * @param lhs Left-hand side vector
-     * @param rhs Right-hand side vector
-     * @return Result of multiplication
-     */
-    half3 operator*(half3 lhs, const half3& rhs) noexcept;
+    inline half3 operator*(half3 vec, float scalar) noexcept { return vec *= scalar; }
+    inline half3 operator*(float scalar, half3 vec) noexcept { return vec *= scalar; }
+    inline half3 operator/(half3 vec, float scalar) noexcept { return vec /= scalar; }
 
-    /**
-     * @brief Component-wise vector division
-     * @param lhs Left-hand side vector
-     * @param rhs Right-hand side vector
-     * @return Result of division
-     */
-    half3 operator/(half3 lhs, const half3& rhs) noexcept;
+    inline half3 operator+(half3 vec, half scalar) noexcept { return half3(vec.x + scalar, vec.y + scalar, vec.z + scalar); }
+    inline half3 operator+(half scalar, half3 vec) noexcept { return half3(scalar + vec.x, scalar + vec.y, scalar + vec.z); }
+    inline half3 operator-(half3 vec, half scalar) noexcept { return half3(vec.x - scalar, vec.y - scalar, vec.z - scalar); }
+    inline half3 operator-(half scalar, half3 vec) noexcept { return half3(scalar - vec.x, scalar - vec.y, scalar - vec.z); }
 
-    /**
-     * @brief Vector-scalar multiplication (half)
-     * @param vec Vector to multiply
-     * @param scalar Scalar multiplier
-     * @return Scaled vector
-     */
-    half3 operator*(half3 vec, half scalar) noexcept;
-
-    /**
-     * @brief Scalar-vector multiplication (half)
-     * @param scalar Scalar multiplier
-     * @param vec Vector to multiply
-     * @return Scaled vector
-     */
-    half3 operator*(half scalar, half3 vec) noexcept;
-
-    /**
-     * @brief Vector-scalar division (half)
-     * @param vec Vector to divide
-     * @param scalar Scalar divisor
-     * @return Scaled vector
-     */
-    half3 operator/(half3 vec, half scalar) noexcept;
-
-    /**
-     * @brief Vector-scalar multiplication (float)
-     * @param vec Vector to multiply
-     * @param scalar Scalar multiplier
-     * @return Scaled vector
-     */
-    half3 operator*(half3 vec, float scalar) noexcept;
-
-    /**
-     * @brief Scalar-vector multiplication (float)
-     * @param scalar Scalar multiplier
-     * @param vec Vector to multiply
-     * @return Scaled vector
-     */
-    half3 operator*(float scalar, half3 vec) noexcept;
-
-    /**
-     * @brief Vector-scalar division (float)
-     * @param vec Vector to divide
-     * @param scalar Scalar divisor
-     * @return Scaled vector
-     */
-    half3 operator/(half3 vec, float scalar) noexcept;
-
-    /**
-     * @brief Vector-scalar addition (half)
-     * @param vec Vector to add to
-     * @param scalar Scalar to add
-     * @return Result vector
-     */
-    half3 operator+(half3 vec, half scalar) noexcept;
-
-    /**
-     * @brief Scalar-vector addition (half)
-     * @param scalar Scalar to add
-     * @param vec Vector to add to
-     * @return Result vector
-     */
-    half3 operator+(half scalar, half3 vec) noexcept;
-
-    /**
-     * @brief Vector-scalar subtraction (half)
-     * @param vec Vector to subtract from
-     * @param scalar Scalar to subtract
-     * @return Result vector
-     */
-    half3 operator-(half3 vec, half scalar) noexcept;
-
-    /**
-     * @brief Scalar-vector subtraction (half)
-     * @param scalar Scalar to subtract from
-     * @param vec Vector to subtract
-     * @return Result vector
-     */
-    half3 operator-(half scalar, half3 vec) noexcept;
-
-    /**
-     * @brief Vector-scalar addition (float)
-     * @param vec Vector to add to
-     * @param scalar Scalar to add
-     * @return Result vector
-     */
-    half3 operator+(half3 vec, float scalar) noexcept;
-
-    /**
-     * @brief Scalar-vector addition (float)
-     * @param scalar Scalar to add
-     * @param vec Vector to add to
-     * @return Result vector
-     */
-    half3 operator+(float scalar, half3 vec) noexcept;
-
-    /**
-     * @brief Vector-scalar subtraction (float)
-     * @param vec Vector to subtract from
-     * @param scalar Scalar to subtract
-     * @return Result vector
-     */
-    half3 operator-(half3 vec, float scalar) noexcept;
-
-    /**
-     * @brief Scalar-vector subtraction (float)
-     * @param scalar Scalar to subtract from
-     * @param vec Vector to subtract
-     * @return Result vector
-     */
-    half3 operator-(float scalar, half3 vec) noexcept;
+    inline half3 operator+(half3 vec, float scalar) noexcept { return half3(vec.x + scalar, vec.y + scalar, vec.z + scalar); }
+    inline half3 operator+(float scalar, half3 vec) noexcept { return half3(scalar + vec.x, scalar + vec.y, scalar + vec.z); }
+    inline half3 operator-(half3 vec, float scalar) noexcept { return half3(vec.x - scalar, vec.y - scalar, vec.z - scalar); }
+    inline half3 operator-(float scalar, half3 vec) noexcept { return half3(scalar - vec.x, scalar - vec.y, scalar - vec.z); }
 
     // ============================================================================
     // Mixed Type Operators (half3 <-> float3)
     // ============================================================================
 
-    /**
-     * @brief Addition between half3 and float3
-     * @param lhs half3 vector
-     * @param rhs float3 vector
-     * @return Result of addition
-     */
-    half3 operator+(const half3& lhs, const float3& rhs) noexcept;
+    inline half3 operator+(const half3& lhs, const float3& rhs) noexcept { return half3(lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z); }
+    inline half3 operator-(const half3& lhs, const float3& rhs) noexcept { return half3(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z); }
+    inline half3 operator*(const half3& lhs, const float3& rhs) noexcept { return half3(lhs.x * rhs.x, lhs.y * rhs.y, lhs.z * rhs.z); }
+    inline half3 operator/(const half3& lhs, const float3& rhs) noexcept { return half3(lhs.x / rhs.x, lhs.y / rhs.y, lhs.z / rhs.z); }
 
-    /**
-     * @brief Subtraction between half3 and float3
-     * @param lhs half3 vector
-     * @param rhs float3 vector
-     * @return Result of subtraction
-     */
-    half3 operator-(const half3& lhs, const float3& rhs) noexcept;
-
-    /**
-     * @brief Multiplication between half3 and float3
-     * @param lhs half3 vector
-     * @param rhs float3 vector
-     * @return Result of multiplication
-     */
-    half3 operator*(const half3& lhs, const float3& rhs) noexcept;
-
-    /**
-     * @brief Division between half3 and float3
-     * @param lhs half3 vector
-     * @param rhs float3 vector
-     * @return Result of division
-     */
-    half3 operator/(const half3& lhs, const float3& rhs) noexcept;
-
-    /**
-     * @brief Addition between float3 and half3
-     * @param lhs float3 vector
-     * @param rhs half3 vector
-     * @return Result of addition
-     */
-    half3 operator+(const float3& lhs, const half3& rhs) noexcept;
-
-    /**
-     * @brief Subtraction between float3 and half3
-     * @param lhs float3 vector
-     * @param rhs half3 vector
-     * @return Result of subtraction
-     */
-    half3 operator-(const float3& lhs, const half3& rhs) noexcept;
-
-    /**
-     * @brief Multiplication between float3 and half3
-     * @param lhs float3 vector
-     * @param rhs half3 vector
-     * @return Result of multiplication
-     */
-    half3 operator*(const float3& lhs, const half3& rhs) noexcept;
-
-    /**
-     * @brief Division between float3 and half3
-     * @param lhs float3 vector
-     * @param rhs half3 vector
-     * @return Result of division
-     */
-    half3 operator/(const float3& lhs, const half3& rhs) noexcept;
+    inline half3 operator+(const float3& lhs, const half3& rhs) noexcept { return half3(lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z); }
+    inline half3 operator-(const float3& lhs, const half3& rhs) noexcept { return half3(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z); }
+    inline half3 operator*(const float3& lhs, const half3& rhs) noexcept { return half3(lhs.x * rhs.x, lhs.y * rhs.y, lhs.z * rhs.z); }
+    inline half3 operator/(const float3& lhs, const half3& rhs) noexcept { return half3(lhs.x / rhs.x, lhs.y / rhs.y, lhs.z / rhs.z); }
 
     // ============================================================================
-    // Global Mathematical Functions
+    // ГЛОБАЛЬНЫЕ МАТЕМАТИЧЕСКИЕ ФУНКЦИИ (HLSL-стиль)
     // ============================================================================
 
-    /**
-     * @brief Compute distance between two points
-     * @param a First point
-     * @param b Second point
-     * @return Euclidean distance between points
-     */
-    half distance(const half3& a, const half3& b) noexcept;
+    // ============================================================================
+    // Базовые векторные операции
+    // ============================================================================
+    inline half length(const half3& vec) noexcept {
+        float fx = float(vec.x);
+        float fy = float(vec.y);
+        float fz = float(vec.z);
+        return half(std::sqrt(fx * fx + fy * fy + fz * fz));
+    }
 
-    /**
-     * @brief Compute squared distance between two points (faster)
-     * @param a First point
-     * @param b Second point
-     * @return Squared Euclidean distance
-     */
-    half distance_sq(const half3& a, const half3& b) noexcept;
+    inline half length_sq(const half3& vec) noexcept {
+        return vec.x * vec.x + vec.y * vec.y + vec.z * vec.z;
+    }
 
-    /**
-     * @brief Compute dot product of two vectors
-     * @param a First vector
-     * @param b Second vector
-     * @return Dot product result
-     */
-    half dot(const half3& a, const half3& b) noexcept;
+    inline half3 normalize(const half3& vec) noexcept {
+        float fx = float(vec.x);
+        float fy = float(vec.y);
+        float fz = float(vec.z);
+        float len = std::sqrt(fx * fx + fy * fy + fz * fz);
 
-    /**
-     * @brief Compute cross product of two vectors
-     * @param a First vector
-     * @param b Second vector
-     * @return Cross product result
-     */
-    half3 cross(const half3& a, const half3& b) noexcept;
+        if (len == 0.0f || !std::isfinite(len)) {
+            return half3::zero();
+        }
 
-    /**
-     * @brief Normalize vector to unit length
-     * @param vec Vector to normalize
-     * @return Normalized vector
-     */
-    half3 normalize(const half3& vec) noexcept;
+        return half3(fx / len, fy / len, fz / len);
+    }
 
-    /**
-     * @brief Linear interpolation between two vectors
-     * @param a Start vector
-     * @param b End vector
-     * @param t Interpolation factor [0, 1]
-     * @return Interpolated vector
-     */
-    half3 lerp(const half3& a, const half3& b, half t) noexcept;
+    inline half dot(const half3& a, const half3& b) noexcept {
+        return a.x * b.x + a.y * b.y + a.z * b.z;
+    }
 
-    /**
-     * @brief Linear interpolation between two vectors (float factor)
-     * @param a Start vector
-     * @param b End vector
-     * @param t Interpolation factor [0, 1] as float
-     * @return Interpolated vector
-     */
-    half3 lerp(const half3& a, const half3& b, float t) noexcept;
+    inline half3 cross(const half3& a, const half3& b) noexcept {
+        float x = float(a.y) * float(b.z) - float(a.z) * float(b.y);
+        float y = float(a.z) * float(b.x) - float(a.x) * float(b.z);
+        float z = float(a.x) * float(b.y) - float(a.y) * float(b.x);
+        return half3(half(x), half(y), half(z));
+    }
 
-    /**
-     * @brief HLSL-like saturate function (clamp components to [0, 1])
-     * @param vec Vector to saturate
-     * @return Saturated vector
-     */
-    half3 saturate(const half3& vec) noexcept;
+    inline half distance(const half3& a, const half3& b) noexcept {
+        return length(b - a);
+    }
 
-    /**
-     * @brief Compute reflection vector
-     * @param incident Incident vector
-     * @param normal Surface normal (must be normalized)
-     * @return Reflected vector
-     */
-    half3 reflect(const half3& incident, const half3& normal) noexcept;
-
-    /**
-     * @brief Compute refraction vector
-     * @param incident Incident vector
-     * @param normal Surface normal (must be normalized)
-     * @param eta Ratio of indices of refraction
-     * @return Refracted vector
-     */
-    half3 refract(const half3& incident, const half3& normal, half eta) noexcept;
-
-    /**
-     * @brief Check if two vectors are approximately equal
-     * @param a First vector
-     * @param b Second vector
-     * @param epsilon Comparison tolerance
-     * @return True if vectors are approximately equal
-     */
-    bool approximately(const half3& a, const half3& b, float epsilon = Constants::Constants<float>::Epsilon) noexcept;
-
-    /**
-     * @brief Check if vector contains valid finite values
-     * @param vec Vector to check
-     * @return True if vector is valid (finite values)
-     */
-    bool is_valid(const half3& vec) noexcept;
-
-    /**
-     * @brief Check if vector is normalized
-     * @param vec Vector to check
-     * @param epsilon Comparison tolerance
-     * @return True if vector is normalized
-     */
-    bool is_normalized(const half3& vec, float epsilon = Constants::Constants<float>::Epsilon) noexcept;
+    inline half distance_sq(const half3& a, const half3& b) noexcept {
+        return length_sq(b - a);
+    }
 
     // ============================================================================
-    // HLSL-like Global Functions
+    // Геометрические операции
     // ============================================================================
+    inline half3 reflect(const half3& incident, const half3& normal) noexcept {
+        half dot_val = dot(incident, normal);
+        return incident - half(2.0f) * dot_val * normal;
+    }
 
-    /**
-     * @brief HLSL-like abs function (component-wise absolute value)
-     * @param vec Input vector
-     * @return Vector with absolute values of components
-     */
-    half3 abs(const half3& vec) noexcept;
+    inline half3 refract(const half3& incident, const half3& normal, half eta) noexcept {
+        half dot_ni = dot(normal, incident);
+        half k = half(1.0f) - eta * eta * (half(1.0f) - dot_ni * dot_ni);
 
-    /**
-     * @brief HLSL-like sign function (component-wise sign)
-     * @param vec Input vector
-     * @return Vector with signs of components
-     */
-    half3 sign(const half3& vec) noexcept;
+        if (k < half(0.0f))
+            return half3::zero(); // total internal reflection
 
-    /**
-     * @brief HLSL-like floor function (component-wise floor)
-     * @param vec Input vector
-     * @return Vector with floored components
-     */
-    half3 floor(const half3& vec) noexcept;
+        return incident * eta - normal * (eta * dot_ni + sqrt(k));
+    }
 
-    /**
-     * @brief HLSL-like ceil function (component-wise ceiling)
-     * @param vec Input vector
-     * @return Vector with ceiling components
-     */
-    half3 ceil(const half3& vec) noexcept;
+    inline half3 project(const half3& vec, const half3& onto) noexcept {
+        half onto_length_sq = length_sq(onto);
 
-    /**
-     * @brief HLSL-like round function (component-wise rounding)
-     * @param vec Input vector
-     * @return Vector with rounded components
-     */
-    half3 round(const half3& vec) noexcept;
+        if (approximately_zero(onto_length_sq, Constants::Constants<float>::Epsilon * 10.0f))
+            return half3::zero();
 
-    /**
-     * @brief HLSL-like frac function (component-wise fractional part)
-     * @param vec Input vector
-     * @return Vector with fractional parts of components
-     */
-    half3 frac(const half3& vec) noexcept;
+        half dot_val = dot(vec, onto);
+        return onto * (dot_val / onto_length_sq);
+    }
 
-    /**
-     * @brief HLSL-like step function (component-wise step)
-     * @param edge Edge value
-     * @param vec Input vector
-     * @return Step result vector
-     */
-    half3 step(half edge, const half3& vec) noexcept;
+    inline half3 reject(const half3& vec, const half3& from) noexcept {
+        half3 projected = project(vec, from);
+        return vec - projected;
+    }
 
-    /**
-     * @brief HLSL-like min function (component-wise minimum)
-     * @param a First vector
-     * @param b Second vector
-     * @return Component-wise minimum
-     */
-    half3 min(const half3& a, const half3& b) noexcept;
+    inline half angle_between(const half3& a, const half3& b) noexcept {
+        if (a.is_all_zero() || b.is_all_zero()) {
+            return half(0.0f);
+        }
 
-    /**
-     * @brief HLSL-like max function (component-wise maximum)
-     * @param a First vector
-     * @param b Second vector
-     * @return Component-wise maximum
-     */
-    half3 max(const half3& a, const half3& b) noexcept;
+        half3 a_norm = normalize(a);
+        half3 b_norm = normalize(b);
 
-    /**
-     * @brief HLSL-like clamp function (component-wise clamping)
-     * @param vec Vector to clamp
-     * @param min_val Minimum values
-     * @param max_val Maximum values
-     * @return Clamped vector
-     */
-    half3 clamp(const half3& vec, const half3& min_val, const half3& max_val) noexcept;
+        if (a_norm.is_all_zero() || b_norm.is_all_zero()) {
+            return half(0.0f);
+        }
 
-    /**
-     * @brief HLSL-like clamp function (scalar boundaries)
-     * @param vec Vector to clamp
-     * @param min_val Minimum value
-     * @param max_val Maximum value
-     * @return Clamped vector
-     */
-    half3 clamp(const half3& vec, float min_val, float max_val) noexcept;
+        half dot_val = dot(a_norm, b_norm);
+        dot_val = clamp(dot_val, -half_One, half_One);
 
-    /**
-     * @brief HLSL-like smoothstep function (component-wise smooth interpolation)
-     * @param edge0 Lower edge
-     * @param edge1 Upper edge
-     * @param vec Input vector
-     * @return Smoothly interpolated vector
-     */
-    half3 smoothstep(half edge0, half edge1, const half3& vec) noexcept;
+        if (dot_val >= half_One) return half(0.0f);
+        if (dot_val <= -half_One) return half(Constants::Constants<float>::Pi);
+
+        return half(std::acos(float(dot_val)));
+    }
 
     // ============================================================================
-    // Geometric Operations
+    // HLSL-подобные функции (компонентные)
     // ============================================================================
+    inline half3 abs(const half3& vec) noexcept {
+        return half3(abs(vec.x), abs(vec.y), abs(vec.z));
+    }
 
-    /**
-     * @brief Project vector onto another vector
-     * @param vec Vector to project
-     * @param onto Vector to project onto
-     * @return Projected vector
-     */
-    half3 project(const half3& vec, const half3& onto) noexcept;
+    inline half3 sign(const half3& vec) noexcept {
+        return half3(sign(vec.x), sign(vec.y), sign(vec.z));
+    }
 
-    /**
-     * @brief Reject vector from another vector (component perpendicular)
-     * @param vec Vector to reject
-     * @param from Vector to reject from
-     * @return Rejected vector
-     */
-    half3 reject(const half3& vec, const half3& from) noexcept;
+    inline half3 floor(const half3& vec) noexcept {
+        return half3(floor(vec.x), floor(vec.y), floor(vec.z));
+    }
 
-    /**
-     * @brief Compute angle between two vectors in radians
-     * @param a First vector
-     * @param b Second vector
-     * @return Angle in radians between [0, pi]
-     */
-    half angle_between(const half3& a, const half3& b) noexcept;
+    inline half3 ceil(const half3& vec) noexcept {
+        return half3(ceil(vec.x), ceil(vec.y), ceil(vec.z));
+    }
+
+    inline half3 round(const half3& vec) noexcept {
+        return half3(round(vec.x), round(vec.y), round(vec.z));
+    }
+
+    inline half3 frac(const half3& vec) noexcept {
+        return half3(frac(vec.x), frac(vec.y), frac(vec.z));
+    }
+
+    inline half3 saturate(const half3& vec) noexcept {
+        return half3(saturate(vec.x), saturate(vec.y), saturate(vec.z));
+    }
+
+    inline half3 step(half edge, const half3& vec) noexcept {
+        return half3(step(edge, vec.x), step(edge, vec.y), step(edge, vec.z));
+    }
+
+    inline half3 smoothstep(half edge0, half edge1, const half3& vec) noexcept {
+        return half3(smoothstep(edge0, edge1, vec.x),
+            smoothstep(edge0, edge1, vec.y),
+            smoothstep(edge0, edge1, vec.z));
+    }
+
+    // ============================================================================
+    // Функции минимума/максимума/ограничения
+    // ============================================================================
+    inline half3 min(const half3& a, const half3& b) noexcept {
+        return half3(min(a.x, b.x), min(a.y, b.y), min(a.z, b.z));
+    }
+
+    inline half3 max(const half3& a, const half3& b) noexcept {
+        return half3(max(a.x, b.x), max(a.y, b.y), max(a.z, b.z));
+    }
+
+    inline half3 clamp(const half3& vec, const half3& min_val, const half3& max_val) noexcept {
+        return half3(clamp(vec.x, min_val.x, max_val.x),
+            clamp(vec.y, min_val.y, max_val.y),
+            clamp(vec.z, min_val.z, max_val.z));
+    }
+
+    inline half3 clamp(const half3& vec, float min_val, float max_val) noexcept {
+        return half3(clamp(vec.x, min_val, max_val),
+            clamp(vec.y, min_val, max_val),
+            clamp(vec.z, min_val, max_val));
+    }
+
+    // ============================================================================
+    // Интерполяция
+    // ============================================================================
+    inline half3 lerp(const half3& a, const half3& b, half t) noexcept {
+        return half3(a.x + (b.x - a.x) * t,
+            a.y + (b.y - a.y) * t,
+            a.z + (b.z - a.z) * t);
+    }
+
+    inline half3 lerp(const half3& a, const half3& b, float t) noexcept {
+        return half3(a.x + (b.x - a.x) * t,
+            a.y + (b.y - a.y) * t,
+            a.z + (b.z - a.z) * t);
+    }
+
+    // ============================================================================
+    // Функции проверки и сравнения
+    // ============================================================================
+    inline bool approximately(const half3& a, const half3& b, float epsilon = Constants::Constants<float>::Epsilon) noexcept {
+        return approximately(a.x, b.x, epsilon) &&
+            approximately(a.y, b.y, epsilon) &&
+            approximately(a.z, b.z, epsilon);
+    }
+
+    inline bool approximately_zero(const half3& vec, float epsilon = Constants::Constants<float>::Epsilon) noexcept {
+        return approximately_zero(vec.x, epsilon) &&
+            approximately_zero(vec.y, epsilon) &&
+            approximately_zero(vec.z, epsilon);
+    }
+
+    inline bool is_normalized(const half3& vec, float epsilon = Constants::Constants<float>::Epsilon) noexcept {
+        half len_sq = length_sq(vec);
+        float adjusted_epsilon = std::max(epsilon, 0.01f);
+        return AfterMathFunctions::approximately(float(len_sq), 1.0f, adjusted_epsilon);
+    }
 
     // ============================================================================
     // Color Operations
     // ============================================================================
+    inline half luminance(const half3& rgb) noexcept {
+        return half(0.2126f) * rgb.x + half(0.7152f) * rgb.y + half(0.0722f) * rgb.z;
+    }
 
-    /**
-     * @brief Convert RGB to grayscale using luminance
-     * @param rgb RGB color vector
-     * @return Grayscale color (RGB = luminance)
-     */
-    half3 rgb_to_grayscale(const half3& rgb) noexcept;
+    inline half3 rgb_to_grayscale(const half3& rgb) noexcept {
+        half luma = luminance(rgb);
+        return half3(luma, luma, luma);
+    }
 
-    /**
-     * @brief Compute luminance of RGB color
-     * @param rgb RGB color vector
-     * @return Luminance value
-     */
-    half luminance(const half3& rgb) noexcept;
+    inline half3 gamma_correct(const half3& color, half gamma) noexcept {
+        return half3(pow(color.x, gamma), pow(color.y, gamma), pow(color.z, gamma));
+    }
 
-    /**
-     * @brief Apply gamma correction to color
-     * @param color Input color
-     * @param gamma Gamma value
-     * @return Gamma-corrected color
-     */
-    half3 gamma_correct(const half3& color, half gamma) noexcept;
+    inline half3 srgb_to_linear(const half3& srgb) noexcept {
+        auto srgb_to_linear_channel = [](half channel) -> half {
+            float c = float(channel);
+            return (c <= 0.04045f) ? half(c / 12.92f) : half(std::pow((c + 0.055f) / 1.055f, 2.4f));
+        };
 
-    /**
-     * @brief Convert sRGB color to linear space
-     * @param srgb sRGB color vector
-     * @return Linear color values
-     */
-    half3 srgb_to_linear(const half3& srgb) noexcept;
+        return half3(srgb_to_linear_channel(srgb.x),
+            srgb_to_linear_channel(srgb.y),
+            srgb_to_linear_channel(srgb.z));
+    }
 
-    /**
-     * @brief Convert linear color to sRGB space
-     * @param linear Linear color vector
-     * @return sRGB color values
-     */
-    half3 linear_to_srgb(const half3& linear) noexcept;
+    inline half3 linear_to_srgb(const half3& linear) noexcept {
+        auto linear_to_srgb_channel = [](half channel) -> half {
+            float c = float(channel);
+            return (c <= 0.0031308f) ? half(c * 12.92f) : half(1.055f * std::pow(c, 1.0f / 2.4f) - 0.055f);
+        };
+
+        return half3(linear_to_srgb_channel(linear.x),
+            linear_to_srgb_channel(linear.y),
+            linear_to_srgb_channel(linear.z));
+    }
 
     // ============================================================================
-    // Type Conversion Functions
+    // Глобальные функции проверки (для совместимости)
     // ============================================================================
-
-    /**
-     * @brief Convert half3 to float3 (promotes components to full precision)
-     * @param vec half-precision vector
-     * @return full-precision vector
-     */
-    float3 to_float3(const half3& vec) noexcept;
-
-    /**
-     * @brief Convert float3 to half3 (demotes components to half precision)
-     * @param vec full-precision vector
-     * @return half-precision vector
-     */
-    half3 to_half3(const float3& vec) noexcept;
-
-    // ============================================================================
-    // Utility Functions
-    // ============================================================================
-
-    /**
-     * @brief Ensure vector is normalized, with fallback to safe value
-     * @param normal Vector to normalize
-     * @param fallback Fallback vector if normalization fails
-     * @return Normalized vector or fallback if normalization fails
-     */
-    half3 ensure_normalized(const half3& normal, const half3& fallback = half3::unit_z()) noexcept;
-
-    /**
-     * @brief Check if any component of vector is infinity
-     * @param vec Vector to check
-     * @return True if any component is infinity
-     */
-    bool is_inf(const half3& vec) noexcept;
-
-    /**
-     * @brief Check if any component of vector is negative infinity
-     * @param vec Vector to check
-     * @return True if any component is negative infinity
-     */
-    bool is_negative_inf(const half3& vec) noexcept;
-
-    /**
-     * @brief Check if any component of vector is positive infinity
-     * @param vec Vector to check
-     * @return True if any component is positive infinity
-     */
-    bool is_positive_inf(const half3& vec) noexcept;
-
-    /**
-     * @brief Check if any component of vector is negative (including negative zero)
-     * @param vec Vector to check
-     * @return True if any component is negative
-     */
-    bool is_negative(const half3& vec) noexcept;
-
-    /**
-     * @brief Check if all components of vector are negative (including negative zero)
-     * @param vec Vector to check
-     * @return True if all components are negative
-     */
-    bool is_all_negative(const half3& vec) noexcept;
-
-    /**
-     * @brief Check if any component of vector is positive (excluding negative zero)
-     * @param vec Vector to check
-     * @return True if any component is positive
-     */
-    bool is_positive(const half3& vec) noexcept;
-
-    /**
-     * @brief Check if all components of vector are positive (excluding negative zero)
-     * @param vec Vector to check
-     * @return True if all components are positive
-     */
-    bool is_all_positive(const half3& vec) noexcept;
-
-    /**
-     * @brief Check if any components of vector are NaN
-     * @param vec Vector to check
-     * @return True if any components are NaN
-     */
-    bool is_nan(const half3& vec) noexcept;
-
-    /**
-     * @brief Check if all components of vector are NaN
-     * @param vec Vector to check
-     * @return True if all components are NaN
-     */
-    bool is_all_nan(const half3& vec) noexcept;
-
-    /**
-     * @brief Check if all components of vector are finite (not NaN and not infinity)
-     * @param vec Vector to check
-     * @return True if all components are finite
-     */
-    bool is_all_finite(const half3& vec) noexcept;
-
-    /**
-     * @brief Check if all components of vector are zero (positive or negative)
-     * @param vec Vector to check
-     * @return True if all components are zero
-     */
-    bool is_all_zero(const half3& vec) noexcept;
+    inline bool is_valid(const half3& vec) noexcept { return vec.is_valid(); }
+    inline bool is_inf(const half3& vec) noexcept { return vec.is_inf(); }
+    inline bool is_negative_inf(const half3& vec) noexcept { return vec.is_negative_inf(); }
+    inline bool is_positive_inf(const half3& vec) noexcept { return vec.is_positive_inf(); }
+    inline bool is_negative(const half3& vec) noexcept { return vec.is_negative(); }
+    inline bool is_all_negative(const half3& vec) noexcept { return vec.is_all_negative(); }
+    inline bool is_positive(const half3& vec) noexcept { return vec.is_positive(); }
+    inline bool is_all_positive(const half3& vec) noexcept { return vec.is_all_positive(); }
+    inline bool is_nan(const half3& vec) noexcept { return vec.is_nan(); }
+    inline bool is_all_nan(const half3& vec) noexcept { return vec.is_all_nan(); }
+    inline bool is_finite(const half3& vec) noexcept { return vec.is_finite(); }
+    inline bool is_all_finite(const half3& vec) noexcept { return vec.is_all_finite(); }
+    inline bool is_zero(const half3& vec) noexcept { return vec.is_zero(); }
+    inline bool is_all_zero(const half3& vec) noexcept { return vec.is_all_zero(); }
+    inline bool is_positive_zero(const half3& vec) noexcept { return vec.is_positive_zero(); }
+    inline bool is_negative_zero(const half3& vec) noexcept { return vec.is_negative_zero(); }
 
     // ============================================================================
-    // Useful Constants
+    // Функции преобразования типов
     // ============================================================================
+    inline float3 to_float3(const half3& vec) noexcept {
+        return float3(float(vec.x), float(vec.y), float(vec.z));
+    }
 
-    /**
-     * @brief Zero vector constant (0, 0, 0)
-     */
-    extern const half3 half3_Zero;
+    inline half3 to_half3(const float3& vec) noexcept {
+        return half3(vec.x, vec.y, vec.z);
+    }
 
-    /**
-     * @brief One vector constant (1, 1, 1)
-     */
-    extern const half3 half3_One;
+    // ============================================================================
+    // Утилитные функции
+    // ============================================================================
+    inline half3 ensure_normalized(const half3& normal, const half3& fallback = half3::unit_z()) noexcept {
+        half len_sq = length_sq(normal);
+        if (len_sq > half::epsilon()) {
+            half len = sqrt(len_sq);
+            if (abs(len - half_One) > half(0.01f)) {
+                return normal / len;
+            }
+            return normal;
+        }
+        return fallback;
+    }
 
-    /**
-     * @brief Unit X vector constant (1, 0, 0)
-     */
-    extern const half3 half3_UnitX;
-
-    /**
-     * @brief Unit Y vector constant (0, 1, 0)
-     */
-    extern const half3 half3_UnitY;
-
-    /**
-     * @brief Unit Z vector constant (0, 0, 1)
-     */
-    extern const half3 half3_UnitZ;
-
-    /**
-     * @brief Forward vector constant (0, 0, 1)
-     */
-    extern const half3 half3_Forward;
-
-    /**
-     * @brief Up vector constant (0, 1, 0)
-     */
-    extern const half3 half3_Up;
-
-    /**
-     * @brief Right vector constant (1, 0, 0)
-     */
-    extern const half3 half3_Right;
-
-    /**
-     * @brief Red color constant (1, 0, 0)
-     */
-    extern const half3 half3_Red;
-
-    /**
-     * @brief Green color constant (0, 1, 0)
-     */
-    extern const half3 half3_Green;
-
-    /**
-     * @brief Blue color constant (0, 0, 1)
-     */
-    extern const half3 half3_Blue;
-
-    /**
-     * @brief White color constant (1, 1, 1)
-     */
-    extern const half3 half3_White;
-
-    /**
-     * @brief Black color constant (0, 0, 0)
-     */
-    extern const half3 half3_Black;
-
-    /**
-     * @brief Yellow color constant (1, 1, 0)
-     */
-    extern const half3 half3_Yellow;
-
-    /**
-     * @brief Cyan color constant (0, 1, 1)
-     */
-    extern const half3 half3_Cyan;
-
-    /**
-     * @brief Magenta color constant (1, 0, 1)
-     */
-    extern const half3 half3_Magenta;
+    // ============================================================================
+    // Полезные константы
+    // ============================================================================
+    inline const half3 half3_Zero(half_Zero);
+    inline const half3 half3_One(half_One);
+    inline const half3 half3_UnitX(half_One, half_Zero, half_Zero);
+    inline const half3 half3_UnitY(half_Zero, half_One, half_Zero);
+    inline const half3 half3_UnitZ(half_Zero, half_Zero, half_One);
+    inline const half3 half3_Forward(half_Zero, half_Zero, half_One);
+    inline const half3 half3_Up(half_Zero, half_One, half_Zero);
+    inline const half3 half3_Right(half_One, half_Zero, half_Zero);
+    inline const half3 half3_Red(half_One, half_Zero, half_Zero);
+    inline const half3 half3_Green(half_Zero, half_One, half_Zero);
+    inline const half3 half3_Blue(half_Zero, half_Zero, half_One);
+    inline const half3 half3_White(half_One);
+    inline const half3 half3_Black(half_Zero);
+    inline const half3 half3_Yellow(half_One, half_One, half_Zero);
+    inline const half3 half3_Cyan(half_Zero, half_One, half_One);
+    inline const half3 half3_Magenta(half_One, half_Zero, half_One);
 
 } // namespace AfterMath
-
-#include "math_half3.inl"

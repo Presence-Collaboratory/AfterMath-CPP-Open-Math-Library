@@ -47,1228 +47,371 @@ namespace AfterMath
         half y; ///< Y component of the vector
 
         // ============================================================================
-        // Constructors
+        // Constructors (остаются как фундаментальные)
         // ============================================================================
 
-        /**
-         * @brief Default constructor (initializes to zero vector)
-         */
-        half2() noexcept;
-
-        /**
-         * @brief Construct from half components
-         * @param x X component
-         * @param y Y component
-         */
-        half2(half x, half y) noexcept;
-
-        /**
-         * @brief Construct from scalar (all components set to same value)
-         * @param scalar Value for all components
-         */
-        explicit half2(half scalar) noexcept;
-
-        /**
-         * @brief Construct from float components
-         * @param x X component as float
-         * @param y Y component as float
-         */
-        half2(float x, float y) noexcept;
-
-        /**
-         * @brief Construct from float scalar (all components set to same value)
-         * @param scalar Value for all components as float
-         */
-        explicit half2(float scalar) noexcept;
-
-        /**
-         * @brief Copy constructor
-         */
+        half2() noexcept : x(half::from_bits(0)), y(half::from_bits(0)) {}
+        half2(half x, half y) noexcept : x(x), y(y) {}
+        explicit half2(half scalar) noexcept : x(scalar), y(scalar) {}
+        half2(float x, float y) noexcept : x(x), y(y) {}
+        explicit half2(float scalar) noexcept : x(scalar), y(scalar) {}
+        half2(const float2& vec) noexcept : x(vec.x), y(vec.y) {}
         half2(const half2&) noexcept = default;
 
-        /**
-         * @brief Construct from float2 (converts components to half precision)
-         * @param vec 32-bit floating point vector
-         */
-        half2(const float2& vec) noexcept;
-
         // ============================================================================
-        // Assignment Operators
+        // Assignment Operators (остаются как фундаментальные)
         // ============================================================================
 
-        /**
-         * @brief Copy assignment operator
-         */
         half2& operator=(const half2&) noexcept = default;
-
-        /**
-         * @brief Assignment from float2 (converts components to half precision)
-         * @param vec 32-bit floating point vector
-         */
-        half2& operator=(const float2& vec) noexcept;
-
-        /**
-         * @brief Assignment from half scalar (sets all components to same value)
-         * @param scalar Value for all components
-         */
-        half2& operator=(half scalar) noexcept;
-
-        /**
-         * @brief Assignment from float scalar (sets all components to same value)
-         * @param scalar Value for all components as float
-         */
-        half2& operator=(float scalar) noexcept;
+        half2& operator=(const float2& vec) noexcept { x = vec.x; y = vec.y; return *this; }
+        half2& operator=(half scalar) noexcept { x = y = scalar; return *this; }
+        half2& operator=(float scalar) noexcept { x = y = scalar; return *this; }
 
         // ============================================================================
-        // Compound Assignment Operators
+        // Compound Assignment Operators (остаются как фундаментальные)
         // ============================================================================
 
-        /**
-         * @brief Compound addition assignment
-         * @param rhs Vector to add
-         * @return Reference to this object
-         */
-        half2& operator+=(const half2& rhs) noexcept;
-
-        /**
-         * @brief Compound subtraction assignment
-         * @param rhs Vector to subtract
-         * @return Reference to this object
-         */
-        half2& operator-=(const half2& rhs) noexcept;
-
-        /**
-         * @brief Compound multiplication assignment
-         * @param rhs Vector to multiply by
-         * @return Reference to this object
-         */
-        half2& operator*=(const half2& rhs) noexcept;
-
-        /**
-         * @brief Compound division assignment
-         * @param rhs Vector to divide by
-         * @return Reference to this object
-         */
-        half2& operator/=(const half2& rhs) noexcept;
-
-        /**
-         * @brief Compound scalar multiplication assignment (half)
-         * @param scalar Scalar to multiply by
-         * @return Reference to this object
-         */
-        half2& operator*=(half scalar) noexcept;
-
-        /**
-         * @brief Compound scalar multiplication assignment (float)
-         * @param scalar Scalar to multiply by
-         * @return Reference to this object
-         */
-        half2& operator*=(float scalar) noexcept;
-
-        /**
-         * @brief Compound scalar division assignment (half)
-         * @param scalar Scalar to divide by
-         * @return Reference to this object
-         */
-        half2& operator/=(half scalar) noexcept;
-
-        /**
-         * @brief Compound scalar division assignment (float)
-         * @param scalar Scalar to divide by
-         * @return Reference to this object
-         */
-        half2& operator/=(float scalar) noexcept;
+        half2& operator+=(const half2& rhs) noexcept { x += rhs.x; y += rhs.y; return *this; }
+        half2& operator-=(const half2& rhs) noexcept { x -= rhs.x; y -= rhs.y; return *this; }
+        half2& operator*=(const half2& rhs) noexcept { x *= rhs.x; y *= rhs.y; return *this; }
+        half2& operator/=(const half2& rhs) noexcept { x /= rhs.x; y /= rhs.y; return *this; }
+        half2& operator*=(half scalar) noexcept { x *= scalar; y *= scalar; return *this; }
+        half2& operator*=(float scalar) noexcept { x *= scalar; y *= scalar; return *this; }
+        half2& operator/=(half scalar) noexcept { x /= scalar; y /= scalar; return *this; }
+        half2& operator/=(float scalar) noexcept { x /= scalar; y /= scalar; return *this; }
 
         // ============================================================================
-        // Unary Operators
+        // Unary Operators (остаются как фундаментальные)
         // ============================================================================
 
-        /**
-         * @brief Unary plus operator
-         * @return Positive vector
-         */
-        half2 operator+() const noexcept;
-
-        /**
-         * @brief Unary minus operator
-         * @return Negated vector
-         */
-        half2 operator-() const noexcept;
+        half2 operator+() const noexcept { return *this; }
+        half2 operator-() const noexcept { return half2(-x, -y); }
 
         // ============================================================================
-        // Access Operators
+        // Access Operators (остаются как фундаментальные)
         // ============================================================================
 
-        /**
-         * @brief Access component by index
-         * @param index Component index (0 = x, 1 = y)
-         * @return Reference to component
-         */
-        half& operator[](int index) noexcept;
-
-        /**
-         * @brief Access component by index (const)
-         * @param index Component index (0 = x, 1 = y)
-         * @return Const reference to component
-         */
-        const half& operator[](int index) const noexcept;
+        half& operator[](int index) noexcept { return (&x)[index]; }
+        const half& operator[](int index) const noexcept { return (&x)[index]; }
 
         // ============================================================================
-        // Conversion Operators
+        // Conversion Operators (остаются как фундаментальные)
         // ============================================================================
 
-        /**
-         * @brief Convert to float2 (promotes components to full precision)
-         * @return 32-bit floating point vector
-         */
-        explicit operator float2() const noexcept;
+        explicit operator float2() const noexcept { return float2(float(x), float(y)); }
 
         // ============================================================================
-        // Static Constructors
+        // Static Constructors (остаются как удобные утилиты)
         // ============================================================================
 
-        /**
-         * @brief Zero vector (0, 0)
-         * @return Zero vector
-         */
-        static half2 zero() noexcept;
-
-        /**
-         * @brief One vector (1, 1)
-         * @return One vector
-         */
-        static half2 one() noexcept;
-
-        /**
-         * @brief Unit X vector (1, 0)
-         * @return Unit X vector
-         */
-        static half2 unit_x() noexcept;
-
-        /**
-         * @brief Unit Y vector (0, 1)
-         * @return Unit Y vector
-         */
-        static half2 unit_y() noexcept;
-
-        /**
-         * @brief Create from texture coordinates
-         * @param u U coordinate
-         * @param v V coordinate
-         * @return Texture coordinate vector
-         */
-        static half2 uv(half u, half v) noexcept;
+        static half2 zero() noexcept { return half2(half::from_bits(0), half::from_bits(0)); }
+        static half2 one() noexcept { return half2(half::from_bits(0x3C00), half::from_bits(0x3C00)); }
+        static half2 unit_x() noexcept { return half2(half::from_bits(0x3C00), half::from_bits(0)); }
+        static half2 unit_y() noexcept { return half2(half::from_bits(0), half::from_bits(0x3C00)); }
+        static half2 uv(half u, half v) noexcept { return half2(u, v); }
 
         // ============================================================================
-        // Mathematical Functions
+        // Swizzle Operations (остаются как удобные утилиты)
         // ============================================================================
 
-        /**
-         * @brief Compute Euclidean length (magnitude)
-         * @return Length of the vector
-         */
-        half length() const noexcept;
-
-        /**
-         * @brief Compute squared length (faster, useful for comparisons)
-         * @return Squared length of the vector
-         */
-        half length_sq() const noexcept;
-
-        /**
-         * @brief Normalize vector to unit length
-         * @return Normalized vector
-         * @note Returns zero vector if length is zero
-         */
-        half2 normalize() const noexcept;
-
-        /**
-         * @brief Compute dot product with another vector
-         * @param other Other vector
-         * @return Dot product result
-         */
-        half dot(const half2& other) const noexcept;
-
-        /**
-         * @brief Compute perpendicular vector (90 degree counter-clockwise rotation)
-         * @return Perpendicular vector (-y, x)
-         */
-        half2 perpendicular() const noexcept;
-
-        /**
-         * @brief Compute distance to another point
-         * @param other Other point
-         * @return Euclidean distance
-         */
-        half distance(const half2& other) const noexcept;
-
-        /**
-         * @brief Compute squared distance to another point (faster)
-         * @param other Other point
-         * @return Squared Euclidean distance
-         */
-        half distance_sq(const half2& other) const noexcept;
+        half2 yx() const noexcept { return half2(y, x); }
+        half2 xx() const noexcept { return half2(x, x); }
+        half2 yy() const noexcept { return half2(y, y); }
 
         // ============================================================================
-        // HLSL-like Functions
+        // Texture Coordinate Accessors (остаются как удобные утилиты)
         // ============================================================================
 
-        /**
-         * @brief HLSL-like abs function (component-wise absolute value)
-         * @return Vector with absolute values of components
-         */
-        half2 abs() const noexcept;
-
-        /**
-         * @brief HLSL-like sign function (component-wise sign)
-         * @return Vector with signs of components (-1, 0, or 1)
-         */
-        half2 sign() const noexcept;
-
-        /**
-         * @brief HLSL-like floor function (component-wise floor)
-         * @return Vector with floored components
-         */
-        half2 floor() const noexcept;
-
-        /**
-         * @brief HLSL-like ceil function (component-wise ceiling)
-         * @return Vector with ceiling components
-         */
-        half2 ceil() const noexcept;
-
-        /**
-         * @brief HLSL-like round function (component-wise rounding)
-         * @return Vector with rounded components
-         */
-        half2 round() const noexcept;
-
-        /**
-         * @brief HLSL-like frac function (component-wise fractional part)
-         * @return Vector with fractional parts of components
-         */
-        half2 frac() const noexcept;
-
-        /**
-         * @brief HLSL-like saturate function (clamp components to [0, 1])
-         * @return Saturated vector
-         */
-        half2 saturate() const noexcept;
-
-        /**
-         * @brief HLSL-like step function (component-wise step)
-         * @param edge Edge value
-         * @return 1.0 if component >= edge, else 0.0
-         */
-        half2 step(half edge) const noexcept;
+        half u() const noexcept { return x; }
+        half v() const noexcept { return y; }
+        void set_u(half u) noexcept { x = u; }
+        void set_v(half v) noexcept { y = v; }
 
         // ============================================================================
-        // Static Mathematical Functions
+        // Basic Checks (остаются как фундаментальные проверки)
         // ============================================================================
 
-        /**
-         * @brief Compute dot product of two vectors
-         * @param a First vector
-         * @param b Second vector
-         * @return Dot product result
-         */
-        static half dot(const half2& a, const half2& b) noexcept;
+        bool is_valid() const noexcept { return x.is_finite() && y.is_finite(); }
 
-        /**
-         * @brief Linear interpolation between two vectors
-         * @param a Start vector
-         * @param b End vector
-         * @param t Interpolation factor [0, 1]
-         * @return Interpolated vector
-         */
-        static half2 lerp(const half2& a, const half2& b, half t) noexcept;
+        bool is_inf() const noexcept { return x.is_inf() || y.is_inf(); }
+        bool is_negative_inf() const noexcept { return x.is_negative_inf() || y.is_negative_inf(); }
+        bool is_positive_inf() const noexcept { return x.is_positive_inf() || y.is_positive_inf(); }
 
-        /**
-         * @brief Linear interpolation between two vectors (float factor)
-         * @param a Start vector
-         * @param b End vector
-         * @param t Interpolation factor [0, 1] as float
-         * @return Interpolated vector
-         */
-        static half2 lerp(const half2& a, const half2& b, float t) noexcept;
+        bool is_negative() const noexcept { return x.is_negative() || y.is_negative(); }
+        bool is_all_negative() const noexcept { return x.is_negative() && y.is_negative(); }
 
-        /**
-         * @brief HLSL-like saturate function (clamp components to [0, 1])
-         * @param vec Vector to saturate
-         * @return Saturated vector
-         */
-        static half2 saturate(const half2& vec) noexcept;
+        bool is_positive() const noexcept { return x.is_positive() || y.is_positive(); }
+        bool is_all_positive() const noexcept { return x.is_positive() && y.is_positive(); }
 
-        /**
-         * @brief Component-wise minimum of two vectors
-         * @param a First vector
-         * @param b Second vector
-         * @return Component-wise minimum
-         */
-        static half2 min(const half2& a, const half2& b) noexcept;
+        bool is_nan() const noexcept { return x.is_nan() || y.is_nan(); }
+        bool is_all_nan() const noexcept { return x.is_nan() && y.is_nan(); }
 
-        /**
-         * @brief Component-wise maximum of two vectors
-         * @param a First vector
-         * @param b Second vector
-         * @return Component-wise maximum
-         */
-        static half2 max(const half2& a, const half2& b) noexcept;
+        bool is_finite() const noexcept { return x.is_finite() || y.is_finite(); }
+        bool is_all_finite() const noexcept { return x.is_finite() && y.is_finite(); }
 
-        // ============================================================================
-        // Swizzle Operations (HLSL style)
-        // ============================================================================
+        bool is_zero() const noexcept { return x.is_zero() || y.is_zero(); }
+        bool is_all_zero() const noexcept { return x.is_zero() && y.is_zero(); }
 
-        /**
-         * @brief Swizzle to (y, x)
-         * @return Vector with components swapped
-         */
-        half2 yx() const noexcept;
-
-        /**
-         * @brief Swizzle to (x, x)
-         * @return Vector with x component duplicated
-         */
-        half2 xx() const noexcept;
-
-        /**
-         * @brief Swizzle to (y, y)
-         * @return Vector with y component duplicated
-         */
-        half2 yy() const noexcept;
-
-        // ============================================================================
-        // Texture Coordinate Accessors
-        // ============================================================================
-
-        /**
-         * @brief Get U texture coordinate (alias for x)
-         * @return U coordinate
-         */
-        half u() const noexcept;
-
-        /**
-         * @brief Get V texture coordinate (alias for y)
-         * @return V coordinate
-         */
-        half v() const noexcept;
-
-        /**
-         * @brief Set U texture coordinate
-         * @param u U coordinate value
-         */
-        void set_u(half u) noexcept;
-
-        /**
-         * @brief Set V texture coordinate
-         * @param v V coordinate value
-         */
-        void set_v(half v) noexcept;
-
-        // ============================================================================
-        // Utility Methods
-        // ============================================================================
-
-        /**
-         * @brief Check if vector contains valid finite values
-         * @return True if all components are finite (not NaN or infinity)
-         */
-        bool is_valid() const noexcept;
-
-        /**
-         * @brief Check if vector is approximately equal to another
-         * @param other Vector to compare with
-         * @param epsilon Comparison tolerance
-         * @return True if vectors are approximately equal
-         */
-        bool approximately(const half2& other, float epsilon = Constants::Constants<float>::Epsilon) const noexcept;
-
-        /**
-         * @brief Check if vector is approximately zero
-         * @param epsilon Comparison tolerance
-         * @return True if vector length is approximately zero
-         */
-        bool approximately_zero(float epsilon = Constants::Constants<float>::Epsilon) const noexcept;
-
-        /**
-         * @brief Check if vector is normalized
-         * @param epsilon Comparison tolerance
-         * @return True if vector length is approximately 1.0
-         */
-        bool is_normalized(float epsilon = Constants::Constants<float>::Epsilon) const noexcept;
-
-        /**
-         * @brief Convert to string representation
-         * @return String in format "(x, y)"
-         */
-        std::string to_string() const;
-
-        /**
-         * @brief Get pointer to raw data
-         * @return Pointer to first component
-         */
-        const half* data() const noexcept;
-
-        /**
-         * @brief Get pointer to raw data (mutable)
-         * @return Pointer to first component
-         */
-        half* data() noexcept;
+        bool is_positive_zero() const noexcept { return x.is_positive_zero() || y.is_positive_zero(); }
+        bool is_negative_zero() const noexcept { return x.is_negative_zero() || y.is_negative_zero(); }
 
         // ============================================================================
         // Comparison Operators
         // ============================================================================
 
-        /**
-         * @brief Equality comparison
-         * @param rhs Vector to compare with
-         * @return True if vectors are approximately equal
-         */
-        bool operator==(const half2& rhs) const noexcept;
-
-        /**
-         * @brief Inequality comparison
-         * @param rhs Vector to compare with
-         * @return True if vectors are not approximately equal
-         */
-        bool operator!=(const half2& rhs) const noexcept;
-
-        /**
-         * @brief Check if any component is infinity
-         * @return True if any component is positive or negative infinity
-         */
-        bool is_inf() const noexcept
-        {
-            return x.is_inf() || y.is_inf();
+        bool operator==(const half2& rhs) const noexcept {
+            return approximately(x, rhs.x) && approximately(y, rhs.y);
         }
 
-        /**
-         * @brief Check if any component is negative infinity
-         * @return True if any component is negative infinity
-         */
-        bool is_negative_inf() const noexcept
-        {
-            return x.is_negative_inf() || y.is_negative_inf();
+        bool operator!=(const half2& rhs) const noexcept { return !(*this == rhs); }
+
+        // ============================================================================
+        // Utility Methods
+        // ============================================================================
+
+        std::string to_string() const {
+            char buffer[64];
+            std::snprintf(buffer, sizeof(buffer), "(%.3f, %.3f)", float(x), float(y));
+            return std::string(buffer);
         }
 
-        /**
-         * @brief Check if any component is positive infinity
-         * @return True if any component is positive infinity
-         */
-        bool is_positive_inf() const noexcept
-        {
-            return x.is_positive_inf() || y.is_positive_inf();
-        }
-
-        /**
-         * @brief Check if any component is negative (including negative zero)
-         * @return True if any component is negative
-         */
-        bool is_negative() const noexcept
-        {
-            return x.is_negative() || y.is_negative();
-        }
-
-        /**
-         * @brief Check if all components are negative (including negative zero)
-         * @return True if all components are negative
-         */
-        bool is_all_negative() const noexcept
-        {
-            return x.is_negative() && y.is_negative();
-        }
-
-        /**
-         * @brief Check if any component is positive (excluding negative zero)
-         * @return True if any component is positive
-         */
-        bool is_positive() const noexcept
-        {
-            return x.is_positive() || y.is_positive();
-        }
-
-        /**
-         * @brief Check if all components are positive (excluding negative zero)
-         * @return True if all components are positive
-         */
-        bool is_all_positive() const noexcept
-        {
-            return x.is_positive() && y.is_positive();
-        }
-
-        /**
-         * @brief Check if any component is NaN (Not a Number)
-         * @return True if any component is NaN
-         */
-        bool is_nan() const noexcept
-        {
-            return x.is_nan() || y.is_nan();
-        }
-
-        /**
-         * @brief Check if all components are NaN
-         * @return True if all components are NaN
-         */
-        bool is_all_nan() const noexcept
-        {
-            return x.is_nan() && y.is_nan();
-        }
-
-        /**
-         * @brief Check if any component is finite (not NaN and not infinity)
-         * @return True if any component is finite
-         */
-        bool is_finite() const noexcept
-        {
-            return x.is_finite() || y.is_finite();
-        }
-
-        /**
-         * @brief Check if all components are finite (not NaN and not infinity)
-         * @return True if all components are finite
-         */
-        bool is_all_finite() const noexcept
-        {
-            return x.is_finite() && y.is_finite();
-        }
-
-        /**
-         * @brief Check if any component is zero (positive or negative)
-         * @return True if any component is zero
-         */
-        bool is_zero() const noexcept
-        {
-            return x.is_zero() || y.is_zero();
-        }
-
-        /**
-         * @brief Check if all components are zero (positive or negative)
-         * @return True if all components are zero
-         */
-        bool is_all_zero() const noexcept
-        {
-            return x.is_zero() && y.is_zero();
-        }
-
-        /**
-         * @brief Check if any component is positive zero
-         * @return True if any component is positive zero
-         */
-        bool is_positive_zero() const noexcept
-        {
-            return x.is_positive_zero() || y.is_positive_zero();
-        }
-
-        /**
-         * @brief Check if any component is negative zero
-         * @return True if any component is negative zero
-         */
-        bool is_negative_zero() const noexcept
-        {
-            return x.is_negative_zero() || y.is_negative_zero();
-        }
+        const half* data() const noexcept { return &x; }
+        half* data() noexcept { return &x; }
     };
 
     // ============================================================================
-    // Binary Operators (declarations)
+    // Binary Operators
     // ============================================================================
 
-    /**
-     * @brief Vector addition
-     * @param lhs Left-hand side vector
-     * @param rhs Right-hand side vector
-     * @return Result of addition
-     */
-    half2 operator+(half2 lhs, const half2& rhs) noexcept;
+    inline half2 operator+(half2 lhs, const half2& rhs) noexcept { return lhs += rhs; }
+    inline half2 operator-(half2 lhs, const half2& rhs) noexcept { return lhs -= rhs; }
+    inline half2 operator*(half2 lhs, const half2& rhs) noexcept { return lhs *= rhs; }
+    inline half2 operator/(half2 lhs, const half2& rhs) noexcept { return lhs /= rhs; }
 
-    /**
-     * @brief Vector subtraction
-     * @param lhs Left-hand side vector
-     * @param rhs Right-hand side vector
-     * @return Result of subtraction
-     */
-    half2 operator-(half2 lhs, const half2& rhs) noexcept;
+    inline half2 operator*(half2 vec, half scalar) noexcept { return vec *= scalar; }
+    inline half2 operator*(half scalar, half2 vec) noexcept { return vec *= scalar; }
+    inline half2 operator/(half2 vec, half scalar) noexcept { return vec /= scalar; }
 
-    /**
-     * @brief Component-wise vector multiplication
-     * @param lhs Left-hand side vector
-     * @param rhs Right-hand side vector
-     * @return Result of multiplication
-     */
-    half2 operator*(half2 lhs, const half2& rhs) noexcept;
+    inline half2 operator*(half2 vec, float scalar) noexcept { return vec *= scalar; }
+    inline half2 operator*(float scalar, half2 vec) noexcept { return vec *= scalar; }
+    inline half2 operator/(half2 vec, float scalar) noexcept { return vec /= scalar; }
 
-    /**
-     * @brief Component-wise vector division
-     * @param lhs Left-hand side vector
-     * @param rhs Right-hand side vector
-     * @return Result of division
-     */
-    half2 operator/(half2 lhs, const half2& rhs) noexcept;
+    inline half2 operator+(half2 vec, half scalar) noexcept { return half2(vec.x + scalar, vec.y + scalar); }
+    inline half2 operator+(half scalar, half2 vec) noexcept { return half2(scalar + vec.x, scalar + vec.y); }
+    inline half2 operator-(half2 vec, half scalar) noexcept { return half2(vec.x - scalar, vec.y - scalar); }
+    inline half2 operator-(half scalar, half2 vec) noexcept { return half2(scalar - vec.x, scalar - vec.y); }
 
-    /**
-     * @brief Vector-scalar multiplication (half)
-     * @param vec Vector to multiply
-     * @param scalar Scalar multiplier
-     * @return Scaled vector
-     */
-    half2 operator*(half2 vec, half scalar) noexcept;
-
-    /**
-     * @brief Scalar-vector multiplication (half)
-     * @param scalar Scalar multiplier
-     * @param vec Vector to multiply
-     * @return Scaled vector
-     */
-    half2 operator*(half scalar, half2 vec) noexcept;
-
-    /**
-     * @brief Vector-scalar division (half)
-     * @param vec Vector to divide
-     * @param scalar Scalar divisor
-     * @return Scaled vector
-     */
-    half2 operator/(half2 vec, half scalar) noexcept;
-
-    /**
-     * @brief Vector-scalar multiplication (float)
-     * @param vec Vector to multiply
-     * @param scalar Scalar multiplier
-     * @return Scaled vector
-     */
-    half2 operator*(half2 vec, float scalar) noexcept;
-
-    /**
-     * @brief Scalar-vector multiplication (float)
-     * @param scalar Scalar multiplier
-     * @param vec Vector to multiply
-     * @return Scaled vector
-     */
-    half2 operator*(float scalar, half2 vec) noexcept;
-
-    /**
-     * @brief Vector-scalar division (float)
-     * @param vec Vector to divide
-     * @param scalar Scalar divisor
-     * @return Scaled vector
-     */
-    half2 operator/(half2 vec, float scalar) noexcept;
-
-    /**
- * @brief Vector-scalar addition (half)
- * @param vec Vector to add to
- * @param scalar Scalar to add
- * @return Result vector
- */
-    half2 operator+(half2 vec, half scalar) noexcept;
-
-    /**
-     * @brief Scalar-vector addition (half)
-     * @param scalar Scalar to add
-     * @param vec Vector to add to
-     * @return Result vector
-     */
-    half2 operator+(half scalar, half2 vec) noexcept;
-
-    /**
-     * @brief Vector-scalar subtraction (half)
-     * @param vec Vector to subtract from
-     * @param scalar Scalar to subtract
-     * @return Result vector
-     */
-    half2 operator-(half2 vec, half scalar) noexcept;
-
-    /**
-     * @brief Scalar-vector subtraction (half)
-     * @param scalar Scalar to subtract from
-     * @param vec Vector to subtract
-     * @return Result vector
-     */
-    half2 operator-(half scalar, half2 vec) noexcept;
-
-    /**
-     * @brief Vector-scalar addition (float)
-     * @param vec Vector to add to
-     * @param scalar Scalar to add
-     * @return Result vector
-     */
-    half2 operator+(half2 vec, float scalar) noexcept;
-
-    /**
-     * @brief Scalar-vector addition (float)
-     * @param scalar Scalar to add
-     * @param vec Vector to add to
-     * @return Result vector
-     */
-    half2 operator+(float scalar, half2 vec) noexcept;
-
-    /**
-     * @brief Vector-scalar subtraction (float)
-     * @param vec Vector to subtract from
-     * @param scalar Scalar to subtract
-     * @return Result vector
-     */
-    half2 operator-(half2 vec, float scalar) noexcept;
-
-    /**
-     * @brief Scalar-vector subtraction (float)
-     * @param scalar Scalar to subtract from
-     * @param vec Vector to subtract
-     * @return Result vector
-     */
-    half2 operator-(float scalar, half2 vec) noexcept;
+    inline half2 operator+(half2 vec, float scalar) noexcept { return half2(vec.x + scalar, vec.y + scalar); }
+    inline half2 operator+(float scalar, half2 vec) noexcept { return half2(scalar + vec.x, scalar + vec.y); }
+    inline half2 operator-(half2 vec, float scalar) noexcept { return half2(vec.x - scalar, vec.y - scalar); }
+    inline half2 operator-(float scalar, half2 vec) noexcept { return half2(scalar - vec.x, scalar - vec.y); }
 
     // ============================================================================
-    // Mixed Type Operators (half2 <-> float2) (declarations)
+    // Mixed Type Operators (half2 <-> float2)
     // ============================================================================
 
-    /**
-     * @brief Addition between half2 and float2
-     * @param lhs half2 vector
-     * @param rhs float2 vector
-     * @return Result of addition
-     */
-    half2 operator+(const half2& lhs, const float2& rhs) noexcept;
+    inline half2 operator+(const half2& lhs, const float2& rhs) noexcept { return half2(lhs.x + rhs.x, lhs.y + rhs.y); }
+    inline half2 operator-(const half2& lhs, const float2& rhs) noexcept { return half2(lhs.x - rhs.x, lhs.y - rhs.y); }
+    inline half2 operator*(const half2& lhs, const float2& rhs) noexcept { return half2(lhs.x * rhs.x, lhs.y * rhs.y); }
+    inline half2 operator/(const half2& lhs, const float2& rhs) noexcept { return half2(lhs.x / rhs.x, lhs.y / rhs.y); }
 
-    /**
-     * @brief Subtraction between half2 and float2
-     * @param lhs half2 vector
-     * @param rhs float2 vector
-     * @return Result of subtraction
-     */
-    half2 operator-(const half2& lhs, const float2& rhs) noexcept;
-
-    /**
-     * @brief Multiplication between half2 and float2
-     * @param lhs half2 vector
-     * @param rhs float2 vector
-     * @return Result of multiplication
-     */
-    half2 operator*(const half2& lhs, const float2& rhs) noexcept;
-
-    /**
-     * @brief Division between half2 and float2
-     * @param lhs half2 vector
-     * @param rhs float2 vector
-     * @return Result of division
-     */
-    half2 operator/(const half2& lhs, const float2& rhs) noexcept;
-
-    /**
-     * @brief Addition between float2 and half2
-     * @param lhs float2 vector
-     * @param rhs half2 vector
-     * @return Result of addition
-     */
-    half2 operator+(const float2& lhs, const half2& rhs) noexcept;
-
-    /**
-     * @brief Subtraction between float2 and half2
-     * @param lhs float2 vector
-     * @param rhs half2 vector
-     * @return Result of subtraction
-     */
-    half2 operator-(const float2& lhs, const half2& rhs) noexcept;
-
-    /**
-     * @brief Multiplication between float2 and half2
-     * @param lhs float2 vector
-     * @param rhs half2 vector
-     * @return Result of multiplication
-     */
-    half2 operator*(const float2& lhs, const half2& rhs) noexcept;
-
-    /**
-     * @brief Division between float2 and half2
-     * @param lhs float2 vector
-     * @param rhs half2 vector
-     * @return Result of division
-     */
-    half2 operator/(const float2& lhs, const half2& rhs) noexcept;
+    inline half2 operator+(const float2& lhs, const half2& rhs) noexcept { return half2(lhs.x + rhs.x, lhs.y + rhs.y); }
+    inline half2 operator-(const float2& lhs, const half2& rhs) noexcept { return half2(lhs.x - rhs.x, lhs.y - rhs.y); }
+    inline half2 operator*(const float2& lhs, const half2& rhs) noexcept { return half2(lhs.x * rhs.x, lhs.y * rhs.y); }
+    inline half2 operator/(const float2& lhs, const half2& rhs) noexcept { return half2(lhs.x / rhs.x, lhs.y / rhs.y); }
 
     // ============================================================================
-    // Global Mathematical Functions (declarations)
+    // ГЛОБАЛЬНЫЕ МАТЕМАТИЧЕСКИЕ ФУНКЦИИ (HLSL-стиль)
     // ============================================================================
 
-    /**
-     * @brief Compute distance between two points
-     * @param a First point
-     * @param b Second point
-     * @return Euclidean distance between points
-     */
-    half distance(const half2& a, const half2& b) noexcept;
+    // ============================================================================
+    // Базовые векторные операции
+    // ============================================================================
+    inline half length(const half2& vec) noexcept {
+        float fx = float(vec.x);
+        float fy = float(vec.y);
+        return half(std::sqrt(fx * fx + fy * fy));
+    }
 
-    /**
-     * @brief Compute squared distance between two points (faster)
-     * @param a First point
-     * @param b Second point
-     * @return Squared Euclidean distance
-     */
-    half distance_sq(const half2& a, const half2& b) noexcept;
+    inline half length_sq(const half2& vec) noexcept {
+        return vec.x * vec.x + vec.y * vec.y;
+    }
 
-    /**
-     * @brief Compute dot product of two vectors
-     * @param a First vector
-     * @param b Second vector
-     * @return Dot product result
-     */
-    half dot(const half2& a, const half2& b) noexcept;
+    inline half2 normalize(const half2& vec) noexcept {
+        float fx = float(vec.x);
+        float fy = float(vec.y);
+        float len = std::sqrt(fx * fx + fy * fy);
 
-    /**
-     * @brief Normalize vector to unit length
-     * @param vec Vector to normalize
-     * @return Normalized vector
-     */
-    half2 normalize(const half2& vec) noexcept;
+        if (len == 0.0f || !std::isfinite(len)) {
+            return half2::zero();
+        }
 
-    /**
-     * @brief Linear interpolation between two vectors
-     * @param a Start vector
-     * @param b End vector
-     * @param t Interpolation factor [0, 1]
-     * @return Interpolated vector
-     */
-    half2 lerp(const half2& a, const half2& b, half t) noexcept;
+        return half2(fx / len, fy / len);
+    }
 
-    /**
-     * @brief Linear interpolation between two vectors (float factor)
-     * @param a Start vector
-     * @param b End vector
-     * @param t Interpolation factor [0, 1] as float
-     * @return Interpolated vector
-     */
-    half2 lerp(const half2& a, const half2& b, float t) noexcept;
+    inline half dot(const half2& a, const half2& b) noexcept {
+        return a.x * b.x + a.y * b.y;
+    }
 
-    /**
-     * @brief HLSL-like saturate function (clamp components to [0, 1])
-     * @param vec Vector to saturate
-     * @return Saturated vector
-     */
-    half2 saturate(const half2& vec) noexcept;
+    inline half distance(const half2& a, const half2& b) noexcept {
+        return length(b - a);
+    }
 
-    /**
-     * @brief Check if two vectors are approximately equal
-     * @param a First vector
-     * @param b Second vector
-     * @param epsilon Comparison tolerance
-     * @return True if vectors are approximately equal
-     */
-    bool approximately(const half2& a, const half2& b, float epsilon = Constants::Constants<float>::Epsilon) noexcept;
-
-    /**
-     * @brief Check if vector contains valid finite values
-     * @param vec Vector to check
-     * @return True if vector is valid (finite values)
-     */
-    bool is_valid(const half2& vec) noexcept;
-
-    /**
-     * @brief Check if vector is normalized
-     * @param vec Vector to check
-     * @param epsilon Comparison tolerance
-     * @return True if vector is normalized
-     */
-    bool is_normalized(const half2& vec, float epsilon = Constants::Constants<float>::Epsilon) noexcept;
-
-    /**
-     * @brief Check if any component of vector is infinity
-     * @param vec Vector to check
-     * @return True if any component is infinity
-     */
-    bool is_inf(const half2& vec) noexcept;
-
-    /**
-     * @brief Check if any component of vector is negative infinity
-     * @param vec Vector to check
-     * @return True if any component is negative infinity
-     */
-    bool is_negative_inf(const half2& vec) noexcept;
-
-    /**
-     * @brief Check if any component of vector is positive infinity
-     * @param vec Vector to check
-     * @return True if any component is positive infinity
-     */
-    bool is_positive_inf(const half2& vec) noexcept;
-
-    /**
-     * @brief Check if any component of vector is negative
-     * @param vec Vector to check
-     * @return True if any component is negative
-     */
-    bool is_negative(const half2& vec) noexcept;
-
-    /**
-     * @brief Check if all components of vector are negative
-     * @param vec Vector to check
-     * @return True if all components are negative
-     */
-    bool is_all_negative(const half2& vec) noexcept;
-
-    /**
-     * @brief Check if any component of vector is positive
-     * @param vec Vector to check
-     * @return True if any component is positive
-     */
-    bool is_positive(const half2& vec) noexcept;
-
-    /**
-     * @brief Check if all components of vector are positive
-     * @param vec Vector to check
-     * @return True if all components are positive
-     */
-    bool is_all_positive(const half2& vec) noexcept;
-
-    /**
-     * @brief Check if any component of vector is NaN
-     * @param vec Vector to check
-     * @return True if any component is NaN
-     */
-    bool is_nan(const half2& vec) noexcept;
-
-    /**
-     * @brief Check if all components of vector are NaN
-     * @param vec Vector to check
-     * @return True if all components are NaN
-     */
-    bool is_all_nan(const half2& vec) noexcept;
-
-    /**
-     * @brief Check if any component of vector is finite
-     * @param vec Vector to check
-     * @return True if any component is finite
-     */
-    bool is_finite(const half2& vec) noexcept;
-
-    /**
-     * @brief Check if all components of vector are finite
-     * @param vec Vector to check
-     * @return True if all components are finite
-     */
-    bool is_all_finite(const half2& vec) noexcept;
-
-    /**
-     * @brief Check if any component of vector is zero
-     * @param vec Vector to check
-     * @return True if any component is zero
-     */
-    bool is_zero(const half2& vec) noexcept;
-
-    /**
-     * @brief Check if all components of vector are zero
-     * @param vec Vector to check
-     * @return True if all components are zero
-     */
-    bool is_all_zero(const half2& vec) noexcept;
+    inline half distance_sq(const half2& a, const half2& b) noexcept {
+        return length_sq(b - a);
+    }
 
     // ============================================================================
-    // HLSL-like Global Functions (declarations)
+    // Геометрические операции
     // ============================================================================
+    inline half2 perpendicular(const half2& vec) noexcept {
+        return half2(-vec.y, vec.x);
+    }
 
-    /**
-     * @brief HLSL-like abs function (component-wise absolute value)
-     * @param vec Input vector
-     * @return Vector with absolute values of components
-     */
-    half2 abs(const half2& vec) noexcept;
+    inline half cross(const half2& a, const half2& b) noexcept {
+        return a.x * b.y - a.y * b.x;
+    }
 
-    /**
-     * @brief HLSL-like sign function (component-wise sign)
-     * @param vec Input vector
-     * @return Vector with signs of components
-     */
-    half2 sign(const half2& vec) noexcept;
+    inline half angle(const half2& vec) noexcept {
+        return half(std::atan2(float(vec.y), float(vec.x)));
+    }
 
-    /**
-     * @brief HLSL-like floor function (component-wise floor)
-     * @param vec Input vector
-     * @return Vector with floored components
-     */
-    half2 floor(const half2& vec) noexcept;
-
-    /**
-     * @brief HLSL-like ceil function (component-wise ceiling)
-     * @param vec Input vector
-     * @return Vector with ceiling components
-     */
-    half2 ceil(const half2& vec) noexcept;
-
-    /**
-     * @brief HLSL-like round function (component-wise rounding)
-     * @param vec Input vector
-     * @return Vector with rounded components
-     */
-    half2 round(const half2& vec) noexcept;
-
-    /**
-     * @brief HLSL-like frac function (component-wise fractional part)
-     * @param vec Input vector
-     * @return Vector with fractional parts of components
-     */
-    half2 frac(const half2& vec) noexcept;
-
-    /**
-     * @brief HLSL-like step function (component-wise step)
-     * @param edge Edge value
-     * @param vec Input vector
-     * @return Step result vector
-     */
-    half2 step(half edge, const half2& vec) noexcept;
-
-    /**
-     * @brief HLSL-like min function (component-wise minimum)
-     * @param a First vector
-     * @param b Second vector
-     * @return Component-wise minimum
-     */
-    half2 min(const half2& a, const half2& b) noexcept;
-
-    /**
-     * @brief HLSL-like max function (component-wise maximum)
-     * @param a First vector
-     * @param b Second vector
-     * @return Component-wise maximum
-     */
-    half2 max(const half2& a, const half2& b) noexcept;
-
-    /**
-     * @brief HLSL-like clamp function (component-wise clamping)
-     * @param vec Vector to clamp
-     * @param min_val Minimum values
-     * @param max_val Maximum values
-     * @return Clamped vector
-     */
-    half2 clamp(const half2& vec, const half2& min_val, const half2& max_val) noexcept;
-
-    /**
-     * @brief HLSL-like clamp function (scalar boundaries)
-     * @param vec Vector to clamp
-     * @param min_val Minimum value
-     * @param max_val Maximum value
-     * @return Clamped vector
-     */
-    half2 clamp(const half2& vec, float min_val, float max_val) noexcept;
-
-    /**
-     * @brief HLSL-like smoothstep function (component-wise smooth interpolation)
-     * @param edge0 Lower edge
-     * @param edge1 Upper edge
-     * @param vec Input vector
-     * @return Smoothly interpolated vector
-     */
-    half2 smoothstep(half edge0, half edge1, const half2& vec) noexcept;
+    inline half angle_between(const half2& a, const half2& b) noexcept {
+        half2 a_norm = normalize(a);
+        half2 b_norm = normalize(b);
+        half dot_val = dot(a_norm, b_norm);
+        dot_val = clamp(dot_val, -half_One, half_One);
+        return half(std::acos(float(dot_val)));
+    }
 
     // ============================================================================
-    // Geometric Operations (declarations)
+    // HLSL-подобные функции (компонентные)
     // ============================================================================
+    inline half2 abs(const half2& vec) noexcept {
+        return half2(abs(vec.x), abs(vec.y));
+    }
 
-    /**
-     * @brief Compute perpendicular vector (90 degree counter-clockwise rotation)
-     * @param vec Input vector
-     * @return Perpendicular vector (-y, x)
-     */
-    half2 perpendicular(const half2& vec) noexcept;
+    inline half2 sign(const half2& vec) noexcept {
+        return half2(sign(vec.x), sign(vec.y));
+    }
 
-    /**
-     * @brief Compute 2D cross product (scalar result)
-     * @param a First vector
-     * @param b Second vector
-     * @return Cross product result (x1*y2 - y1*x2)
-     */
-    half cross(const half2& a, const half2& b) noexcept;
+    inline half2 floor(const half2& vec) noexcept {
+        return half2(floor(vec.x), floor(vec.y));
+    }
 
-    /**
-     * @brief Compute angle of vector relative to X-axis
-     * @param vec Input vector
-     * @return Angle in radians between [-pi, pi]
-     */
-    half angle(const half2& vec) noexcept;
+    inline half2 ceil(const half2& vec) noexcept {
+        return half2(ceil(vec.x), ceil(vec.y));
+    }
 
-    /**
-     * @brief Compute angle between two vectors in radians
-     * @param a First vector
-     * @param b Second vector
-     * @return Angle in radians between [0, pi]
-     */
-    half angle_between(const half2& a, const half2& b) noexcept;
+    inline half2 round(const half2& vec) noexcept {
+        return half2(round(vec.x), round(vec.y));
+    }
 
-    // ============================================================================
-    // Type Conversion Functions (declarations)
-    // ============================================================================
+    inline half2 frac(const half2& vec) noexcept {
+        return half2(frac(vec.x), frac(vec.y));
+    }
 
-    /**
-     * @brief Convert half2 to float2 (promotes components to full precision)
-     * @param vec half-precision vector
-     * @return full-precision vector
-     */
-    float2 to_float2(const half2& vec) noexcept;
+    inline half2 saturate(const half2& vec) noexcept {
+        return half2(saturate(vec.x), saturate(vec.y));
+    }
 
-    /**
-     * @brief Convert float2 to half2 (demotes components to half precision)
-     * @param vec full-precision vector
-     * @return half-precision vector
-     */
-    half2 to_half2(const float2& vec) noexcept;
+    inline half2 step(half edge, const half2& vec) noexcept {
+        return half2(step(edge, vec.x), step(edge, vec.y));
+    }
+
+    inline half2 smoothstep(half edge0, half edge1, const half2& vec) noexcept {
+        return half2(smoothstep(edge0, edge1, vec.x), smoothstep(edge0, edge1, vec.y));
+    }
 
     // ============================================================================
-    // Useful Constants
+    // Функции минимума/максимума/ограничения
     // ============================================================================
+    inline half2 min(const half2& a, const half2& b) noexcept {
+        return half2(min(a.x, b.x), min(a.y, b.y));
+    }
 
-    /**
-     * @brief Zero vector constant (0, 0)
-     */
-    extern const half2 half2_Zero;
+    inline half2 max(const half2& a, const half2& b) noexcept {
+        return half2(max(a.x, b.x), max(a.y, b.y));
+    }
 
-    /**
-     * @brief One vector constant (1, 1)
-     */
-    extern const half2 half2_One;
+    inline half2 clamp(const half2& vec, const half2& min_val, const half2& max_val) noexcept {
+        return half2(clamp(vec.x, min_val.x, max_val.x), clamp(vec.y, min_val.y, max_val.y));
+    }
 
-    /**
-     * @brief Unit X vector constant (1, 0)
-     */
-    extern const half2 half2_UnitX;
+    inline half2 clamp(const half2& vec, float min_val, float max_val) noexcept {
+        return half2(clamp(vec.x, min_val, max_val), clamp(vec.y, min_val, max_val));
+    }
 
-    /**
-     * @brief Unit Y vector constant (0, 1)
-     */
-    extern const half2 half2_UnitY;
+    // ============================================================================
+    // Интерполяция
+    // ============================================================================
+    inline half2 lerp(const half2& a, const half2& b, half t) noexcept {
+        return half2(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t);
+    }
 
-    /**
-     * @brief Zero texture coordinate constant (0, 0)
-     */
-    extern const half2 half2_UV_Zero;
+    inline half2 lerp(const half2& a, const half2& b, float t) noexcept {
+        return half2(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t);
+    }
 
-    /**
-     * @brief One texture coordinate constant (1, 1)
-     */
-    extern const half2 half2_UV_One;
+    // ============================================================================
+    // Функции проверки и сравнения
+    // ============================================================================
+    inline bool approximately(const half2& a, const half2& b, float epsilon = Constants::Constants<float>::Epsilon) noexcept {
+        return approximately(a.x, b.x, epsilon) && approximately(a.y, b.y, epsilon);
+    }
 
-    /**
-     * @brief Half texture coordinate constant (0.5, 0.5)
-     */
-    extern const half2 half2_UV_Half;
+    inline bool approximately_zero(const half2& vec, float epsilon = Constants::Constants<float>::Epsilon) noexcept {
+        return approximately_zero(vec.x, epsilon) && approximately_zero(vec.y, epsilon);
+    }
 
-    /**
-     * @brief Right vector constant (1, 0)
-     */
-    extern const half2 half2_Right;
+    inline bool is_normalized(const half2& vec, float epsilon = Constants::Constants<float>::Epsilon) noexcept {
+        half len_sq = length_sq(vec);
+        float adjusted_epsilon = std::max(epsilon, 0.01f);
+        return AfterMathFunctions::approximately(float(len_sq), 1.0f, adjusted_epsilon);
+    }
 
-    /**
-     * @brief Left vector constant (-1, 0)
-     */
-    extern const half2 half2_Left;
+    // ============================================================================
+    // Глобальные функции проверки (для совместимости)
+    // ============================================================================
+    inline bool is_valid(const half2& vec) noexcept { return vec.is_valid(); }
+    inline bool is_inf(const half2& vec) noexcept { return vec.is_inf(); }
+    inline bool is_negative_inf(const half2& vec) noexcept { return vec.is_negative_inf(); }
+    inline bool is_positive_inf(const half2& vec) noexcept { return vec.is_positive_inf(); }
+    inline bool is_negative(const half2& vec) noexcept { return vec.is_negative(); }
+    inline bool is_all_negative(const half2& vec) noexcept { return vec.is_all_negative(); }
+    inline bool is_positive(const half2& vec) noexcept { return vec.is_positive(); }
+    inline bool is_all_positive(const half2& vec) noexcept { return vec.is_all_positive(); }
+    inline bool is_nan(const half2& vec) noexcept { return vec.is_nan(); }
+    inline bool is_all_nan(const half2& vec) noexcept { return vec.is_all_nan(); }
+    inline bool is_finite(const half2& vec) noexcept { return vec.is_finite(); }
+    inline bool is_all_finite(const half2& vec) noexcept { return vec.is_all_finite(); }
+    inline bool is_zero(const half2& vec) noexcept { return vec.is_zero(); }
+    inline bool is_all_zero(const half2& vec) noexcept { return vec.is_all_zero(); }
 
-    /**
-     * @brief Up vector constant (0, 1)
-     */
-    extern const half2 half2_Up;
+    // ============================================================================
+    // Функции преобразования типов
+    // ============================================================================
+    inline float2 to_float2(const half2& vec) noexcept {
+        return float2(float(vec.x), float(vec.y));
+    }
 
-    /**
-     * @brief Down vector constant (0, -1)
-     */
-    extern const half2 half2_Down;
+    inline half2 to_half2(const float2& vec) noexcept {
+        return half2(vec.x, vec.y);
+    }
+
+    // ============================================================================
+    // Полезные константы
+    // ============================================================================
+    inline const half2 half2_Zero(half_Zero);
+    inline const half2 half2_One(half_One);
+    inline const half2 half2_UnitX(half_One, half_Zero);
+    inline const half2 half2_UnitY(half_Zero, half_One);
+    inline const half2 half2_UV_Zero(half_Zero, half_Zero);
+    inline const half2 half2_UV_One(half_One, half_One);
+    inline const half2 half2_UV_Half(half(0.5f), half(0.5f));
+    inline const half2 half2_Right(half_One, half_Zero);
+    inline const half2 half2_Left(-half_One, half_Zero);
+    inline const half2 half2_Up(half_Zero, half_One);
+    inline const half2 half2_Down(half_Zero, -half_One);
 
 } // namespace AfterMath
-
-// Include inline implementations
-#include "math_half2.inl"

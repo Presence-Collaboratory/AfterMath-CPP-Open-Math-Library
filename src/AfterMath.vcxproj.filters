@@ -170,14 +170,5 @@
     <None Include="AfterMath\math_float4.inl">
       <Filter>Math\Implementation\Primitives\Vectors\Float</Filter>
     </None>
-    <None Include="AfterMath\math_half2.inl">
-      <Filter>Math\Implementation\Primitives\Vectors\Half</Filter>
-    </None>
-    <None Include="AfterMath\math_half3.inl">
-      <Filter>Math\Implementation\Primitives\Vectors\Half</Filter>
-    </None>
-    <None Include="AfterMath\math_half4.inl">
-      <Filter>Math\Implementation\Primitives\Vectors\Half</Filter>
-    </None>
   </ItemGroup>
 </Project>

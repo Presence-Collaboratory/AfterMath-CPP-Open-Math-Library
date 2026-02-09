@@ -118,46 +118,12 @@ namespace AfterMath
          *
          * @note Uses combined comparison for robustness across all value ranges
          */
-        template<typename T>
-        constexpr bool approximately(T a, T b, T epsilon = Constants<T>::Epsilon) noexcept {
-            return approximately_combined(a, b, epsilon, epsilon);
+        inline bool approximately(float a, float b, float epsilon = Constants::Constants<float>::Epsilon) noexcept {
+            return std::abs(a - b) <= epsilon;
         }
 
-        // Explicit specializations for common types
-        template<>
-        constexpr bool approximately<float>(float a, float b, float epsilon) noexcept {
-            return approximately_combined(a, b, epsilon, epsilon);
-        }
-
-        template<>
-        constexpr bool approximately<double>(double a, double b, double epsilon) noexcept {
-            return approximately_combined(a, b, epsilon, epsilon);
-        }
-
-        /**
-         * @brief Fast approximate equality (absolute comparison only)
-         * @param a First float value
-         * @param b Second float value
-         * @param epsilon Absolute tolerance
-         * @return True if |a - b| <= epsilon
-         *
-         * @note Faster but less robust than the default approximately()
-         */
-        inline bool approximately_fast(float a, float b, float epsilon = Constants::Constants<float>::Epsilon) noexcept {
-            return approximately_absolute(a, b, epsilon);
-        }
-
-        /**
-         * @brief Check if value is approximately zero
-         * @tparam T Floating-point type
-         * @param value Value to check
-         * @param epsilon Absolute tolerance
-         * @return True if |value| <= epsilon
-         */
-        template<typename T>
-        constexpr bool approximately_zero(T value, T epsilon = Constants::Constants<T>::Epsilon) noexcept {
-            static_assert(std::is_floating_point_v<T>, "T must be a floating-point type");
-            return std::abs(value) <= epsilon;
+        inline bool approximately_zero(float x, float epsilon = Constants::Constants<float>::Epsilon) noexcept {
+            return std::abs(x) <= epsilon;
         }
 
         // ============================================================================

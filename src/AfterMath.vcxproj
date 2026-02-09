@@ -197,9 +197,6 @@
     <None Include="AfterMath\math_float3x3.inl" />
     <None Include="AfterMath\math_float4.inl" />
     <None Include="AfterMath\math_float4x4.inl" />
-    <None Include="AfterMath\math_half2.inl" />
-    <None Include="AfterMath\math_half3.inl" />
-    <None Include="AfterMath\math_half4.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
