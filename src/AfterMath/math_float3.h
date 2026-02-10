@@ -1,43 +1,45 @@
-﻿// Description: 3-dimensional vector class with comprehensive 
-//              mathematical operations and SSE optimization (Packed 12-byte version)
+﻿// math_float3.h
+// Description: 3-dimensional vector class with HLSL-like syntax and SSE optimization
 // Author: NSDeathman, DeepSeek
+
 #pragma once
 
-#include <xmmintrin.h>
-#include <pmmintrin.h> // SSE3
-#include <smmintrin.h>
 #include <string>
 #include <cstdio>
 #include <cmath>
 #include <algorithm>
+#include <cassert>
+#include <xmmintrin.h>
+#include <pmmintrin.h>
 
-#include "math_config.h"
-#include "math_constants.h"
-#include "math_functions.h"
 #include "math_float2.h"
+#include "math_constants.h"
 
 namespace AfterMath
 {
+    // Forward declarations
+    class float2;
+    class float3;
+
+    // ============================================================================
+    // 3D Vector Class
+    // ============================================================================
+
     /**
      * @class float3
-     * @brief 3-dimensional vector with comprehensive mathematical operations
+     * @brief 3-dimensional vector with HLSL-like syntax
      *
-     * Represents a 3D vector (x, y, z). This version is packed to 12 bytes
-     * (no padding) to ensure compatibility with standard vertex buffers.
-     * Operations still use SSE acceleration by loading/storing to registers on the fly.
+     * Represents a 3D vector (x, y, z) with 12-byte packing for compatibility
+     * with standard vertex buffers. Operations use SSE acceleration by
+     * loading/storing to registers on the fly.
      *
      * @note Perfect for 3D game development, computer graphics, and physics engines
-     * @note Size is exactly 12 bytes.
-     * @note Includes comprehensive HLSL-like function set
+     * @note Size is exactly 12 bytes
      */
     class float3
     {
     public:
-        // ============================================================================
-        // Data Members (Public for Direct Access)
-        // ============================================================================
-
-        // Removed union with __m128 to enforce 12-byte size
+        // Data members (public for direct access)
         float x; ///< X component of the vector
         float y; ///< Y component of the vector  
         float z; ///< Z component of the vector
@@ -46,709 +48,706 @@ namespace AfterMath
         // Constructors
         // ============================================================================
 
-        /**
-         * @brief Default constructor (initializes to zero vector)
-         */
-        float3() noexcept;
+        constexpr float3() noexcept : x(0.0f), y(0.0f), z(0.0f) {}
 
-        /**
-         * @brief Construct from components
-         * @param x X component
-         * @param y Y component
-         * @param z Z component
-         */
-        float3(float x, float y, float z) noexcept;
+        constexpr float3(float x, float y, float z) noexcept : x(x), y(y), z(z) {}
 
-        /**
-         * @brief Construct from scalar (all components set to same value)
-         * @param scalar Value for all components
-         */
-        explicit float3(float scalar) noexcept;
+        explicit constexpr float3(float scalar) noexcept : x(scalar), y(scalar), z(scalar) {}
 
-        /**
-         * @brief Construct from float2 and z component
-         * @param vec 2D vector for x and y components
-         * @param z Z component
-         */
-        float3(const float2& vec, float z = 0.0f) noexcept;
+        // Note: float2 declaration would be needed here
+        // float3(const float2& vec, float z = 0.0f) noexcept : x(vec.x), y(vec.y), z(z) {}
 
-        /**
-         * @brief Copy constructor
-         */
-        float3(const float3&) noexcept = default;
+        constexpr float3(const float3&) noexcept = default;
 
-        /**
-         * @brief Construct from raw float array
-         * @param data Pointer to float array [x, y, z]
-         */
-        explicit float3(const float* data) noexcept;
+        explicit float3(const float* data) noexcept : x(data[0]), y(data[1]), z(data[2]) {}
 
-        /**
-         * @brief Construct from SSE register (internal helper)
-         * @param simd_val SSE register containing vector data in [x, y, z, -]
-         */
-        explicit float3(__m128 simd_val) noexcept;
+        explicit float3(__m128 simd_val) noexcept {
+            alignas(16) float temp[4];
+            _mm_store_ps(temp, simd_val);
+            x = temp[0];
+            y = temp[1];
+            z = temp[2];
+        }
 
         // ============================================================================
         // Assignment Operators
         // ============================================================================
 
-        /**
-         * @brief Copy assignment operator
-         */
         float3& operator=(const float3&) noexcept = default;
 
-        /**
-         * @brief Scalar assignment (sets all components to same value)
-         * @param scalar Value for all components
-         */
-        float3& operator=(float scalar) noexcept;
+        float3& operator=(float scalar) noexcept {
+            x = scalar;
+            y = scalar;
+            z = scalar;
+            return *this;
+        }
 
         // ============================================================================
         // Compound Assignment Operators
         // ============================================================================
 
-        /**
-         * @brief Component-wise addition assignment
-         * @param rhs Right-hand side vector
-         * @return Reference to this vector
-         */
-        float3& operator+=(const float3& rhs) noexcept;
+        float3& operator+=(const float3& rhs) noexcept {
+            __m128 a = _mm_set_ps(0.0f, z, y, x);
+            __m128 b = _mm_set_ps(0.0f, rhs.z, rhs.y, rhs.x);
+            __m128 result = _mm_add_ps(a, b);
 
-        /**
-         * @brief Component-wise subtraction assignment
-         * @param rhs Right-hand side vector
-         * @return Reference to this vector
-         */
-        float3& operator-=(const float3& rhs) noexcept;
+            alignas(16) float temp[4];
+            _mm_store_ps(temp, result);
+            x = temp[0];
+            y = temp[1];
+            z = temp[2];
+            return *this;
+        }
 
-        /**
-         * @brief Component-wise multiplication assignment
-         * @param rhs Right-hand side vector
-         * @return Reference to this vector
-         */
-        float3& operator*=(const float3& rhs) noexcept;
+        float3& operator-=(const float3& rhs) noexcept {
+            __m128 a = _mm_set_ps(0.0f, z, y, x);
+            __m128 b = _mm_set_ps(0.0f, rhs.z, rhs.y, rhs.x);
+            __m128 result = _mm_sub_ps(a, b);
 
-        /**
-         * @brief Component-wise division assignment
-         * @param rhs Right-hand side vector
-         * @return Reference to this vector
-         */
-        float3& operator/=(const float3& rhs) noexcept;
+            alignas(16) float temp[4];
+            _mm_store_ps(temp, result);
+            x = temp[0];
+            y = temp[1];
+            z = temp[2];
+            return *this;
+        }
 
-        /**
-         * @brief Scalar multiplication assignment
-         * @param scalar Scalar multiplier
-         * @return Reference to this vector
-         */
-        float3& operator*=(float scalar) noexcept;
+        float3& operator*=(const float3& rhs) noexcept {
+            __m128 a = _mm_set_ps(0.0f, z, y, x);
+            __m128 b = _mm_set_ps(0.0f, rhs.z, rhs.y, rhs.x);
+            __m128 result = _mm_mul_ps(a, b);
 
-        /**
-         * @brief Scalar division assignment
-         * @param scalar Scalar divisor
-         * @return Reference to this vector
-         */
-        float3& operator/=(float scalar) noexcept;
+            alignas(16) float temp[4];
+            _mm_store_ps(temp, result);
+            x = temp[0];
+            y = temp[1];
+            z = temp[2];
+            return *this;
+        }
+
+        float3& operator/=(const float3& rhs) noexcept {
+            __m128 a = _mm_set_ps(0.0f, z, y, x);
+            __m128 b = _mm_set_ps(0.0f, rhs.z, rhs.y, rhs.x);
+            __m128 result = _mm_div_ps(a, b);
+
+            alignas(16) float temp[4];
+            _mm_store_ps(temp, result);
+            x = temp[0];
+            y = temp[1];
+            z = temp[2];
+            return *this;
+        }
+
+        float3& operator*=(float scalar) noexcept {
+            __m128 a = _mm_set_ps(0.0f, z, y, x);
+            __m128 s = _mm_set1_ps(scalar);
+            __m128 result = _mm_mul_ps(a, s);
+
+            alignas(16) float temp[4];
+            _mm_store_ps(temp, result);
+            x = temp[0];
+            y = temp[1];
+            z = temp[2];
+            return *this;
+        }
+
+        float3& operator/=(float scalar) noexcept {
+            __m128 a = _mm_set_ps(0.0f, z, y, x);
+            __m128 s = _mm_set1_ps(scalar);
+            __m128 result = _mm_div_ps(a, s);
+
+            alignas(16) float temp[4];
+            _mm_store_ps(temp, result);
+            x = temp[0];
+            y = temp[1];
+            z = temp[2];
+            return *this;
+        }
+
+        // ============================================================================
+        // Binary Operators
+        // ============================================================================
+
+        float3 operator+(const float3& rhs) const noexcept {
+            return float3(x + rhs.x, y + rhs.y, z + rhs.z);
+        }
+
+        float3 operator-(const float3& rhs) const noexcept {
+            return float3(x - rhs.x, y - rhs.y, z - rhs.z);
+        }
+
+        float3 operator+(float rhs) const noexcept {
+            return float3(x + rhs, y + rhs, z + rhs);
+        }
+
+        float3 operator-(float rhs) const noexcept {
+            return float3(x - rhs, y - rhs, z - rhs);
+        }
 
         // ============================================================================
         // Unary Operators
         // ============================================================================
 
-        /**
-         * @brief Unary plus operator
-         * @return Copy of this vector
-         */
-        float3 operator+() const noexcept;
+        constexpr float3 operator+() const noexcept { return *this; }
 
-        /**
-         * @brief Unary minus operator
-         * @return Negated vector
-         */
-        float3 operator-() const noexcept;
+        constexpr float3 operator-() const noexcept { return float3(-x, -y, -z); }
 
         // ============================================================================
         // Access Operators
         // ============================================================================
 
-        /**
-         * @brief Access component by index
-         * @param index Component index (0 = x, 1 = y, 2 = z)
-         * @return Reference to component
-         */
-        float& operator[](int index) noexcept;
+        float& operator[](int index) noexcept {
+            assert(index >= 0 && index < 3);
+            return (&x)[index];
+        }
 
-        /**
-         * @brief Access component by index (const)
-         * @param index Component index (0 = x, 1 = y, 2 = z)
-         * @return Const reference to component
-         */
-        const float& operator[](int index) const noexcept;
+        const float& operator[](int index) const noexcept {
+            assert(index >= 0 && index < 3);
+            return (&x)[index];
+        }
 
         // ============================================================================
         // Conversion Operators
         // ============================================================================
 
-        /**
-         * @brief Convert to const float pointer (for interoperability)
-         * @return Pointer to const float array [x, y, z]
-         */
-        operator const float* () const noexcept;
+        operator const float* () const noexcept { return &x; }
+        operator float* () noexcept { return &x; }
 
-        /**
-         * @brief Convert to float pointer (for interoperability)
-         * @return Pointer to float array [x, y, z]
-         */
-        operator float* () noexcept;
-
-        /**
-         * @brief Convert to SSE register (Loads from memory)
-         * @return SSE register containing vector data
-         */
-        operator __m128() const noexcept;
+        operator __m128() const noexcept {
+            return _mm_set_ps(0.0f, z, y, x);
+        }
 
         // ============================================================================
         // Static Constructors
         // ============================================================================
 
-        /**
-         * @brief Zero vector (0, 0, 0)
-         * @return Zero vector
-         */
-        static float3 zero() noexcept;
-
-        /**
-         * @brief One vector (1, 1, 1)
-         * @return One vector
-         */
-        static float3 one() noexcept;
-
-        /**
-         * @brief Unit X vector (1, 0, 0)
-         * @return Unit X vector
-         */
-        static float3 unit_x() noexcept;
-
-        /**
-         * @brief Unit Y vector (0, 1, 0)
-         * @return Unit Y vector
-         */
-        static float3 unit_y() noexcept;
-
-        /**
-         * @brief Unit Z vector (0, 0, 1)
-         * @return Unit Z vector
-         */
-        static float3 unit_z() noexcept;
-
-        /**
-         * @brief Forward vector (0, 0, 1) - common in 3D graphics
-         * @return Forward vector
-         */
-        static float3 forward() noexcept;
-
-        /**
-         * @brief Up vector (0, 1, 0) - common in 3D graphics
-         * @return Up vector
-         */
-        static float3 up() noexcept;
-
-        /**
-         * @brief Right vector (1, 0, 0) - common in 3D graphics
-         * @return Right vector
-         */
-        static float3 right() noexcept;
+        static constexpr float3 zero() noexcept { return float3(0.0f, 0.0f, 0.0f); }
+        static constexpr float3 one() noexcept { return float3(1.0f, 1.0f, 1.0f); }
+        static constexpr float3 unit_x() noexcept { return float3(1.0f, 0.0f, 0.0f); }
+        static constexpr float3 unit_y() noexcept { return float3(0.0f, 1.0f, 0.0f); }
+        static constexpr float3 unit_z() noexcept { return float3(0.0f, 0.0f, 1.0f); }
+        static constexpr float3 forward() noexcept { return float3(0.0f, 0.0f, 1.0f); }
+        static constexpr float3 up() noexcept { return float3(0.0f, 1.0f, 0.0f); }
+        static constexpr float3 right() noexcept { return float3(1.0f, 0.0f, 0.0f); }
 
         // ============================================================================
-        // Mathematical Functions
+        // Basic Properties
         // ============================================================================
 
-        /**
-         * @brief Compute Euclidean length (magnitude)
-         * @return Length of the vector
-         */
-        float length() const noexcept;
+        constexpr float length_sq() const noexcept { return x * x + y * y + z * z; }
 
-        /**
-         * @brief Compute squared length (faster, useful for comparisons)
-         * @return Squared length of the vector
-         */
-        float length_sq() const noexcept;
-
-        /**
-         * @brief Normalize vector to unit length
-         * @return Normalized vector
-         * @note Returns zero vector if length is zero
-         */
-        float3 normalize() const noexcept;
-
-        /**
-         * @brief Compute dot product with another vector
-         * @param other Other vector
-         * @return Dot product result
-         */
-        float dot(const float3& other) const noexcept;
-
-        /**
-         * @brief Compute cross product with another vector
-         * @param other Other vector
-         * @return Cross product result
-         */
-        float3 cross(const float3& other) const noexcept;
-
-        /**
-         * @brief Compute distance to another point
-         * @param other Other point
-         * @return Euclidean distance
-         */
-        float distance(const float3& other) const noexcept;
-
-        /**
-         * @brief Compute squared distance to another point (faster)
-         * @param other Other point
-         * @return Squared Euclidean distance
-         */
-        float distance_sq(const float3& other) const noexcept;
+        constexpr float distance_sq(const float3& other) const noexcept {
+            float dx = x - other.x;
+            float dy = y - other.y;
+            float dz = z - other.z;
+            return dx * dx + dy * dy + dz * dz;
+        }
 
         // ============================================================================
-        // HLSL-like Functions
+        // Swizzle Operations (Complete Set)
         // ============================================================================
 
-        /**
-         * @brief HLSL-like clamp function (component-wise clamping)
-         * @param vec Vector to clamp
-         * @param min_val Minimum values
-         * @param max_val Maximum values
-         * @return Clamped vector
-         */
-        static float3 clamp(const float3& vec, const float3& min_val, const float3& max_val) noexcept;
+        // 2-component swizzles (all permutations)
+        constexpr float2 xx() const noexcept { return float2(x, x); }
+        constexpr float2 xy() const noexcept { return float2(x, y); }
+        constexpr float2 xz() const noexcept { return float2(x, z); }
+        constexpr float2 yx() const noexcept { return float2(y, x); }
+        constexpr float2 yy() const noexcept { return float2(y, y); }
+        constexpr float2 yz() const noexcept { return float2(y, z); }
+        constexpr float2 zx() const noexcept { return float2(z, x); }
+        constexpr float2 zy() const noexcept { return float2(z, y); }
+        constexpr float2 zz() const noexcept { return float2(z, z); }
 
-        /**
-         * @brief Scalar clamp function (all components clamped to same range)
-         * @param vec Vector to clamp
-         * @param min_val Minimum value for all components
-         * @param max_val Maximum value for all components
-         * @return Clamped vector
-         */
-        static float3 clamp(const float3& vec, float min_val, float max_val) noexcept;
+        // 3-component swizzles (all permutations)
+        constexpr float3 xxx() const noexcept { return float3(x, x, x); }
+        constexpr float3 xxy() const noexcept { return float3(x, x, y); }
+        constexpr float3 xxz() const noexcept { return float3(x, x, z); }
+        constexpr float3 xyx() const noexcept { return float3(x, y, x); }
+        constexpr float3 xyy() const noexcept { return float3(x, y, y); }
+        constexpr float3 xyz() const noexcept { return float3(x, y, z); }
+        constexpr float3 xzx() const noexcept { return float3(x, z, x); }
+        constexpr float3 xzy() const noexcept { return float3(x, z, y); }
+        constexpr float3 xzz() const noexcept { return float3(x, z, z); }
 
-        /**
-         * @brief HLSL-like abs function (component-wise absolute value)
-         * @return Vector with absolute values of components
-         */
-        float3 abs() const noexcept;
+        constexpr float3 yxx() const noexcept { return float3(y, x, x); }
+        constexpr float3 yxy() const noexcept { return float3(y, x, y); }
+        constexpr float3 yxz() const noexcept { return float3(y, x, z); }
+        constexpr float3 yyx() const noexcept { return float3(y, y, x); }
+        constexpr float3 yyy() const noexcept { return float3(y, y, y); }
+        constexpr float3 yyz() const noexcept { return float3(y, y, z); }
+        constexpr float3 yzx() const noexcept { return float3(y, z, x); }
+        constexpr float3 yzy() const noexcept { return float3(y, z, y); }
+        constexpr float3 yzz() const noexcept { return float3(y, z, z); }
 
-        /**
-         * @brief HLSL-like sign function (component-wise sign)
-         * @return Vector with signs of components (-1, 0, or 1)
-         */
-        float3 sign() const noexcept;
+        constexpr float3 zxx() const noexcept { return float3(z, x, x); }
+        constexpr float3 zxy() const noexcept { return float3(z, x, y); }
+        constexpr float3 zxz() const noexcept { return float3(z, x, z); }
+        constexpr float3 zyx() const noexcept { return float3(z, y, x); }
+        constexpr float3 zyy() const noexcept { return float3(z, y, y); }
+        constexpr float3 zyz() const noexcept { return float3(z, y, z); }
+        constexpr float3 zzx() const noexcept { return float3(z, z, x); }
+        constexpr float3 zzy() const noexcept { return float3(z, z, y); }
+        constexpr float3 zzz() const noexcept { return float3(z, z, z); }
 
-        /**
-         * @brief HLSL-like floor function (component-wise floor)
-         * @return Vector with floored components
-         */
-        float3 floor() const noexcept;
+        // Color swizzles (RGB notation)
+        // 1-component
+        constexpr float r() const noexcept { return x; }
+        constexpr float g() const noexcept { return y; }
+        constexpr float b() const noexcept { return z; }
 
-        /**
-         * @brief HLSL-like ceil function (component-wise ceiling)
-         * @return Vector with ceiling components
-         */
-        float3 ceil() const noexcept;
+        // 2-component color swizzles
+        constexpr float2 rr() const noexcept { return float2(x, x); }
+        constexpr float2 rg() const noexcept { return float2(x, y); }
+        constexpr float2 rb() const noexcept { return float2(x, z); }
+        constexpr float2 gr() const noexcept { return float2(y, x); }
+        constexpr float2 gg() const noexcept { return float2(y, y); }
+        constexpr float2 gb() const noexcept { return float2(y, z); }
+        constexpr float2 br() const noexcept { return float2(z, x); }
+        constexpr float2 bg() const noexcept { return float2(z, y); }
+        constexpr float2 bb() const noexcept { return float2(z, z); }
 
-        /**
-         * @brief HLSL-like round function (component-wise rounding)
-         * @return Vector with rounded components
-         */
-        float3 round() const noexcept;
+        // 3-component color swizzles (complete set)
+        constexpr float3 rrr() const noexcept { return float3(x, x, x); }
+        constexpr float3 rrg() const noexcept { return float3(x, x, y); }
+        constexpr float3 rrb() const noexcept { return float3(x, x, z); }
+        constexpr float3 rgr() const noexcept { return float3(x, y, x); }
+        constexpr float3 rgg() const noexcept { return float3(x, y, y); }
+        constexpr float3 rgb() const noexcept { return float3(x, y, z); }
+        constexpr float3 rbr() const noexcept { return float3(x, z, x); }
+        constexpr float3 rbg() const noexcept { return float3(x, z, y); }
+        constexpr float3 rbb() const noexcept { return float3(x, z, z); }
 
-        /**
-         * @brief HLSL-like frac function (component-wise fractional part)
-         * @return Vector with fractional parts of components
-         */
-        float3 frac() const noexcept;
+        constexpr float3 grr() const noexcept { return float3(y, x, x); }
+        constexpr float3 grg() const noexcept { return float3(y, x, y); }
+        constexpr float3 grb() const noexcept { return float3(y, x, z); }
+        constexpr float3 ggr() const noexcept { return float3(y, y, x); }
+        constexpr float3 ggg() const noexcept { return float3(y, y, y); }
+        constexpr float3 ggb() const noexcept { return float3(y, y, z); }
+        constexpr float3 gbr() const noexcept { return float3(y, z, x); }
+        constexpr float3 gbg() const noexcept { return float3(y, z, y); }
+        constexpr float3 gbb() const noexcept { return float3(y, z, z); }
 
-        /**
-         * @brief HLSL-like saturate function (clamp components to [0, 1])
-         * @return Saturated vector
-         */
-        float3 saturate() const noexcept;
+        constexpr float3 brr() const noexcept { return float3(z, x, x); }
+        constexpr float3 brg() const noexcept { return float3(z, x, y); }
+        constexpr float3 brb() const noexcept { return float3(z, x, z); }
+        constexpr float3 bgr() const noexcept { return float3(z, y, x); }
+        constexpr float3 bgg() const noexcept { return float3(z, y, y); }
+        constexpr float3 bgb() const noexcept { return float3(z, y, z); }
+        constexpr float3 bbr() const noexcept { return float3(z, z, x); }
+        constexpr float3 bbg() const noexcept { return float3(z, z, y); }
+        constexpr float3 bbb() const noexcept { return float3(z, z, z); }
 
-        /**
-         * @brief HLSL-like step function (component-wise step)
-         * @param edge Edge value
-         * @return 1.0 if component >= edge, else 0.0
-         */
-        float3 step(float edge) const noexcept;
-
-        // ============================================================================
-        // Geometric Operations
-        // ============================================================================
-
-        /**
-         * @brief Compute reflection vector
-         * @param normal Surface normal (must be normalized)
-         * @return Reflected vector
-         */
-        float3 reflect(const float3& normal) const noexcept;
-
-        /**
-         * @brief Compute refraction vector
-         * @param normal Surface normal (must be normalized)
-         * @param eta Ratio of indices of refraction
-         * @return Refracted vector
-         */
-        float3 refract(const float3& normal, float eta) const noexcept;
-
-        /**
-         * @brief Project vector onto another vector
-         * @param onto Vector to project onto
-         * @return Projected vector
-         */
-        float3 project(const float3& onto) const noexcept;
-
-        /**
-         * @brief Reject vector from another vector (component perpendicular)
-         * @param from Vector to reject from
-         * @return Rejected vector
-         */
-        float3 reject(const float3& from) const noexcept;
+        // Swizzles that return float2 (common graphics operations)
+        constexpr float2 st() const noexcept { return float2(x, y); } // Texture coordinates
+        constexpr float2 ts() const noexcept { return float2(y, x); } // Swapped texture coordinates
+        constexpr float2 sp() const noexcept { return float2(x, z); } // Special coordinates
+        constexpr float2 ps() const noexcept { return float2(z, x); } // Special coordinates swapped
 
         // ============================================================================
-        // Static Mathematical Functions
+        // Utility swizzle functions for common operations
         // ============================================================================
-
-        /**
-         * @brief Compute dot product of two vectors
-         * @param a First vector
-         * @param b Second vector
-         * @return Dot product result
-         */
-        static float dot(const float3& a, const float3& b) noexcept;
-
-        /**
-         * @brief Compute cross product of two vectors
-         * @param a First vector
-         * @param b Second vector
-         * @return Cross product result
-         */
-        static float3 cross(const float3& a, const float3& b) noexcept;
-
-        /**
-         * @brief Linear interpolation between two vectors
-         * @param a Start vector
-         * @param b End vector
-         * @param t Interpolation factor [0, 1]
-         * @return Interpolated vector
-         */
-        static float3 lerp(const float3& a, const float3& b, float t) noexcept;
-
-        /**
-         * @brief Spherical linear interpolation (for directions)
-         * @param a Start vector (should be normalized)
-         * @param b End vector (should be normalized)
-         * @param t Interpolation factor [0, 1]
-         * @return Interpolated vector
-         */
-        static float3 slerp(const float3& a, const float3& b, float t) noexcept;
-
-        /**
-         * @brief Component-wise minimum of two vectors
-         * @param a First vector
-         * @param b Second vector
-         * @return Component-wise minimum
-         */
-        static float3 min(const float3& a, const float3& b) noexcept;
-
-        /**
-         * @brief Component-wise maximum of two vectors
-         * @param a First vector
-         * @param b Second vector
-         * @return Component-wise maximum
-         */
-        static float3 max(const float3& a, const float3& b) noexcept;
-
-        /**
-         * @brief HLSL-like saturate function (clamp components to [0, 1])
-         * @param vec Vector to saturate
-         * @return Saturated vector
-         */
-        static float3 saturate(const float3& vec) noexcept;
-
-        /**
-         * @brief Compute reflection vector
-         * @param incident Incident vector
-         * @param normal Surface normal (must be normalized)
-         * @return Reflected vector
-         */
-        static float3 reflect(const float3& incident, const float3& normal) noexcept;
-
-        /**
-         * @brief Compute refraction vector
-         * @param incident Incident vector
-         * @param normal Surface normal (must be normalized)
-         * @param eta Ratio of indices of refraction
-         * @return Refracted vector
-         */
-        static float3 refract(const float3& incident, const float3& normal, float eta) noexcept;
-
-        // ============================================================================
-        // Swizzle Operations (HLSL style)
-        // ============================================================================
-
-        float2 xy() const noexcept;
-        float2 xz() const noexcept;
-        float2 yz() const noexcept;
-        float2 yx() const noexcept;
-        float2 zx() const noexcept;
-        float2 zy() const noexcept;
-
-        float3 yxz() const noexcept;
-        float3 zxy() const noexcept;
-        float3 zyx() const noexcept;
-        float3 xzy() const noexcept;
-        float3 xyx() const noexcept;
-        float3 xyz() const noexcept;
-        float3 xzx() const noexcept;
-        float3 yxy() const noexcept;
-        float3 yzy() const noexcept;
-        float3 zxz() const noexcept;
-        float3 zyz() const noexcept;
-
-        // Color swizzles
-        float r() const noexcept;
-        float g() const noexcept;
-        float b() const noexcept;
-        float2 rg() const noexcept;
-        float2 rb() const noexcept;
-        float2 gb() const noexcept;
-        float3 rgb() const noexcept;
-        float3 bgr() const noexcept;
-        float3 gbr() const noexcept;
-
-        // ============================================================================
-        // Utility Methods
-        // ============================================================================
-
-        /**
-         * @brief Check if vector contains finite values
-         * @return True if all components are finite (not NaN or infinity)
-         */
-        bool isValid() const noexcept;
-
-        /**
-         * @brief Check if vector is approximately equal to another
-         * @param other Vector to compare with
-         * @param epsilon Comparison tolerance
-         * @return True if vectors are approximately equal
-         */
-        bool approximately(const float3& other, float epsilon = EPSILON) const noexcept;
-
-        /**
-         * @brief Check if vector is approximately zero
-         * @param epsilon Comparison tolerance
-         * @return True if vector length is approximately zero
-         */
-        bool approximately_zero(float epsilon = EPSILON) const noexcept;
-
-        /**
-         * @brief Check if vector is normalized
-         * @param epsilon Comparison tolerance
-         * @return True if vector length is approximately 1.0
-         */
-        bool is_normalized(float epsilon = 0.001f) const noexcept;
-
-        /**
-         * @brief Convert to string representation
-         * @return String in format "(x, y, z)"
-         */
-        std::string to_string() const;
-
-        /**
-         * @brief Get pointer to raw data
-         * @return Pointer to first component
-         */
-        const float* data() const noexcept;
-
-        /**
-         * @brief Get pointer to raw data (mutable)
-         * @return Pointer to first component
-         */
-        float* data() noexcept;
-
-        /**
-         * @brief Set x and y components from float2
-         * @param xy 2D vector for x and y components
-         */
-        void set_xy(const float2& xy) noexcept;
-
-        /**
-         * @brief Create SSE register from current data (internal helper)
-         * @return SSE register containing vector data
-         */
-        __m128 get_simd() const noexcept;
-
-        /**
-         * @brief Store SSE register to current data (internal helper)
-         * @param new_simd SSE register to set
-         */
-        void set_simd(__m128 new_simd) noexcept;
-
-        // ============================================================================
-        // Comparison Operators
-        // ============================================================================
-
-        bool operator==(const float3& rhs) const noexcept;
-        bool operator!=(const float3& rhs) const noexcept;
-
-        // ============================================================================
-        // Component Operations Implementation
-        // ============================================================================
-
-        /**
-        * @brief Get the minimum component of the vector
-        * @return Minimum value among x, y, z
-        */
-        float min_component() const noexcept;
-
-        /**
-         * @brief Get the maximum component of the vector
-         * @return Maximum value among x, y, z
-         */
-        float max_component() const noexcept;
-
-        /**
-         * @brief Get the index of the minimum component
-         * @return Index of minimum component (0=x, 1=y, 2=z)
-         */
-        int min_component_index() const noexcept;
-
-        /**
-         * @brief Get the index of the maximum component
-         * @return Index of maximum component (0=x, 1=y, 2=z)
-         */
-        int max_component_index() const noexcept;
 
         /**
          * @brief Get sum of all components
          * @return x + y + z
          */
-        float sum_components() const noexcept;
+        constexpr float sum() const noexcept {
+            return x + y + z;
+        }
 
         /**
          * @brief Get product of all components
          * @return x * y * z
          */
-        float product_components() const noexcept;
-
-        /**
- * @brief Compute average of components
- * @return (x + y + z) / 3
- */
-        float average() const noexcept
-        {
-            return sum_components() / 3.0f;
+        constexpr float product() const noexcept {
+            return x * y * z;
         }
 
-        /**
-         * @brief Check if any component is NaN
-         * @return True if any component is NaN
-         */
-        bool has_nan() const noexcept
-        {
+        // ============================================================================
+        // Utility Methods
+        // ============================================================================
+
+        std::string to_string() const {
+            char buffer[64];
+            std::snprintf(buffer, sizeof(buffer), "(%.3f, %.3f, %.3f)", x, y, z);
+            return std::string(buffer);
+        }
+
+        const float* data() const noexcept { return &x; }
+        float* data() noexcept { return &x; }
+
+        // ============================================================================
+        // Component Operations
+        // ============================================================================
+
+        float min_component() const noexcept {
+            return std::min({ x, y, z });
+        }
+
+        float max_component() const noexcept {
+            return std::max({ x, y, z });
+        }
+
+        int min_component_index() const noexcept {
+            if (x <= y && x <= z) return 0;
+            if (y <= z) return 1;
+            return 2;
+        }
+
+        int max_component_index() const noexcept {
+            if (x >= y && x >= z) return 0;
+            if (y >= z) return 1;
+            return 2;
+        }
+
+        float sum_components() const noexcept {
+            return x + y + z;
+        }
+
+        float product_components() const noexcept {
+            return x * y * z;
+        }
+
+        float average() const noexcept {
+            return (x + y + z) / 3.0f;
+        }
+
+        bool has_nan() const noexcept {
             return std::isnan(x) || std::isnan(y) || std::isnan(z);
         }
 
-        /**
-         * @brief Check if any component is infinite
-         * @return True if any component is infinite
-         */
-        bool has_infinite() const noexcept
-        {
+        bool has_infinite() const noexcept {
             return std::isinf(x) || std::isinf(y) || std::isinf(z);
         }
 
-        /**
-         * @brief Check if all components are finite
-         * @return True if all components are finite
-         */
-        bool all_finite() const noexcept
-        {
+        bool all_finite() const noexcept {
             return std::isfinite(x) && std::isfinite(y) && std::isfinite(z);
         }
     };
 
     // ============================================================================
-    // Binary Operators
+    // Global Mathematical Functions (HLSL Style)
     // ============================================================================
 
-    inline float3 operator+(float3 lhs, const float3& rhs) noexcept;
-    inline float3 operator-(float3 lhs, const float3& rhs) noexcept;
-    inline float3 operator*(float3 lhs, const float3& rhs) noexcept;
-    inline float3 operator/(float3 lhs, const float3& rhs) noexcept;
-    inline float3 operator*(float3 vec, float scalar) noexcept;
-    inline float3 operator*(float scalar, float3 vec) noexcept;
-    inline float3 operator/(float3 vec, float scalar) noexcept;
-    inline float3 operator/(float scalar, float3 vec) noexcept;
+    // Vector operations
+    inline float3 operator*(float3 lhs, const float3& rhs) noexcept {
+        return float3(lhs.x * rhs.x, lhs.y * rhs.y, lhs.z * rhs.z);
+    }
 
-    // ============================================================================
-    // Global Mathematical Functions
-    // ============================================================================
+    inline float3 operator/(float3 lhs, const float3& rhs) noexcept {
+        return float3(lhs.x / rhs.x, lhs.y / rhs.y, lhs.z / rhs.z);
+    }
 
-    inline float distance(const float3& a, const float3& b) noexcept;
-    inline float distance_sq(const float3& a, const float3& b) noexcept;
-    inline float dot(const float3& a, const float3& b) noexcept;
-    inline float3 cross(const float3& a, const float3& b) noexcept;
-    inline float3 normalize(const float3& vec) noexcept;
-    inline float3 lerp(const float3& a, const float3& b, float t) noexcept;
-    inline float3 slerp(const float3& a, const float3& b, float t) noexcept;
-    inline bool approximately(const float3& a, const float3& b, float epsilon = EPSILON) noexcept;
-    inline bool is_normalized(const float3& vec, float epsilon = EPSILON) noexcept;
-    inline bool are_orthogonal(const float3& a, const float3& b, float epsilon = EPSILON) noexcept;
-    inline bool is_orthonormal_basis(const float3& x, const float3& y, const float3& z, float epsilon = EPSILON) noexcept;
-    inline bool isValid(const float3& vec) noexcept;
+    inline float3 operator*(float3 vec, float scalar) noexcept {
+        return float3(vec.x * scalar, vec.y * scalar, vec.z * scalar);
+    }
+
+    inline float3 operator*(float scalar, float3 vec) noexcept {
+        return vec * scalar;
+    }
+
+    inline float3 operator/(float3 vec, float scalar) noexcept {
+        return vec * (1.0f / scalar);
+    }
+
+    inline float3 operator/(float scalar, float3 vec) noexcept {
+        return float3(scalar / vec.x, scalar / vec.y, scalar / vec.z);
+    }
+
+    // Length and distance
+    inline float length(const float3& v) noexcept {
+        return std::sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+    }
+
+    inline float length_sq(const float3& v) noexcept {
+        return v.x * v.x + v.y * v.y + v.z * v.z;
+    }
+
+    inline float distance(const float3& a, const float3& b) noexcept {
+        float dx = a.x - b.x;
+        float dy = a.y - b.y;
+        float dz = a.z - b.z;
+        return std::sqrt(dx * dx + dy * dy + dz * dz);
+    }
+
+    inline float distance_sq(const float3& a, const float3& b) noexcept {
+        float dx = a.x - b.x;
+        float dy = a.y - b.y;
+        float dz = a.z - b.z;
+        return dx * dx + dy * dy + dz * dz;
+    }
+
+    // Normalization
+    inline float3 normalize(const float3& v) noexcept {
+        float len = length(v);
+        if (len < EPSILON) {
+            return float3::zero();
+        }
+        return v / len;
+    }
+
+    // Dot and cross products
+    inline float dot(const float3& a, const float3& b) noexcept {
+        return a.x * b.x + a.y * b.y + a.z * b.z;
+    }
+
+    inline float3 cross(const float3& a, const float3& b) noexcept {
+        return float3(
+            a.y * b.z - a.z * b.y,
+            a.z * b.x - a.x * b.z,
+            a.x * b.y - a.y * b.x
+        );
+    }
+
+    // Comparison
+    inline bool approximately(const float3& a, const float3& b, float epsilon = EPSILON) noexcept {
+        return std::abs(a.x - b.x) <= epsilon &&
+            std::abs(a.y - b.y) <= epsilon &&
+            std::abs(a.z - b.z) <= epsilon;
+    }
+
+    inline bool approximately_zero(const float3& v, float epsilon = 1e-6f) noexcept {
+        return std::abs(v.x) <= epsilon &&
+            std::abs(v.y) <= epsilon &&
+            std::abs(v.z) <= epsilon;
+    }
+
+    inline bool isValid(const float3& v) noexcept {
+        return std::isfinite(v.x) && std::isfinite(v.y) && std::isfinite(v.z);
+    }
+
+    inline bool is_normalized(const float3& v, float epsilon = EPSILON) noexcept {
+        return std::abs(length_sq(v) - 1.0f) <= epsilon;
+    }
+
+    // Interpolation
+    inline float3 lerp(const float3& a, const float3& b, float t) noexcept {
+        return a + (b - a) * t;
+    }
+
+    inline float3 slerp(const float3& a, const float3& b, float t) noexcept {
+        if (t <= 0.0f) return a;
+        if (t >= 1.0f) return b;
+
+        float3 an = normalize(a);
+        float3 bn = normalize(b);
+        float d = dot(an, bn);
+        d = std::max(-1.0f, std::min(1.0f, d));
+
+        if (d > 0.9995f) return normalize(lerp(an, bn, t));
+
+        if (d < -0.9995f) {
+            // Find an orthogonal vector
+            float3 ortho;
+            if (std::abs(an.x) > 0.1f) {
+                ortho = float3(-an.y, an.x, 0.0f);
+            }
+            else {
+                ortho = float3(0.0f, -an.z, an.y);
+            }
+            ortho = normalize(ortho);
+            float angle = PI * t;
+            return an * std::cos(angle) + ortho * std::sin(angle);
+        }
+
+        float theta = std::acos(d);
+        float sinTheta = std::sin(theta);
+        if (sinTheta < 1e-8f) return normalize(lerp(an, bn, t));
+
+        float fa = std::sin((1.0f - t) * theta) / sinTheta;
+        float fb = std::sin(t * theta) / sinTheta;
+        return an * fa + bn * fb;
+    }
+
+    // Geometric operations
+    inline float3 reflect(const float3& incident, const float3& normal) noexcept {
+        return incident - normal * (2.0f * dot(incident, normal));
+    }
+
+    inline float3 refract(const float3& incident, const float3& normal, float eta) noexcept {
+        float cos_theta_i = -dot(incident, normal);
+        float sin_theta_i_sq = 1.0f - cos_theta_i * cos_theta_i;
+        float sin_theta_t_sq = (eta * eta) * sin_theta_i_sq;
+
+        // Total internal reflection
+        if (sin_theta_t_sq > 1.0f) {
+            return float3::zero();
+        }
+
+        float cos_theta_t = std::sqrt(1.0f - sin_theta_t_sq);
+        return incident * eta + normal * (eta * cos_theta_i - cos_theta_t);
+    }
+
+    inline float3 project(const float3& v, const float3& onto) noexcept {
+        float len_sq = length_sq(onto);
+        if (len_sq < EPSILON) {
+            return float3::zero();
+        }
+        return onto * (dot(v, onto) / len_sq);
+    }
+
+    inline float3 reject(const float3& v, const float3& from) noexcept {
+        return v - project(v, from);
+    }
+
+    // Angle operations
+    inline float angle_between(const float3& a, const float3& b) noexcept {
+        float3 na = normalize(a);
+        float3 nb = normalize(b);
+        float dot_val = dot(na, nb);
+        dot_val = std::max(-1.0f, std::min(1.0f, dot_val));
+        return std::acos(dot_val);
+    }
+
+    // Orthogonality checks
+    inline bool are_orthogonal(const float3& a, const float3& b, float epsilon = EPSILON) noexcept {
+        return std::abs(dot(a, b)) <= epsilon;
+    }
+
+    inline bool is_orthonormal_basis(const float3& x, const float3& y, const float3& z, float epsilon = EPSILON) noexcept {
+        return is_normalized(x, epsilon) && is_normalized(y, epsilon) && is_normalized(z, epsilon) &&
+            are_orthogonal(x, y, epsilon) && are_orthogonal(x, z, epsilon) && are_orthogonal(y, z, epsilon);
+    }
 
     // ============================================================================
     // HLSL-like Global Functions
     // ============================================================================
 
-    inline float3 abs(const float3& vec) noexcept;
-    inline float3 sign(const float3& vec) noexcept;
-    inline float3 floor(const float3& vec) noexcept;
-    inline float3 ceil(const float3& vec) noexcept;
-    inline float3 round(const float3& vec) noexcept;
-    inline float3 frac(const float3& vec) noexcept;
-    inline float3 saturate(const float3& vec) noexcept;
-    inline float3 step(float edge, const float3& vec) noexcept;
-    inline float3 min(const float3& a, const float3& b) noexcept;
-    inline float3 max(const float3& a, const float3& b) noexcept;
-    inline float3 clamp(const float3& vec, const float3& min_val, const float3& max_val) noexcept;
-    inline float3 clamp(const float3& vec, float min_val, float max_val) noexcept;
-    inline float length(const float3& vec) noexcept;
-    inline float length_sq(const float3& vec) noexcept;
+    inline float3 abs(const float3& v) noexcept {
+        return float3(std::abs(v.x), std::abs(v.y), std::abs(v.z));
+    }
+
+    inline float3 sign(const float3& v) noexcept {
+        return float3(
+            (v.x > 0.0f) ? 1.0f : ((v.x < 0.0f) ? -1.0f : 0.0f),
+            (v.y > 0.0f) ? 1.0f : ((v.y < 0.0f) ? -1.0f : 0.0f),
+            (v.z > 0.0f) ? 1.0f : ((v.z < 0.0f) ? -1.0f : 0.0f)
+        );
+    }
+
+    inline float3 floor(const float3& v) noexcept {
+        return float3(std::floor(v.x), std::floor(v.y), std::floor(v.z));
+    }
+
+    inline float3 ceil(const float3& v) noexcept {
+        return float3(std::ceil(v.x), std::ceil(v.y), std::ceil(v.z));
+    }
+
+    inline float3 round(const float3& v) noexcept {
+        return float3(std::round(v.x), std::round(v.y), std::round(v.z));
+    }
+
+    inline float3 frac(const float3& v) noexcept {
+        return float3(
+            v.x - std::floor(v.x),
+            v.y - std::floor(v.y),
+            v.z - std::floor(v.z)
+        );
+    }
+
+    inline float3 saturate(const float3& v) noexcept {
+        return float3(
+            std::max(0.0f, std::min(1.0f, v.x)),
+            std::max(0.0f, std::min(1.0f, v.y)),
+            std::max(0.0f, std::min(1.0f, v.z))
+        );
+    }
+
+    inline float3 step(float edge, const float3& v) noexcept {
+        return float3(
+            (v.x >= edge) ? 1.0f : 0.0f,
+            (v.y >= edge) ? 1.0f : 0.0f,
+            (v.z >= edge) ? 1.0f : 0.0f
+        );
+    }
+
+    inline float3 smoothstep(float edge0, float edge1, const float3& v) noexcept {
+        auto smooth = [edge0, edge1](float t) {
+            t = std::max(0.0f, std::min(1.0f, (t - edge0) / (edge1 - edge0)));
+            return t * t * (3.0f - 2.0f * t);
+        };
+        return float3(smooth(v.x), smooth(v.y), smooth(v.z));
+    }
+
+    inline float3 min(const float3& a, const float3& b) noexcept {
+        return float3(
+            std::min(a.x, b.x),
+            std::min(a.y, b.y),
+            std::min(a.z, b.z)
+        );
+    }
+
+    inline float3 max(const float3& a, const float3& b) noexcept {
+        return float3(
+            std::max(a.x, b.x),
+            std::max(a.y, b.y),
+            std::max(a.z, b.z)
+        );
+    }
+
+    inline float3 clamp(const float3& v, const float3& min_val, const float3& max_val) noexcept {
+        return float3(
+            std::max(min_val.x, std::min(max_val.x, v.x)),
+            std::max(min_val.y, std::min(max_val.y, v.y)),
+            std::max(min_val.z, std::min(max_val.z, v.z))
+        );
+    }
+
+    inline float3 clamp(const float3& v, float min_val, float max_val) noexcept {
+        return float3(
+            std::max(min_val, std::min(max_val, v.x)),
+            std::max(min_val, std::min(max_val, v.y)),
+            std::max(min_val, std::min(max_val, v.z))
+        );
+    }
 
     // ============================================================================
-    // Geometric Operations
+    // Global Component Operations
     // ============================================================================
 
-    inline float3 reflect(const float3& incident, const float3& normal) noexcept;
-    inline float3 refract(const float3& incident, const float3& normal, float eta) noexcept;
-    inline float3 project(const float3& vec, const float3& onto) noexcept;
-    inline float3 reject(const float3& vec, const float3& from) noexcept;
-    inline float angle_between(const float3& a, const float3& b) noexcept;
+    inline float min_component(const float3& v) noexcept {
+        return v.min_component();
+    }
+
+    inline float max_component(const float3& v) noexcept {
+        return v.max_component();
+    }
+
+    inline float sum_components(const float3& v) noexcept {
+        return v.sum_components();
+    }
+
+    inline float product_components(const float3& v) noexcept {
+        return v.product_components();
+    }
+
+    inline float average(const float3& v) noexcept {
+        return v.average();
+    }
+
+    // ============================================================================
+    // Comparison Operators
+    // ============================================================================
+
+    inline bool operator==(const float3& a, const float3& b) noexcept {
+        return approximately(a, b);
+    }
+
+    inline bool operator!=(const float3& a, const float3& b) noexcept {
+        return !approximately(a, b);
+    }
 
     // ============================================================================
     // Useful Constants
     // ============================================================================
 
-    extern const float3 float3_Zero;
-    extern const float3 float3_One;
-    extern const float3 float3_UnitX;
-    extern const float3 float3_UnitY;
-    extern const float3 float3_UnitZ;
-    extern const float3 float3_Forward;
-    extern const float3 float3_Up;
-    extern const float3 float3_Right;
+    inline const float3 float3_Zero(0.0f, 0.0f, 0.0f);
+    inline const float3 float3_One(1.0f, 1.0f, 1.0f);
+    inline const float3 float3_UnitX(1.0f, 0.0f, 0.0f);
+    inline const float3 float3_UnitY(0.0f, 1.0f, 0.0f);
+    inline const float3 float3_UnitZ(0.0f, 0.0f, 1.0f);
+    inline const float3 float3_Forward(0.0f, 0.0f, 1.0f);
+    inline const float3 float3_Up(0.0f, 1.0f, 0.0f);
+    inline const float3 float3_Right(1.0f, 0.0f, 0.0f);
 
 } // namespace AfterMath
-
-#include "math_float3.inl"

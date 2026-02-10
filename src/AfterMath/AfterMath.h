@@ -25,8 +25,8 @@
 // ============================================================================
 // Advanced Types
 // ============================================================================
-#include "math_quaternion.h"
-#include "math_aabb.h"
+//#include "math_quaternion.h"
+//#include "math_aabb.h"
 
 // ============================================================================
 // Vector Types
@@ -81,7 +81,7 @@ namespace AfterMath
     using half = AfterMath::half;
     using half2 = AfterMath::half2;
     using half3 = AfterMath::half3;
-    //using half4 = AfterMath::half4;
+    using half4 = AfterMath::half4;
     using float2 = AfterMath::float2;
     using float3 = AfterMath::float3;
     using float4 = AfterMath::float4;

@@ -1,121 +1,50 @@
-// Description: 4-dimensional vector class with comprehensive 
-//              mathematical operations and SSE optimization
-//              Supports both 4D vectors and homogeneous coordinates
+// math_float4.h
+// Description: 4-dimensional vector class with HLSL-like syntax and SSE optimization
 // Author: NSDeathman, DeepSeek
+
 #pragma once
 
-/**
- * @file math_float4.h
- * @brief 4-dimensional vector with comprehensive mathematical operations and SSE optimization
- * @note Supports both 4D vectors and homogeneous coordinates, includes color operations
- * @note Perfect for 4D graphics, homogeneous coordinates, RGBA colors, and quaternions
- */
-
-#include <xmmintrin.h>
-#include <pmmintrin.h> // SSE3
-#include <smmintrin.h> // SSE4.1
 #include <string>
 #include <cstdio>
 #include <cmath>
 #include <algorithm>
+#include <cassert>
+#include <cstdint>
+#include <xmmintrin.h>
+#include <pmmintrin.h>
+#include <smmintrin.h>
 
-#include "math_config.h"
-#include "math_constants.h"
-#include "math_functions.h"
-#include "math_float2.h"
-#include "math_float3.h"
-
-///////////////////////////////////////////////////////////////
 namespace AfterMath
 {
-    // ============================================================================
-    // Fwd Declaration
-    // ============================================================================
-
+    // Forward declarations
+    class float2;
+    class float3;
     class float4;
 
-    /**
-     * @brief Vector addition operator
-     * @param lhs Left-hand side vector
-     * @param rhs Right-hand side vector
-     * @return Result of addition
-     */
-    inline float4 operator+(float4 lhs, const float4& rhs) noexcept;
-
-    /**
-     * @brief Vector subtraction operator
-     * @param lhs Left-hand side vector
-     * @param rhs Right-hand side vector
-     * @return Result of subtraction
-     */
-    inline float4 operator-(float4 lhs, const float4& rhs) noexcept;
-
-    /**
-     * @brief Component-wise vector multiplication operator
-     * @param lhs Left-hand side vector
-     * @param rhs Right-hand side vector
-     * @return Result of multiplication
-     */
-    inline float4 operator*(float4 lhs, const float4& rhs) noexcept;
-
-    /**
-     * @brief Component-wise vector division operator
-     * @param lhs Left-hand side vector
-     * @param rhs Right-hand side vector
-     * @return Result of division
-     */
-    inline float4 operator/(float4 lhs, const float4& rhs) noexcept;
-
-    /**
-     * @brief Vector-scalar multiplication operator
-     * @param vec Vector to multiply
-     * @param scalar Scalar multiplier
-     * @return Scaled vector
-     */
-    inline float4 operator*(float4 vec, float scalar) noexcept;
-
-    /**
-     * @brief Scalar-vector multiplication operator
-     * @param scalar Scalar multiplier
-     * @param vec Vector to multiply
-     * @return Scaled vector
-     */
-    inline float4 operator*(float scalar, float4 vec) noexcept;
-
-    /**
-     * @brief Vector-scalar division operator
-     * @param vec Vector to divide
-     * @param scalar Scalar divisor
-     * @return Scaled vector
-     */
-    inline float4 operator/(float4 vec, float scalar) noexcept;
+    // ============================================================================
+    // 4D Vector Class
+    // ============================================================================
 
     /**
      * @class float4
-     * @brief 4-dimensional vector with comprehensive mathematical operations
+     * @brief 4-dimensional vector with HLSL-like syntax
      *
-     * Represents a 4D vector (x, y, z, w) with optimized operations for 4D graphics,
-     * homogeneous coordinates, colors with alpha, and 4D mathematics.
-     * Features SSE optimization for performance-critical operations.
+     * Represents a 4D vector (x, y, z, w) with SSE optimization for
+     * 4D graphics, homogeneous coordinates, colors with alpha, and 4D mathematics.
      *
      * @note Perfect for 4D graphics, homogeneous coordinates, RGBA colors, and quaternions
-     * @note All operations are optimized and constexpr where possible
      * @note Includes comprehensive HLSL-like function set and color operations
-     * @note Supports both aligned and unaligned memory operations
      */
     class float4
     {
     public:
-        // ============================================================================
-        // Data Members (Public for Direct Access)
-        // ============================================================================
-
+        // Union for SSE optimization
         union {
             struct {
                 float x; ///< X component of the vector
                 float y; ///< Y component of the vector  
                 float z; ///< Z component of the vector
-                float w; ///< W component of the vector (homogeneous coordinate or alpha)
+                float w; ///< W component of the vector
             };
             __m128 simd_; ///< SSE register for optimized operations
         };
@@ -124,1231 +53,534 @@ namespace AfterMath
         // Constructors
         // ============================================================================
 
-        /**
-         * @brief Default constructor (initializes to zero vector)
-         * @note Uses SSE optimized initialization
-         */
-        float4() noexcept;
+        float4() noexcept : simd_(_mm_setzero_ps()) {}
 
-        /**
-         * @brief Construct from components
-         * @param x X component
-         * @param y Y component
-         * @param z Z component
-         * @param w W component
-         * @note Components are stored in SSE register for optimal performance
-         */
-        float4(float x, float y, float z, float w) noexcept;
+        float4(float x, float y, float z, float w) noexcept :
+            simd_(_mm_set_ps(w, z, y, x)) {}
 
-        /**
-         * @brief Construct from scalar (all components set to same value)
-         * @param scalar Value for all components
-         * @note Useful for creating uniform vectors
-         */
-        explicit float4(float scalar) noexcept;
+        float4(float2 xy, float z, float w) noexcept :
+            simd_(_mm_set_ps(w, z, xy.y, xy.x)) {}
+        
+        float4(float3 xyz, float w) noexcept :
+            simd_(_mm_set_ps(w, xyz.z, xyz.y, xyz.x)) {}
 
-        /**
-         * @brief Construct from float2 and z, w components
-         * @param vec 2D vector for x and y components
-         * @param z Z component (default: 0.0f)
-         * @param w W component (default: 0.0f)
-         * @note Convenient for extending 2D vectors to 4D
-         */
-        float4(const float2& vec, float z = 0.0f, float w = 0.0f) noexcept;
+        explicit float4(float scalar) noexcept :
+            simd_(_mm_set1_ps(scalar)) {}
 
-        /**
-         * @brief Construct from float3 and w component
-         * @param vec 3D vector for x, y, z components
-         * @param w W component (default: 0.0f)
-         * @note Useful for homogeneous coordinates and colors with alpha
-         */
-        float4(const float3& vec, float w = 0.0f) noexcept;
+        // Note: float2 and float3 constructors would require their headers
+        // float4(const float2& vec, float z = 0.0f, float w = 0.0f) noexcept;
+        // float4(const float3& vec, float w = 0.0f) noexcept;
 
-        /**
-         * @brief Copy constructor
-         * @note Default implementation is efficient for SSE types
-         */
         float4(const float4&) noexcept = default;
 
-        /**
-         * @brief Construct from raw float array
-         * @param data Pointer to float array [x, y, z, w]
-         * @note Uses unaligned load for maximum compatibility
-         */
-        explicit float4(const float* data) noexcept;
+        explicit float4(const float* data) noexcept :
+            simd_(_mm_loadu_ps(data)) {}
 
-        /**
-         * @brief Construct from SSE register (advanced users)
-         * @param simd_val SSE register containing vector data
-         * @note For advanced SSE optimization scenarios
-         */
-        explicit float4(__m128 simd_val) noexcept;
+        explicit float4(__m128 simd_val) noexcept : simd_(simd_val) {}
 
         // ============================================================================
         // Assignment Operators
         // ============================================================================
 
-        /**
-         * @brief Copy assignment operator
-         * @note Default implementation is efficient for SSE types
-         */
         float4& operator=(const float4&) noexcept = default;
 
-        /**
-         * @brief Scalar assignment (sets all components to same value)
-         * @param scalar Value for all components
-         * @return Reference to this vector
-         */
-        float4& operator=(float scalar) noexcept;
+        float4& operator=(float scalar) noexcept {
+            simd_ = _mm_set1_ps(scalar);
+            return *this;
+        }
 
-        /**
-         * @brief Assignment from float3 (preserves w component)
-         * @param xyz 3D vector for x, y, z components
-         * @return Reference to this vector
-         * @note Preserves existing w component value
-         */
-        float4& operator=(const float3& xyz) noexcept;
+        // Note: float3 assignment would require float3 header
+        // float4& operator=(const float3& xyz) noexcept;
 
         // ============================================================================
         // Compound Assignment Operators
         // ============================================================================
 
-        /**
-         * @brief Add and assign operator
-         * @param rhs Vector to add
-         * @return Reference to this vector
-         * @note SSE optimized implementation
-         */
-        float4& operator+=(const float4& rhs) noexcept;
+        float4& operator+=(const float4& rhs) noexcept {
+            simd_ = _mm_add_ps(simd_, rhs.simd_);
+            return *this;
+        }
 
-        /**
-         * @brief Subtract and assign operator
-         * @param rhs Vector to subtract
-         * @return Reference to this vector
-         * @note SSE optimized implementation
-         */
-        float4& operator-=(const float4& rhs) noexcept;
+        float4& operator-=(const float4& rhs) noexcept {
+            simd_ = _mm_sub_ps(simd_, rhs.simd_);
+            return *this;
+        }
 
-        /**
-         * @brief Component-wise multiply and assign operator
-         * @param rhs Vector to multiply by
-         * @return Reference to this vector
-         * @note SSE optimized implementation
-         */
-        float4& operator*=(const float4& rhs) noexcept;
+        float4& operator*=(const float4& rhs) noexcept {
+            simd_ = _mm_mul_ps(simd_, rhs.simd_);
+            return *this;
+        }
 
-        /**
-         * @brief Component-wise divide and assign operator
-         * @param rhs Vector to divide by
-         * @return Reference to this vector
-         * @note SSE optimized implementation
-         */
-        float4& operator/=(const float4& rhs) noexcept;
+        float4& operator/=(const float4& rhs) noexcept {
+            simd_ = _mm_div_ps(simd_, rhs.simd_);
+            return *this;
+        }
 
-        /**
-         * @brief Scalar multiply and assign operator
-         * @param scalar Scalar to multiply by
-         * @return Reference to this vector
-         * @note SSE optimized implementation
-         */
-        float4& operator*=(float scalar) noexcept;
+        float4& operator*=(float scalar) noexcept {
+            __m128 scalar_vec = _mm_set1_ps(scalar);
+            simd_ = _mm_mul_ps(simd_, scalar_vec);
+            return *this;
+        }
 
-        /**
-         * @brief Scalar divide and assign operator
-         * @param scalar Scalar to divide by
-         * @return Reference to this vector
-         * @note SSE optimized implementation
-         */
-        float4& operator/=(float scalar) noexcept;
+        float4& operator/=(float scalar) noexcept {
+            __m128 inv_scalar = _mm_set1_ps(1.0f / scalar);
+            simd_ = _mm_mul_ps(simd_, inv_scalar);
+            return *this;
+        }
+
+        // ============================================================================
+        // Binary Operators
+        // ============================================================================
+
+        float4 operator+(const float4& rhs) const noexcept {
+            return float4(_mm_add_ps(simd_, rhs.simd_));
+        }
+
+        float4 operator-(const float4& rhs) const noexcept {
+            return float4(_mm_sub_ps(simd_, rhs.simd_));
+        }
 
         // ============================================================================
         // Unary Operators
         // ============================================================================
 
-        /**
-         * @brief Unary plus operator
-         * @return Copy of this vector
-         */
-        float4 operator+() const noexcept;
+        float4 operator+() const noexcept { return *this; }
 
-        /**
-         * @brief Unary minus operator (negation)
-         * @return Negated vector
-         * @note SSE optimized implementation
-         */
-        float4 operator-() const noexcept;
+        float4 operator-() const noexcept {
+            __m128 neg = _mm_set1_ps(-1.0f);
+            return float4(_mm_mul_ps(simd_, neg));
+        }
 
         // ============================================================================
         // Access Operators
         // ============================================================================
 
-        /**
-         * @brief Access component by index
-         * @param index Component index (0 = x, 1 = y, 2 = z, 3 = w)
-         * @return Reference to component
-         * @warning No bounds checking - use with valid indices 0-3
-         */
-        float& operator[](int index) noexcept;
+        float& operator[](int index) noexcept {
+            assert(index >= 0 && index < 4);
+            return (&x)[index];
+        }
 
-        /**
-         * @brief Access component by index (const)
-         * @param index Component index (0 = x, 1 = y, 2 = z, 3 = w)
-         * @return Const reference to component
-         * @warning No bounds checking - use with valid indices 0-3
-         */
-        const float& operator[](int index) const noexcept;
+        const float& operator[](int index) const noexcept {
+            assert(index >= 0 && index < 4);
+            return (&x)[index];
+        }
 
         // ============================================================================
         // Conversion Operators
         // ============================================================================
 
-        /**
-         * @brief Convert to const float pointer (for interoperability)
-         * @return Pointer to first component
-         * @note Useful for passing to C-style APIs
-         */
-        operator const float* () const noexcept;
-
-        /**
-         * @brief Convert to float pointer (for interoperability)
-         * @return Pointer to first component
-         * @note Useful for modifying data in C-style APIs
-         */
-        operator float* () noexcept;
-
-        /**
-         * @brief Convert to SSE register (advanced users)
-         * @return SSE register containing vector data
-         * @note For advanced SSE optimization scenarios
-         */
-        operator __m128() const noexcept;
+        operator const float* () const noexcept { return &x; }
+        operator float* () noexcept { return &x; }
+        operator __m128() const noexcept { return simd_; }
 
         // ============================================================================
         // Static Constructors
         // ============================================================================
 
-        /**
-         * @brief Zero vector (0, 0, 0, 0)
-         * @return Zero vector
-         */
-        static float4 zero() noexcept;
+        static float4 zero() noexcept { return float4(0.0f, 0.0f, 0.0f, 0.0f); }
+        static float4 one() noexcept { return float4(1.0f, 1.0f, 1.0f, 1.0f); }
+        static float4 unit_x() noexcept { return float4(1.0f, 0.0f, 0.0f, 0.0f); }
+        static float4 unit_y() noexcept { return float4(0.0f, 1.0f, 0.0f, 0.0f); }
+        static float4 unit_z() noexcept { return float4(0.0f, 0.0f, 1.0f, 0.0f); }
+        static float4 unit_w() noexcept { return float4(0.0f, 0.0f, 0.0f, 1.0f); }
 
-        /**
-         * @brief One vector (1, 1, 1, 1)
-         * @return One vector
-         */
-        static float4 one() noexcept;
+        static float4 from_rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255) noexcept {
+            return float4(
+                static_cast<float>(r) / 255.0f,
+                static_cast<float>(g) / 255.0f,
+                static_cast<float>(b) / 255.0f,
+                static_cast<float>(a) / 255.0f
+            );
+        }
 
-        /**
-         * @brief Unit X vector (1, 0, 0, 0)
-         * @return Unit vector along X axis
-         */
-        static float4 unit_x() noexcept;
-
-        /**
-         * @brief Unit Y vector (0, 1, 0, 0)
-         * @return Unit vector along Y axis
-         */
-        static float4 unit_y() noexcept;
-
-        /**
-         * @brief Unit Z vector (0, 0, 1, 0)
-         * @return Unit vector along Z axis
-         */
-        static float4 unit_z() noexcept;
-
-        /**
-         * @brief Unit W vector (0, 0, 0, 1)
-         * @return Unit vector along W axis
-         */
-        static float4 unit_w() noexcept;
-
-        /**
-         * @brief Create vector from RGBA color values [0-255]
-         * @param r Red component [0-255]
-         * @param g Green component [0-255]
-         * @param b Blue component [0-255]
-         * @param a Alpha component [0-255] (default: 255)
-         * @return Color vector with components normalized to [0,1]
-         * @note Automatically converts from 8-bit to float format
-         */
-        static float4 from_rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255) noexcept;
-
-        /**
-         * @brief Create vector from float values with automatic normalization
-         * @param r Red component [0.0-1.0]
-         * @param g Green component [0.0-1.0]
-         * @param b Blue component [0.0-1.0]
-         * @param a Alpha component [0.0-1.0] (default: 1.0)
-         * @return Color vector
-         * @note Components should be in [0,1] range for correct color representation
-         */
-        static float4 from_color(float r, float g, float b, float a = 1.0f) noexcept;
+        static float4 from_color(float r, float g, float b, float a = 1.0f) noexcept {
+            return float4(r, g, b, a);
+        }
 
         // ============================================================================
-        // Mathematical Functions
+        // Basic Properties
         // ============================================================================
 
-        /**
-         * @brief Compute Euclidean length (magnitude)
-         * @return Length of the vector
-         * @note SSE optimized implementation using horizontal addition
-         */
-        float length() const noexcept;
+        float length_sq() const noexcept {
+            __m128 squared = _mm_mul_ps(simd_, simd_);
+            __m128 sum = _mm_hadd_ps(squared, squared);
+            sum = _mm_hadd_ps(sum, sum);
+            return _mm_cvtss_f32(sum);
+        }
 
-        /**
-         * @brief Compute squared length (faster, useful for comparisons)
-         * @return Squared length of the vector
-         * @note Faster than length() for distance comparisons
-         */
-        float length_sq() const noexcept;
-
-        /**
-         * @brief Normalize vector to unit length
-         * @return Normalized vector
-         * @note Returns zero vector if length is zero
-         * @note SSE optimized implementation
-         */
-        float4 normalize() const noexcept;
-
-        /**
-         * @brief Compute dot product with another vector
-         * @param other Other vector
-         * @return Dot product result
-         * @note Includes all 4 components in calculation
-         */
-        float dot(const float4& other) const noexcept;
-
-        /**
-         * @brief Compute 3D dot product (ignores w component)
-         * @param other Other vector
-         * @return 3D dot product result
-         * @note Useful for 3D operations in homogeneous coordinates
-         */
-        float dot3(const float4& other) const noexcept;
-
-        /**
-         * @brief Compute 3D cross product (ignores w component)
-         * @param other Other vector
-         * @return 3D cross product result (w = 0)
-         * @note Resulting w component is set to 0
-         * @note SSE optimized implementation using shuffles
-         */
-        float4 cross(const float4& other) const noexcept;
-
-        /**
-         * @brief Compute distance to another point
-         * @param other Other point
-         * @return Euclidean distance
-         * @note Treats vectors as points in 4D space
-         */
-        float distance(const float4& other) const noexcept;
-
-        /**
-         * @brief Compute squared distance to another point (faster)
-         * @param other Other point
-         * @return Squared Euclidean distance
-         * @note Faster than distance() for distance comparisons
-         */
-        float distance_sq(const float4& other) const noexcept;
+        float distance_sq(const float4& other) const noexcept {
+            float4 diff = *this - other;
+            return diff.length_sq();
+        }
 
         // ============================================================================
-        // HLSL-like Functions
+        // Swizzle Operations (HLSL style) - float4 returns
         // ============================================================================
 
-        /**
-         * @brief HLSL-like abs function (component-wise absolute value)
-         * @return Vector with absolute values of components
-         * @note SSE optimized using bitwise operations
-         */
-        float4 abs() const noexcept;
+        float4 yxzw() const noexcept { return float4(y, x, z, w); }
+        float4 zxyw() const noexcept { return float4(z, x, y, w); }
+        float4 zyxw() const noexcept { return float4(z, y, x, w); }
+        float4 wzyx() const noexcept { return float4(w, z, y, x); }
+        float4 xyxw() const noexcept { return float4(x, y, x, w); }
+        float4 xzxw() const noexcept { return float4(x, z, x, w); }
+        float4 yxyw() const noexcept { return float4(y, x, y, w); }
+        float4 yzyw() const noexcept { return float4(y, z, y, w); }
+        float4 zxzw() const noexcept { return float4(z, x, z, w); }
+        float4 zyzw() const noexcept { return float4(z, y, z, w); }
 
-        /**
-         * @brief HLSL-like sign function (component-wise sign)
-         * @return Vector with signs of components (-1, 0, or 1)
-         * @note SSE optimized implementation
-         */
-        float4 sign() const noexcept;
+        // Color swizzles (as float4)
+        float r() const noexcept { return x; }
+        float g() const noexcept { return y; }
+        float b() const noexcept { return z; }
+        float a() const noexcept { return w; }
 
-        /**
-         * @brief HLSL-like floor function (component-wise floor)
-         * @return Vector with floored components
-         * @note Uses SSE4.1 instruction when available, fallback to std::floor
-         */
-        float4 floor() const noexcept;
-
-        /**
-         * @brief HLSL-like ceil function (component-wise ceiling)
-         * @return Vector with ceiling components
-         * @note Uses SSE4.1 instruction when available, fallback to std::ceil
-         */
-        float4 ceil() const noexcept;
-
-        /**
-         * @brief HLSL-like round function (component-wise rounding)
-         * @return Vector with rounded components
-         * @note Uses SSE4.1 instruction when available, fallback to std::round
-         */
-        float4 round() const noexcept;
-
-        /**
-         * @brief HLSL-like frac function (component-wise fractional part)
-         * @return Vector with fractional parts of components
-         * @note Computes component - floor(component) for each component
-         */
-        float4 frac() const noexcept;
-
-        /**
-         * @brief HLSL-like saturate function (clamp components to [0, 1])
-         * @return Saturated vector
-         * @note SSE optimized implementation
-         */
-        float4 saturate() const noexcept;
-
-        /**
-         * @brief HLSL-like step function (component-wise step)
-         * @param edge Edge value
-         * @return 1.0 if component >= edge, else 0.0
-         * @note SSE optimized implementation
-         */
-        float4 step(float edge) const noexcept;
-
-        // ============================================================================
-        // Color Operations
-        // ============================================================================
-
-        /**
-         * @brief Compute luminance (grayscale value) using standard weights
-         * @return Luminance value
-         * @note Uses Rec. 709 weights: 0.2126*R + 0.7152*G + 0.0722*B
-         * @note Standard weights for HD television and sRGB colorspace
-         */
-        float luminance() const noexcept;
-
-        /**
-         * @brief Compute average brightness (simple average of RGB)
-         * @return Brightness value
-         * @note Simple average: (R + G + B) / 3
-         */
-        float brightness() const noexcept;
-
-        /**
-         * @brief Premultiply RGB components by alpha
-         * @return Premultiplied color
-         * @note Useful for alpha blending operations
-         * @note Preserves original alpha value
-         */
-        float4 premultiply_alpha() const noexcept;
-
-        /**
-         * @brief Unpremultiply RGB components (divide by alpha)
-         * @return Unpremultiplied color
-         * @note Returns original color if alpha is zero
-         * @note Inverse operation of premultiply_alpha()
-         */
-        float4 unpremultiply_alpha() const noexcept;
-
-        /**
-         * @brief Convert to grayscale using luminance
-         * @return Grayscale color (RGB = luminance, alpha preserved)
-         * @note Uses standard luminance weights for accurate grayscale conversion
-         */
-        float4 grayscale() const noexcept;
-
-        // ============================================================================
-        // Geometric Operations
-        // ============================================================================
-
-        /**
-         * @brief Project 4D homogeneous coordinates to 3D
-         * @return 3D projected coordinates (x/w, y/w, z/w)
-         * @note Returns zero vector if w is zero
-         * @note Standard homogeneous coordinate projection
-         */
-        float3 project() const noexcept;
-
-        /**
-         * @brief Transform to homogeneous coordinates (set w = 1)
-         * @return Homogeneous coordinates (x, y, z, 1)
-         * @note Useful for converting 3D points to homogeneous coordinates
-         */
-        float4 to_homogeneous() const noexcept;
-
-        // ============================================================================
-        // Static Mathematical Functions
-        // ============================================================================
-
-        /**
-         * @brief Compute dot product of two vectors
-         * @param a First vector
-         * @param b Second vector
-         * @return Dot product result
-         * @note SSE optimized implementation
-         */
-        static float dot(const float4& a, const float4& b) noexcept;
-
-        /**
-         * @brief Compute 3D dot product (ignores w component)
-         * @param a First vector
-         * @param b Second vector
-         * @return 3D dot product result
-         * @note Useful for 3D operations in homogeneous coordinates
-         */
-        static float dot3(const float4& a, const float4& b) noexcept;
-
-        /**
-         * @brief Compute 3D cross product (ignores w component)
-         * @param a First vector
-         * @param b Second vector
-         * @return 3D cross product result (w = 0)
-         * @note SSE optimized implementation using shuffles
-         */
-        static float4 cross(const float4& a, const float4& b) noexcept;
-
-        /**
-         * @brief Linear interpolation between two vectors
-         * @param a Start vector
-         * @param b End vector
-         * @param t Interpolation factor [0, 1]
-         * @return Interpolated vector
-         * @note SSE optimized implementation
-         */
-        static float4 lerp(const float4& a, const float4& b, float t) noexcept;
-
-        /**
-         * @brief Component-wise minimum of two vectors
-         * @param a First vector
-         * @param b Second vector
-         * @return Component-wise minimum
-         * @note SSE optimized implementation
-         */
-        static float4 min(const float4& a, const float4& b) noexcept;
-
-        /**
-         * @brief Component-wise maximum of two vectors
-         * @param a First vector
-         * @param b Second vector
-         * @return Component-wise maximum
-         * @note SSE optimized implementation
-         */
-        static float4 max(const float4& a, const float4& b) noexcept;
-
-        /**
-         * @brief HLSL-like saturate function (clamp components to [0, 1])
-         * @param vec Vector to saturate
-         * @return Saturated vector
-         * @note SSE optimized implementation
-         */
-        static float4 saturate(const float4& vec) noexcept;
-
-        // ============================================================================
-        // Swizzle Operations (HLSL style)
-        // ============================================================================
-
-        /**
-         * @brief Swizzle to (x, y)
-         * @return 2D vector with x and y components
-         */
-        float2 xy() const noexcept;
-
-        /**
-         * @brief Swizzle to (x, z)
-         * @return 2D vector with x and z components
-         */
-        float2 xz() const noexcept;
-
-        /**
-         * @brief Swizzle to (x, w)
-         * @return 2D vector with x and w components
-         */
-        float2 xw() const noexcept;
-
-        /**
-         * @brief Swizzle to (y, z)
-         * @return 2D vector with y and z components
-         */
-        float2 yz() const noexcept;
-
-        /**
-         * @brief Swizzle to (y, w)
-         * @return 2D vector with y and w components
-         */
-        float2 yw() const noexcept;
-
-        /**
-         * @brief Swizzle to (z, w)
-         * @return 2D vector with z and w components
-         */
-        float2 zw() const noexcept;
-
-        /**
-         * @brief Swizzle to (x, y, z)
-         * @return 3D vector with x, y, z components
-         */
-        float3 xyz() const noexcept;
-
-        /**
-         * @brief Swizzle to (x, y, w)
-         * @return 3D vector with x, y, w components
-         */
-        float3 xyw() const noexcept;
-
-        /**
-         * @brief Swizzle to (x, z, w)
-         * @return 3D vector with x, z, w components
-         */
-        float3 xzw() const noexcept;
-
-        /**
-         * @brief Swizzle to (y, z, w)
-         * @return 3D vector with y, z, w components
-         */
-        float3 yzw() const noexcept;
-
-        /**
-         * @brief Swizzle to (y, x, z, w)
-         * @return 4D vector with components swapped
-         */
-        float4 yxzw() const noexcept;
-
-        /**
-         * @brief Swizzle to (z, x, y, w)
-         * @return 4D vector with components rotated
-         */
-        float4 zxyw() const noexcept;
-
-        /**
-         * @brief Swizzle to (z, y, x, w)
-         * @return 4D vector with components reversed in XYZ
-         */
-        float4 zyxw() const noexcept;
-
-        /**
-         * @brief Swizzle to (w, z, y, x)
-         * @return 4D vector with components fully reversed
-         */
-        float4 wzyx() const noexcept;
-
-        // Color swizzles
-        /**
-         * @brief Get red component (alias for x)
-         * @return Red component
-         */
-        float r() const noexcept;
-
-        /**
-         * @brief Get green component (alias for y)
-         * @return Green component
-         */
-        float g() const noexcept;
-
-        /**
-         * @brief Get blue component (alias for z)
-         * @return Blue component
-         */
-        float b() const noexcept;
-
-        /**
-         * @brief Get alpha component (alias for w)
-         * @return Alpha component
-         */
-        float a() const noexcept;
-
-        /**
-         * @brief Swizzle to (r, g) - red and green components
-         * @return 2D vector with red and green components
-         */
-        float2 rg() const noexcept;
-
-        /**
-         * @brief Swizzle to (r, b) - red and blue components
-         * @return 2D vector with red and blue components
-         */
-        float2 rb() const noexcept;
-
-        /**
-         * @brief Swizzle to (r, a) - red and alpha components
-         * @return 2D vector with red and alpha components
-         */
-        float2 ra() const noexcept;
-
-        /**
-         * @brief Swizzle to (g, b) - green and blue components
-         * @return 2D vector with green and blue components
-         */
-        float2 gb() const noexcept;
-
-        /**
-         * @brief Swizzle to (g, a) - green and alpha components
-         * @return 2D vector with green and alpha components
-         */
-        float2 ga() const noexcept;
-
-        /**
-         * @brief Swizzle to (b, a) - blue and alpha components
-         * @return 2D vector with blue and alpha components
-         */
-        float2 ba() const noexcept;
-
-        /**
-         * @brief Swizzle to (r, g, b) - RGB color
-         * @return 3D vector with RGB components
-         */
-        float3 rgb() const noexcept;
-
-        /**
-         * @brief Swizzle to (r, g, a) - red, green, alpha components
-         * @return 3D vector with RGA components
-         */
-        float3 rga() const noexcept;
-
-        /**
-         * @brief Swizzle to (r, b, a) - red, blue, alpha components
-         * @return 3D vector with RBA components
-         */
-        float3 rba() const noexcept;
-
-        /**
-         * @brief Swizzle to (g, b, a) - green, blue, alpha components
-         * @return 3D vector with GBA components
-         */
-        float3 gba() const noexcept;
-
-        /**
-         * @brief Swizzle to (g, r, b, a) - green, red, blue, alpha
-         * @return 4D vector with GRBA components
-         */
-        float4 grba() const noexcept;
-
-        /**
-         * @brief Swizzle to (b, r, g, a) - blue, red, green, alpha
-         * @return 4D vector with BRGA components
-         */
-        float4 brga() const noexcept;
-
-        /**
-         * @brief Swizzle to (b, g, r, a) - blue, green, red, alpha (BGR format)
-         * @return 4D vector with BGRA components
-         */
-        float4 bgra() const noexcept;
-
-        /**
-         * @brief Swizzle to (a, b, g, r) - alpha, blue, green, red
-         * @return 4D vector with ABGR components
-         */
-        float4 abgr() const noexcept;
+        float4 grba() const noexcept { return float4(y, x, z, w); }
+        float4 brga() const noexcept { return float4(z, x, y, w); }
+        float4 bgra() const noexcept { return float4(z, y, x, w); }
+        float4 abgr() const noexcept { return float4(w, z, y, x); }
+        float4 argb() const noexcept { return float4(w, x, y, z); }
+        float4 rbga() const noexcept { return float4(x, z, y, w); }
+        float4 gbra() const noexcept { return float4(y, z, x, w); }
 
         // ============================================================================
         // Utility Methods
         // ============================================================================
 
-        /**
-         * @brief Check if vector contains finite values
-         * @return True if all components are finite (not NaN or infinity)
-         * @note SSE optimized implementation
-         */
-        bool isValid() const noexcept;
+        std::string to_string() const {
+            char buffer[80];
+            std::snprintf(buffer, sizeof(buffer), "(%.3f, %.3f, %.3f, %.3f)", x, y, z, w);
+            return std::string(buffer);
+        }
 
-        /**
-         * @brief Check if vector is approximately equal to another
-         * @param other Vector to compare with
-         * @param epsilon Comparison tolerance (default: EPSILON)
-         * @return True if vectors are approximately equal
-         * @note SSE optimized implementation
-         */
-        bool approximately(const float4& other, float epsilon = EPSILON) const noexcept;
+        const float* data() const noexcept { return &x; }
+        float* data() noexcept { return &x; }
 
-        /**
-         * @brief Check if vector is approximately zero
-         * @param epsilon Comparison tolerance (default: EPSILON)
-         * @return True if vector length is approximately zero
-         */
-        bool approximately_zero(float epsilon = EPSILON) const noexcept;
+        // SSE-specific methods
+        __m128 get_simd() const noexcept { return simd_; }
+        void set_simd(__m128 new_simd) noexcept { simd_ = new_simd; }
 
-        /**
-         * @brief Check if vector is normalized
-         * @param epsilon Comparison tolerance (default: EPSILON)
-         * @return True if vector length is approximately 1.0
-         */
-        bool is_normalized(float epsilon = EPSILON) const noexcept;
+        static float4 load_unaligned(const float* data) noexcept {
+            return float4(_mm_loadu_ps(data));
+        }
 
-        /**
-         * @brief Convert to string representation
-         * @return String in format "(x, y, z, w)"
-         */
-        std::string to_string() const;
+        static float4 load_aligned(const float* data) noexcept {
+            return float4(_mm_load_ps(data));
+        }
 
-        /**
-         * @brief Get pointer to raw data
-         * @return Pointer to first component
-         */
-        const float* data() const noexcept;
+        void store_unaligned(float* data) const noexcept {
+            _mm_storeu_ps(data, simd_);
+        }
 
-        /**
-         * @brief Get pointer to raw data (mutable)
-         * @return Pointer to first component
-         */
-        float* data() noexcept;
-
-        /**
-         * @brief Set x, y, z components from float3
-         * @param xyz 3D vector for x, y, z components
-         * @note Preserves existing w component
-         */
-        void set_xyz(const float3& xyz) noexcept;
-
-        /**
-         * @brief Set x, y components from float2
-         * @param xy 2D vector for x, y components
-         * @note Preserves existing z and w components
-         */
-        void set_xy(const float2& xy) noexcept;
-
-        /**
-         * @brief Set z, w components from float2
-         * @param zw 2D vector for z, w components
-         * @note Preserves existing x and y components
-         */
-        void set_zw(const float2& zw) noexcept;
+        void store_aligned(float* data) const noexcept {
+            _mm_store_ps(data, simd_);
+        }
 
         // ============================================================================
-        // SSE-specific Methods
+        // Color Operations
         // ============================================================================
 
-        /**
-         * @brief Get SSE register (advanced users)
-         * @return SSE register containing vector data
-         * @note For advanced SSE optimization scenarios
-         */
-        __m128 get_simd() const noexcept;
+        float luminance() const noexcept {
+            // Rec. 709 weights: 0.2126*R + 0.7152*G + 0.0722*B
+            return x * 0.2126f + y * 0.7152f + z * 0.0722f;
+        }
 
-        /**
-         * @brief Set SSE register (advanced users)
-         * @param new_simd SSE register to set
-         * @note For advanced SSE optimization scenarios
-         */
-        void set_simd(__m128 new_simd) noexcept;
+        float brightness() const noexcept {
+            return (x + y + z) / 3.0f;
+        }
 
-        /**
-         * @brief Load from unaligned memory
-         * @param data Pointer to float data
-         * @return Loaded vector
-         * @note Uses _mm_loadu_ps for unaligned memory access
-         */
-        static float4 load_unaligned(const float* data) noexcept;
+        float4 premultiply_alpha() const noexcept {
+            return float4(x * w, y * w, z * w, w);
+        }
 
-        /**
-         * @brief Load from aligned memory (16-byte aligned)
-         * @param data Pointer to float data (must be 16-byte aligned)
-         * @return Loaded vector
-         * @note Uses _mm_load_ps for aligned memory access
-         * @warning data must be 16-byte aligned
-         */
-        static float4 load_aligned(const float* data) noexcept;
+        float4 unpremultiply_alpha() const noexcept {
+            if (std::abs(w) < EPSILON) return *this;
+            return float4(x / w, y / w, z / w, w);
+        }
 
-        /**
-         * @brief Store to unaligned memory
-         * @param data Pointer to destination memory
-         * @note Uses _mm_storeu_ps for unaligned memory access
-         */
-        void store_unaligned(float* data) const noexcept;
-
-        /**
-         * @brief Store to aligned memory (16-byte aligned)
-         * @param data Pointer to destination memory (must be 16-byte aligned)
-         * @note Uses _mm_store_ps for aligned memory access
-         * @warning data must be 16-byte aligned
-         */
-        void store_aligned(float* data) const noexcept;
+        float4 grayscale() const noexcept {
+            float lum = luminance();
+            return float4(lum, lum, lum, w);
+        }
 
         // ============================================================================
-        // Comparison Operators
+        // Geometric Operations
         // ============================================================================
 
-        /**
-         * @brief Equality comparison with epsilon tolerance
-         * @param rhs Vector to compare with
-         * @return True if vectors are approximately equal
-         */
-        bool operator==(const float4& rhs) const noexcept;
+        float4 to_homogeneous() const noexcept {
+            return float4(x, y, z, 1.0f);
+        }
 
-        /**
-         * @brief Inequality comparison with epsilon tolerance
-         * @param rhs Vector to compare with
-         * @return True if vectors are not approximately equal
-         */
-        bool operator!=(const float4& rhs) const noexcept;
+        // Note: project() would require float3 header
+        // float3 project() const noexcept;
     };
 
     // ============================================================================
-    // Binary Operators (Declarations)
+    // Global Mathematical Functions (HLSL Style)
     // ============================================================================
 
-    /**
-     * @brief Vector addition
-     * @param lhs Left-hand side vector
-     * @param rhs Right-hand side vector
-     * @return Result of addition
-     */
-    inline float4 operator+(float4 lhs, const float4& rhs) noexcept;
+    // Vector operations
+    inline float4 operator*(float4 lhs, const float4& rhs) noexcept {
+        return float4(_mm_mul_ps(lhs.get_simd(), rhs.get_simd()));
+    }
 
-    /**
-     * @brief Vector subtraction
-     * @param lhs Left-hand side vector
-     * @param rhs Right-hand side vector
-     * @return Result of subtraction
-     */
-    inline float4 operator-(float4 lhs, const float4& rhs) noexcept;
+    inline float4 operator/(float4 lhs, const float4& rhs) noexcept {
+        return float4(_mm_div_ps(lhs.get_simd(), rhs.get_simd()));
+    }
 
-    /**
-     * @brief Component-wise vector multiplication
-     * @param lhs Left-hand side vector
-     * @param rhs Right-hand side vector
-     * @return Result of multiplication
-     */
-    inline float4 operator*(float4 lhs, const float4& rhs) noexcept;
+    inline float4 operator*(float4 vec, float scalar) noexcept {
+        __m128 scalar_vec = _mm_set1_ps(scalar);
+        return float4(_mm_mul_ps(vec.get_simd(), scalar_vec));
+    }
 
-    /**
-     * @brief Component-wise vector division
-     * @param lhs Left-hand side vector
-     * @param rhs Right-hand side vector
-     * @return Result of division
-     */
-    inline float4 operator/(float4 lhs, const float4& rhs) noexcept;
+    inline float4 operator*(float scalar, float4 vec) noexcept {
+        return vec * scalar;
+    }
 
-    /**
-     * @brief Vector-scalar multiplication
-     * @param vec Vector to multiply
-     * @param scalar Scalar multiplier
-     * @return Scaled vector
-     */
-    inline float4 operator*(float4 vec, float scalar) noexcept;
+    inline float4 operator/(float4 vec, float scalar) noexcept {
+        __m128 inv_scalar = _mm_set1_ps(1.0f / scalar);
+        return float4(_mm_mul_ps(vec.get_simd(), inv_scalar));
+    }
 
-    /**
-     * @brief Scalar-vector multiplication
-     * @param scalar Scalar multiplier
-     * @param vec Vector to multiply
-     * @return Scaled vector
-     */
-    inline float4 operator*(float scalar, float4 vec) noexcept;
+    inline float4 operator/(float scalar, float4 vec) noexcept {
+        return float4(scalar / vec.x, scalar / vec.y, scalar / vec.z, scalar / vec.w);
+    }
 
-    /**
-     * @brief Vector-scalar division
-     * @param vec Vector to divide
-     * @param scalar Scalar divisor
-     * @return Scaled vector
-     */
-    inline float4 operator/(float4 vec, float scalar) noexcept;
+    // Length and distance
+    inline float length(const float4& v) noexcept {
+        __m128 squared = _mm_mul_ps(v.get_simd(), v.get_simd());
+        __m128 sum = _mm_hadd_ps(squared, squared);
+        sum = _mm_hadd_ps(sum, sum);
+        return std::sqrt(_mm_cvtss_f32(sum));
+    }
 
-    // ============================================================================
-    // Global Mathematical Functions (Declarations)
-    // ============================================================================
+    inline float length_sq(const float4& v) noexcept {
+        __m128 squared = _mm_mul_ps(v.get_simd(), v.get_simd());
+        __m128 sum = _mm_hadd_ps(squared, squared);
+        sum = _mm_hadd_ps(sum, sum);
+        return _mm_cvtss_f32(sum);
+    }
 
-    /**
-     * @brief Compute distance between two points
-     * @param a First point
-     * @param b Second point
-     * @return Euclidean distance between points
-     */
-    inline float distance(const float4& a, const float4& b) noexcept;
+    inline float distance(const float4& a, const float4& b) noexcept {
+        return length(a - b);
+    }
 
-    /**
-     * @brief Compute squared distance between two points (faster)
-     * @param a First point
-     * @param b Second point
-     * @return Squared Euclidean distance
-     */
-    inline float distance_sq(const float4& a, const float4& b) noexcept;
+    inline float distance_sq(const float4& a, const float4& b) noexcept {
+        return length_sq(a - b);
+    }
 
-    /**
-     * @brief Compute dot product of two vectors
-     * @param a First vector
-     * @param b Second vector
-     * @return Dot product result
-     */
-    inline float dot(const float4& a, const float4& b) noexcept;
+    // Normalization
+    inline float4 normalize(const float4& v) noexcept {
+        float len = length(v);
+        if (len < EPSILON) {
+            return float4::zero();
+        }
+        return v / len;
+    }
 
-    /**
-     * @brief Compute 3D dot product (ignores w component)
-     * @param a First vector
-     * @param b Second vector
-     * @return 3D dot product result
-     */
-    inline float dot3(const float4& a, const float4& b) noexcept;
+    // Dot products
+    inline float dot(const float4& a, const float4& b) noexcept {
+        __m128 mul = _mm_mul_ps(a.get_simd(), b.get_simd());
+        __m128 sum = _mm_hadd_ps(mul, mul);
+        sum = _mm_hadd_ps(sum, sum);
+        return _mm_cvtss_f32(sum);
+    }
 
-    /**
-     * @brief Compute 3D cross product (ignores w component)
-     * @param a First vector
-     * @param b Second vector
-     * @return 3D cross product result
-     */
-    inline float4 cross(const float4& a, const float4& b) noexcept;
+    inline float dot3(const float4& a, const float4& b) noexcept {
+        // Sum of x*x + y*y + z*z (ignore w component)
+        return a.x * b.x + a.y * b.y + a.z * b.z;
+    }
 
-    /**
-     * @brief Normalize vector to unit length
-     * @param vec Vector to normalize
-     * @return Normalized vector
-     */
-    inline float4 normalize(const float4& vec) noexcept;
+    // Cross product (3D, ignores w component)
+    inline float4 cross(const float4& a, const float4& b) noexcept {
+        return float4(
+            a.y * b.z - a.z * b.y,
+            a.z * b.x - a.x * b.z,
+            a.x * b.y - a.y * b.x,
+            0.0f
+        );
+    }
 
-    /**
-     * @brief Linear interpolation between two vectors
-     * @param a Start vector
-     * @param b End vector
-     * @param t Interpolation factor [0, 1]
-     * @return Interpolated vector
-     */
-    inline float4 lerp(const float4& a, const float4& b, float t) noexcept;
+    // Comparison
+    inline bool approximately(const float4& a, const float4& b, float epsilon = EPSILON) noexcept {
+        return std::abs(a.x - b.x) <= epsilon &&
+            std::abs(a.y - b.y) <= epsilon &&
+            std::abs(a.z - b.z) <= epsilon &&
+            std::abs(a.w - b.w) <= epsilon;
+    }
 
-    /**
-     * @brief HLSL-like saturate function (clamp components to [0, 1])
-     * @param vec Vector to saturate
-     * @return Saturated vector
-     */
-    inline float4 saturate(const float4& vec) noexcept;
+    inline bool isValid(const float4& v) noexcept {
+        return std::isfinite(v.x) && std::isfinite(v.y) &&
+            std::isfinite(v.z) && std::isfinite(v.w);
+    }
 
-    /**
-     * @brief HLSL-like floor function (component-wise floor)
-     * @param vec Vector to floor
-     * @return Floored vector
-     */
-    inline float4 floor(const float4& vec) noexcept;
+    inline bool is_normalized(const float4& v, float epsilon = EPSILON) noexcept {
+        return std::abs(length_sq(v) - 1.0f) <= epsilon;
+    }
 
-    /**
-     * @brief HLSL-like ceil function (component-wise ceiling)
-     * @param vec Vector to ceil
-     * @return Ceiling vector
-     */
-    inline float4 ceil(const float4& vec) noexcept;
-
-    /**
-     * @brief HLSL-like round function (component-wise rounding)
-     * @param vec Vector to round
-     * @return Rounded vector
-     */
-    inline float4 round(const float4& vec) noexcept;
-
-    /**
-     * @brief Check if two vectors are approximately equal
-     * @param a First vector
-     * @param b Second vector
-     * @param epsilon Comparison tolerance
-     * @return True if vectors are approximately equal
-     */
-    inline bool approximately(const float4& a, const float4& b, float epsilon = EPSILON) noexcept;
-
-    /**
-     * @brief Check if vector is normalized
-     * @param vec Vector to check
-     * @param epsilon Comparison tolerance
-     * @return True if vector length is approximately 1.0
-     */
-    inline bool is_normalized(const float4& vec, float epsilon = EPSILON) noexcept;
-
-    /**
-     * @brief Check if vector contains valid finite values
-     * @param vec Vector to check
-     * @return True if vector is valid (finite values)
-     */
-    inline bool isValid(const float4& vec) noexcept;
+    // Interpolation
+    inline float4 lerp(const float4& a, const float4& b, float t) noexcept {
+        t = std::max(0.0f, std::min(1.0f, t));
+        return a + (b - a) * t;
+    }
 
     // ============================================================================
-    // HLSL-like Global Functions (Declarations)
+    // HLSL-like Global Functions
     // ============================================================================
 
-    /**
-     * @brief HLSL-like abs function (component-wise absolute value)
-     * @param vec Input vector
-     * @return Vector with absolute values of components
-     */
-    inline float4 abs(const float4& vec) noexcept;
+    inline float4 abs(const float4& v) noexcept {
+        __m128 mask = _mm_set1_ps(-0.0f);
+        return float4(_mm_andnot_ps(mask, v.get_simd()));
+    }
 
-    /**
-     * @brief HLSL-like sign function (component-wise sign)
-     * @param vec Input vector
-     * @return Vector with signs of components
-     */
-    inline float4 sign(const float4& vec) noexcept;
+    inline float4 sign(const float4& v) noexcept {
+        return float4(
+            (v.x > 0.0f) ? 1.0f : ((v.x < 0.0f) ? -1.0f : 0.0f),
+            (v.y > 0.0f) ? 1.0f : ((v.y < 0.0f) ? -1.0f : 0.0f),
+            (v.z > 0.0f) ? 1.0f : ((v.z < 0.0f) ? -1.0f : 0.0f),
+            (v.w > 0.0f) ? 1.0f : ((v.w < 0.0f) ? -1.0f : 0.0f)
+        );
+    }
 
-    /**
-     * @brief HLSL-like frac function (component-wise fractional part)
-     * @param vec Input vector
-     * @return Vector with fractional parts of components
-     */
-    inline float4 frac(const float4& vec) noexcept;
+    inline float4 floor(const float4& v) noexcept {
+        return float4(_mm_floor_ps(v.get_simd()));
+    }
 
-    /**
-     * @brief HLSL-like step function (component-wise step)
-     * @param edge Edge value
-     * @param vec Input vector
-     * @return Step result vector
-     */
-    inline float4 step(float edge, const float4& vec) noexcept;
+    inline float4 ceil(const float4& v) noexcept {
+        return float4(_mm_ceil_ps(v.get_simd()));
+    }
 
-    /**
-     * @brief HLSL-like min function (component-wise minimum)
-     * @param a First vector
-     * @param b Second vector
-     * @return Component-wise minimum
-     */
-    inline float4 min(const float4& a, const float4& b) noexcept;
+    inline float4 round(const float4& v) noexcept {
+        return float4(_mm_round_ps(v.get_simd(), _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));
+    }
 
-    /**
-     * @brief HLSL-like max function (component-wise maximum)
-     * @param a First vector
-     * @param b Second vector
-     * @return Component-wise maximum
-     */
-    inline float4 max(const float4& a, const float4& b) noexcept;
+    inline float4 frac(const float4& v) noexcept {
+        return float4(
+            v.x - std::floor(v.x),
+            v.y - std::floor(v.y),
+            v.z - std::floor(v.z),
+            v.w - std::floor(v.w)
+        );
+    }
 
-    /**
-     * @brief HLSL-like clamp function (component-wise clamping)
-     * @param vec Vector to clamp
-     * @param min_val Minimum values
-     * @param max_val Maximum values
-     * @return Clamped vector
-     */
-    inline float4 clamp(const float4& vec, const float4& min_val, const float4& max_val) noexcept;
+    inline float4 saturate(const float4& v) noexcept {
+        __m128 zero = _mm_setzero_ps();
+        __m128 one = _mm_set1_ps(1.0f);
+        __m128 result = _mm_max_ps(v.get_simd(), zero);
+        result = _mm_min_ps(result, one);
+        return float4(result);
+    }
 
-    // ============================================================================
-    // Color Operations (Declarations)
-    // ============================================================================
+    inline float4 step(float edge, const float4& v) noexcept {
+        return float4(
+            (v.x >= edge) ? 1.0f : 0.0f,
+            (v.y >= edge) ? 1.0f : 0.0f,
+            (v.z >= edge) ? 1.0f : 0.0f,
+            (v.w >= edge) ? 1.0f : 0.0f
+        );
+    }
 
-    /**
-     * @brief Compute luminance (grayscale value) using standard weights
-     * @param color Input color
-     * @return Luminance value
-     */
-    inline float luminance(const float4& color) noexcept;
+    inline float4 smoothstep(float edge0, float edge1, const float4& v) noexcept {
+        auto smooth = [edge0, edge1](float t) {
+            t = std::max(0.0f, std::min(1.0f, (t - edge0) / (edge1 - edge0)));
+            return t * t * (3.0f - 2.0f * t);
+        };
+        return float4(smooth(v.x), smooth(v.y), smooth(v.z), smooth(v.w));
+    }
 
-    /**
-     * @brief Compute average brightness (simple average of RGB)
-     * @param color Input color
-     * @return Brightness value
-     */
-    inline float brightness(const float4& color) noexcept;
+    inline float4 min(const float4& a, const float4& b) noexcept {
+        return float4(_mm_min_ps(a.get_simd(), b.get_simd()));
+    }
 
-    /**
-     * @brief Premultiply RGB components by alpha
-     * @param color Input color
-     * @return Premultiplied color
-     */
-    inline float4 premultiply_alpha(const float4& color) noexcept;
+    inline float4 max(const float4& a, const float4& b) noexcept {
+        return float4(_mm_max_ps(a.get_simd(), b.get_simd()));
+    }
 
-    /**
-     * @brief Unpremultiply RGB components (divide by alpha)
-     * @param color Input color
-     * @return Unpremultiplied color
-     */
-    inline float4 unpremultiply_alpha(const float4& color) noexcept;
+    inline float4 clamp(const float4& v, const float4& min_val, const float4& max_val) noexcept {
+        return min(max(v, min_val), max_val);
+    }
 
-    /**
-     * @brief Convert to grayscale using luminance
-     * @param color Input color
-     * @return Grayscale color
-     */
-    inline float4 grayscale(const float4& color) noexcept;
+    inline float4 clamp(const float4& v, float min_val, float max_val) noexcept {
+        return float4(
+            std::max(min_val, std::min(max_val, v.x)),
+            std::max(min_val, std::min(max_val, v.y)),
+            std::max(min_val, std::min(max_val, v.z)),
+            std::max(min_val, std::min(max_val, v.w))
+        );
+    }
 
     // ============================================================================
-    // Geometric Operations (Declarations)
+    // Global Color Operations
     // ============================================================================
 
-    /**
-     * @brief Project 4D homogeneous coordinates to 3D
-     * @param vec 4D homogeneous vector
-     * @return 3D projected coordinates
-     */
-    inline float3 project(const float4& vec) noexcept;
+    inline float luminance(const float4& color) noexcept {
+        return color.luminance();
+    }
 
-    /**
-     * @brief Transform to homogeneous coordinates (set w = 1)
-     * @param vec Input vector
-     * @return Homogeneous coordinates
-     */
-    inline float4 to_homogeneous(const float4& vec) noexcept;
+    inline float brightness(const float4& color) noexcept {
+        return color.brightness();
+    }
+
+    inline float4 premultiply_alpha(const float4& color) noexcept {
+        return color.premultiply_alpha();
+    }
+
+    inline float4 unpremultiply_alpha(const float4& color) noexcept {
+        return color.unpremultiply_alpha();
+    }
+
+    inline float4 grayscale(const float4& color) noexcept {
+        return color.grayscale();
+    }
 
     // ============================================================================
-    // Useful Constants (Declarations)
+    // Geometric Operations
     // ============================================================================
 
-    /**
-     * @brief Zero vector constant (0, 0, 0, 0)
-     */
-    extern const float4 float4_Zero;
+    // Note: project() would require float3 header
+    // inline float3 project(const float4& vec) noexcept;
 
-    /**
-     * @brief One vector constant (1, 1, 1, 1)
-     */
-    extern const float4 float4_One;
+    inline float4 to_homogeneous(const float4& vec) noexcept {
+        return vec.to_homogeneous();
+    }
 
-    /**
-     * @brief Unit X vector constant (1, 0, 0, 0)
-     */
-    extern const float4 float4_UnitX;
+    // ============================================================================
+    // Comparison Operators
+    // ============================================================================
 
-    /**
-     * @brief Unit Y vector constant (0, 1, 0, 0)
-     */
-    extern const float4 float4_UnitY;
+    inline bool operator==(const float4& a, const float4& b) noexcept {
+        return approximately(a, b);
+    }
 
-    /**
-     * @brief Unit Z vector constant (0, 0, 1, 0)
-     */
-    extern const float4 float4_UnitZ;
+    inline bool operator!=(const float4& a, const float4& b) noexcept {
+        return !approximately(a, b);
+    }
 
-    /**
-     * @brief Unit W vector constant (0, 0, 0, 1)
-     */
-    extern const float4 float4_UnitW;
+    // ============================================================================
+    // Useful Constants
+    // ============================================================================
+
+    inline const float4 float4_Zero(0.0f, 0.0f, 0.0f, 0.0f);
+    inline const float4 float4_One(1.0f, 1.0f, 1.0f, 1.0f);
+    inline const float4 float4_UnitX(1.0f, 0.0f, 0.0f, 0.0f);
+    inline const float4 float4_UnitY(0.0f, 1.0f, 0.0f, 0.0f);
+    inline const float4 float4_UnitZ(0.0f, 0.0f, 1.0f, 0.0f);
+    inline const float4 float4_UnitW(0.0f, 0.0f, 0.0f, 1.0f);
 
     // Color constants
-
-    /**
-     * @brief Red color constant (1, 0, 0, 1)
-     */
-    extern const float4 float4_Red;
-
-    /**
-     * @brief Green color constant (0, 1, 0, 1)
-     */
-    extern const float4 float4_Green;
-
-    /**
-     * @brief Blue color constant (0, 0, 1, 1)
-     */
-    extern const float4 float4_Blue;
-
-    /**
-     * @brief White color constant (1, 1, 1, 1)
-     */
-    extern const float4 float4_White;
-
-    /**
-     * @brief Black color constant (0, 0, 0, 1)
-     */
-    extern const float4 float4_Black;
-
-    /**
-     * @brief Transparent color constant (0, 0, 0, 0)
-     */
-    extern const float4 float4_Transparent;
-
-    /**
-     * @brief Yellow color constant (1, 1, 0, 1)
-     */
-    extern const float4 float4_Yellow;
-
-    /**
-     * @brief Cyan color constant (0, 1, 1, 1)
-     */
-    extern const float4 float4_Cyan;
-
-    /**
-     * @brief Magenta color constant (1, 0, 1, 1)
-     */
-    extern const float4 float4_Magenta;
+    inline const float4 float4_Red(1.0f, 0.0f, 0.0f, 1.0f);
+    inline const float4 float4_Green(0.0f, 1.0f, 0.0f, 1.0f);
+    inline const float4 float4_Blue(0.0f, 0.0f, 1.0f, 1.0f);
+    inline const float4 float4_White(1.0f, 1.0f, 1.0f, 1.0f);
+    inline const float4 float4_Black(0.0f, 0.0f, 0.0f, 1.0f);
+    inline const float4 float4_Transparent(0.0f, 0.0f, 0.0f, 0.0f);
+    inline const float4 float4_Yellow(1.0f, 1.0f, 0.0f, 1.0f);
+    inline const float4 float4_Cyan(0.0f, 1.0f, 1.0f, 1.0f);
+    inline const float4 float4_Magenta(1.0f, 0.0f, 1.0f, 1.0f);
+    inline const float4 float4_Gray(0.5f, 0.5f, 0.5f, 1.0f);
+    inline const float4 float4_Silver(0.75f, 0.75f, 0.75f, 1.0f);
+    inline const float4 float4_Purple(0.5f, 0.0f, 0.5f, 1.0f);
+    inline const float4 float4_Orange(1.0f, 0.5f, 0.0f, 1.0f);
+    inline const float4 float4_Brown(0.6f, 0.4f, 0.2f, 1.0f);
+    inline const float4 float4_Pink(1.0f, 0.75f, 0.8f, 1.0f);
 
 } // namespace AfterMath
-
-// Include implementation
-#include "math_float4.inl"

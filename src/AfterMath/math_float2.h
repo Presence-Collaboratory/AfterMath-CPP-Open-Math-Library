@@ -1,6 +1,7 @@
-﻿// Description: 2-dimensional vector class with comprehensive 
-//              mathematical operations and SSE optimization
+﻿// math_float2.h
+// Description: 2-dimensional vector class with HLSL-like syntax and SSE optimization
 // Author: NSDeathman, DeepSeek
+
 #pragma once
 
 #include <string>
@@ -11,30 +12,26 @@
 #include <xmmintrin.h>
 #include <pmmintrin.h>
 
-#include "math_config.h"
-#include "math_constants.h"
-#include "math_functions.h"
-
 namespace AfterMath
 {
+    // Forward declaration
+    class float2;
+
+    // ============================================================================
+    // 2D Vector Class
+    // ============================================================================
+
     /**
      * @class float2
-     * @brief 2-dimensional vector with comprehensive mathematical operations
+     * @brief 2-dimensional vector with HLSL-like syntax
      *
      * Represents a 2D vector (x, y) with optimized operations for 2D graphics,
-     * physics simulations, and 2D mathematics. Features SSE optimization for
-     * performance-critical operations.
-     *
-     * @note Perfect for 2D game development, UI systems, and 2D physics engines
-     * @note All operations are optimized and constexpr where possible
-     * @note Includes comprehensive HLSL-like function set
+     * physics simulations, and 2D mathematics. Features HLSL-like syntax
+     * with global mathematical functions.
      */
     class float2 {
     public:
-        // ============================================================================
-        // Data Members (Public for Direct Access)
-        // ============================================================================
-
+        // Data members (public for direct access)
         float x; ///< X component of the vector
         float y; ///< Y component of the vector
 
@@ -42,801 +39,437 @@ namespace AfterMath
         // Constructors
         // ============================================================================
 
-        /**
-         * @brief Default constructor (initializes to zero vector)
-         */
         constexpr float2() noexcept : x(0.0f), y(0.0f) {}
-
-        /**
-         * @brief Construct from components
-         * @param x X component
-         * @param y Y component
-         */
         constexpr float2(float x, float y) noexcept : x(x), y(y) {}
-
-        /**
-         * @brief Construct from scalar (all components set to same value)
-         * @param scalar Value for all components
-         */
         explicit constexpr float2(float scalar) noexcept : x(scalar), y(scalar) {}
-
-        /**
-         * @brief Copy constructor
-         */
         constexpr float2(const float2&) noexcept = default;
 
-        /**
-         * @brief Construct from raw float array
-         * @param data Pointer to float array [x, y]
-         */
-        explicit float2(const float* data) noexcept;
-
-        /**
-         * @brief Construct from SSE register (advanced users)
-         * @param simd_ SSE register containing vector data
-         */
-        explicit float2(__m128 simd_) noexcept;
+        explicit float2(const float* data) noexcept : x(data[0]), y(data[1]) {}
+        explicit float2(__m128 simd_) noexcept {
+            alignas(16) float data[4];
+            _mm_store_ps(data, simd_);
+            x = data[0]; y = data[1];
+        }
 
         // ============================================================================
         // Assignment Operators
         // ============================================================================
 
-        /**
-         * @brief Copy assignment operator
-         */
         float2& operator=(const float2&) noexcept = default;
 
-        /**
-         * @brief Scalar assignment (sets all components to same value)
-         * @param scalar Value for all components
-         */
-        float2& operator=(float scalar) noexcept;
+        float2& operator=(float scalar) noexcept {
+            x = scalar;
+            y = scalar;
+            return *this;
+        }
 
         // ============================================================================
         // Compound Assignment Operators
         // ============================================================================
 
-        /**
-         * @brief Component-wise addition assignment
-         * @param rhs Right-hand side vector
-         * @return Reference to this vector
-         */
-        float2& operator+=(const float2& rhs) noexcept;
+        float2& operator+=(const float2& rhs) noexcept {
+            x += rhs.x;
+            y += rhs.y;
+            return *this;
+        }
 
-        /**
-         * @brief Component-wise subtraction assignment
-         * @param rhs Right-hand side vector
-         * @return Reference to this vector
-         */
-        float2& operator-=(const float2& rhs) noexcept;
+        float2& operator-=(const float2& rhs) noexcept {
+            x -= rhs.x;
+            y -= rhs.y;
+            return *this;
+        }
 
-        /**
-         * @brief Component-wise multiplication assignment
-         * @param rhs Right-hand side vector
-         * @return Reference to this vector
-         */
-        float2& operator*=(const float2& rhs) noexcept;
+        float2& operator*=(const float2& rhs) noexcept {
+            x *= rhs.x;
+            y *= rhs.y;
+            return *this;
+        }
 
-        /**
-         * @brief Component-wise division assignment
-         * @param rhs Right-hand side vector
-         * @return Reference to this vector
-         */
-        float2& operator/=(const float2& rhs) noexcept;
+        float2& operator/=(const float2& rhs) noexcept {
+            x /= rhs.x;
+            y /= rhs.y;
+            return *this;
+        }
 
-        /**
-         * @brief Scalar multiplication assignment
-         * @param scalar Scalar multiplier
-         * @return Reference to this vector
-         */
-        float2& operator*=(float scalar) noexcept;
+        float2& operator*=(float scalar) noexcept {
+            x *= scalar;
+            y *= scalar;
+            return *this;
+        }
 
-        /**
-         * @brief Scalar division assignment
-         * @param scalar Scalar divisor
-         * @return Reference to this vector
-         */
-        float2& operator/=(float scalar) noexcept;
+        float2& operator/=(float scalar) noexcept {
+            float inv = 1.0f / scalar;
+            x *= inv;
+            y *= inv;
+            return *this;
+        }
 
         // ============================================================================
         // Binary Operators
         // ============================================================================
 
-        /**
-         * @brief Vector addition
-         * @param rhs Right-hand side vector
-         * @return Result of addition
-         */
-        float2 operator+(const float2& rhs) const noexcept;
+        float2 operator+(const float2& rhs) const noexcept {
+            return float2(x + rhs.x, y + rhs.y);
+        }
 
-        /**
-         * @brief Vector subtraction
-         * @param rhs Right-hand side vector
-         * @return Result of subtraction
-         */
-        float2 operator-(const float2& rhs) const noexcept;
+        float2 operator-(const float2& rhs) const noexcept {
+            return float2(x - rhs.x, y - rhs.y);
+        }
 
-        /**
-         * @brief Vector-scalar addition
-         * @param rhs Scalar to add to all components
-         * @return Result of addition
-         */
-        float2 operator+(const float& rhs) const noexcept;
+        float2 operator+(float rhs) const noexcept {
+            return float2(x + rhs, y + rhs);
+        }
 
-        /**
-         * @brief Vector-scalar subtraction
-         * @param rhs Scalar to subtract from all components
-         * @return Result of subtraction
-         */
-        float2 operator-(const float& rhs) const noexcept;
+        float2 operator-(float rhs) const noexcept {
+            return float2(x - rhs, y - rhs);
+        }
 
         // ============================================================================
         // Unary Operators
         // ============================================================================
 
-        /**
-         * @brief Unary plus operator
-         * @return Copy of this vector
-         */
         constexpr float2 operator+() const noexcept { return *this; }
-
-        /**
-         * @brief Unary minus operator
-         * @return Negated vector
-         */
         constexpr float2 operator-() const noexcept { return float2(-x, -y); }
 
         // ============================================================================
         // Access Operators
         // ============================================================================
 
-        /**
-         * @brief Access component by index
-         * @param index Component index (0 = x, 1 = y)
-         * @return Reference to component
-         */
-        float& operator[](int index) noexcept;
+        float& operator[](int index) noexcept {
+            assert(index >= 0 && index < 2);
+            return (&x)[index];
+        }
 
-        /**
-         * @brief Access component by index (const)
-         * @param index Component index (0 = x, 1 = y)
-         * @return Const reference to component
-         */
-        const float& operator[](int index) const noexcept;
+        const float& operator[](int index) const noexcept {
+            assert(index >= 0 && index < 2);
+            return (&x)[index];
+        }
 
         // ============================================================================
         // Conversion Operators
         // ============================================================================
 
-        /**
-         * @brief Convert to const float pointer (for interoperability)
-         * @return Pointer to const float array [x, y]
-         */
-        operator const float* () const noexcept;
-
-        /**
-         * @brief Convert to float pointer (for interoperability)
-         * @return Pointer to float array [x, y]
-         */
-        operator float* () noexcept;
-
-        /**
-         * @brief Convert to SSE register (advanced users)
-         * @return SSE register containing vector data
-         */
-        operator __m128() const noexcept;
+        operator const float* () const noexcept { return &x; }
+        operator float* () noexcept { return &x; }
+        operator __m128() const noexcept {
+            return _mm_set_ps(0.0f, 0.0f, y, x);
+        }
 
         // ============================================================================
         // Static Constructors
         // ============================================================================
 
-        /**
-         * @brief Zero vector (0, 0)
-         * @return Zero vector
-         */
         static constexpr float2 zero() noexcept { return float2(0.0f, 0.0f); }
-
-        /**
-         * @brief One vector (1, 1)
-         * @return One vector
-         */
         static constexpr float2 one() noexcept { return float2(1.0f, 1.0f); }
-
-        /**
-         * @brief Unit X vector (1, 0)
-         * @return Unit X vector
-         */
         static constexpr float2 unit_x() noexcept { return float2(1.0f, 0.0f); }
-
-        /**
-         * @brief Unit Y vector (0, 1)
-         * @return Unit Y vector
-         */
         static constexpr float2 unit_y() noexcept { return float2(0.0f, 1.0f); }
 
         // ============================================================================
-        // Mathematical Functions
+        // Basic Properties (minimal, most operations moved to global functions)
         // ============================================================================
 
-        /**
-         * @brief Compute Euclidean length (magnitude)
-         * @return Length of the vector
-         */
-        float length() const noexcept;
-
-        /**
-         * @brief Compute squared length (faster, useful for comparisons)
-         * @return Squared length of the vector
-         */
         constexpr float length_sq() const noexcept { return x * x + y * y; }
 
-        /**
-         * @brief Normalize vector to unit length
-         * @return Normalized vector
-         * @note Returns zero vector if length is zero
-         */
-        float2 normalize() const noexcept;
-
-        /**
-         * @brief Compute dot product with another vector
-         * @param other Other vector
-         * @return Dot product result
-         */
-        float dot(const float2& other) const noexcept;
-
-        /**
-         * @brief Compute 2D cross product (scalar result)
-         * @param other Other vector
-         * @return Cross product scalar (x1*y2 - y1*x2)
-         * @note 2D cross product returns a scalar representing the signed area
-         */
-        float cross(const float2& other) const;
-
-        /**
-         * @brief Compute distance to another point
-         * @param other Other point
-         * @return Euclidean distance
-         */
-        float distance(const float2& other) const noexcept;
-
-        /**
-         * @brief Compute squared distance to another point (faster)
-         * @param other Other point
-         * @return Squared Euclidean distance
-         */
         constexpr float distance_sq(const float2& other) const noexcept {
-            float dx = x - other.x; float dy = y - other.y; return dx * dx + dy * dy;
+            float dx = x - other.x;
+            float dy = y - other.y;
+            return dx * dx + dy * dy;
         }
 
-        // ============================================================================
-        // HLSL-like Functions
-        // ============================================================================
-
-        /**
-         * @brief HLSL-like abs function (component-wise absolute value)
-         * @return Vector with absolute values of components
-         */
-        float2 abs() const noexcept;
-
-        /**
-         * @brief HLSL-like sign function (component-wise sign)
-         * @return Vector with signs of components (-1, 0, or 1)
-         */
-        float2 sign() const noexcept;
-
-        /**
-         * @brief HLSL-like floor function (component-wise floor)
-         * @return Vector with floored components
-         */
-        float2 floor() const noexcept;
-
-        /**
-         * @brief HLSL-like ceil function (component-wise ceiling)
-         * @return Vector with ceiling components
-         */
-        float2 ceil() const noexcept;
-
-        /**
-         * @brief HLSL-like round function (component-wise rounding)
-         * @return Vector with rounded components
-         */
-        float2 round() const noexcept;
-
-        /**
-         * @brief HLSL-like frac function (component-wise fractional part)
-         * @return Vector with fractional parts of components
-         */
-        float2 frac() const noexcept;
-
-        /**
-         * @brief HLSL-like saturate function (clamp components to [0, 1])
-         * @return Saturated vector
-         */
-        float2 saturate() const noexcept;
-
-        /**
-         * @brief HLSL-like step function (component-wise step)
-         * @param edge Edge value
-         * @return 1.0 if component >= edge, else 0.0
-         */
-        float2 step(float edge) const noexcept;
-
-        /**
-         * @brief HLSL-like smoothstep function (smooth interpolation)
-         * @param edge0 Lower edge
-         * @param edge1 Upper edge
-         * @return Smoothly interpolated values between 0 and 1
-         */
-        float2 smoothstep(float edge0, float edge1) const noexcept;
-
-        // ============================================================================
-        // Geometric Operations
-        // ============================================================================
-
-        /**
-         * @brief Get perpendicular vector (90-degree rotation)
-         * @return Perpendicular vector (-y, x)
-         */
-        constexpr float2 perpendicular() const noexcept { return float2(-y, x); }
-
-        /**
-         * @brief Compute reflection vector
-         * @param normal Surface normal (must be normalized)
-         * @return Reflected vector
-         */
-        float2 reflect(const float2& normal) const noexcept;
-
-        /**
-         * @brief Compute refraction vector
-         * @param normal Surface normal (must be normalized)
-         * @param eta Ratio of indices of refraction
-         * @return Refracted vector
-         */
-        float2 refract(const float2& normal, float eta) const noexcept;
-
-        /**
-         * @brief Rotate vector by angle
-         * @param angle Rotation angle in radians
-         * @return Rotated vector
-         */
-        float2 rotate(float angle) const noexcept;
-
-        /**
-         * @brief Get angle of vector in radians
-         * @return Angle from positive x-axis in range [-pi, pi]
-         */
-        float angle() const noexcept;
-
-        // ============================================================================
-        // Swizzle Operations (HLSL style)
-        // ============================================================================
-
-        /**
-         * @brief Get YX components as float2 (swapped)
-         * @return 2D vector with y and x components
-         */
+        // Swizzle operations (HLSL style)
         constexpr float2 yx() const noexcept { return float2(y, x); }
-
-        /**
-         * @brief Get XX components as float2
-         * @return 2D vector with x and x components
-         */
         constexpr float2 xx() const noexcept { return float2(x, x); }
-
-        /**
-         * @brief Get YY components as float2
-         * @return 2D vector with y and y components
-         */
         constexpr float2 yy() const noexcept { return float2(y, y); }
 
         // ============================================================================
         // Utility Methods
         // ============================================================================
 
-        /**
-         * @brief Check if vector contains finite values
-         * @return True if all components are finite (not NaN or infinity)
-         */
-        bool isValid() const noexcept;
+        std::string to_string() const {
+            char buf[64];
+            std::snprintf(buf, 64, "(%.3f, %.3f)", x, y);
+            return std::string(buf);
+        }
 
-        /**
-         * @brief Check if vector is approximately equal to another
-         * @param other Vector to compare with
-         * @param epsilon Comparison tolerance
-         * @return True if vectors are approximately equal
-         */
-        bool approximately(const float2& other, float epsilon = EPSILON) const noexcept;
-
-        /**
-         * @brief Check if vector is approximately zero
-         * @param epsilon Comparison tolerance
-         * @return True if vector length is approximately zero
-         */
-        bool approximately_zero(float epsilon = EPSILON) const noexcept;
-
-        /**
-         * @brief Check if vector is normalized
-         * @param epsilon Comparison tolerance
-         * @return True if vector length is approximately 1.0
-         */
-        bool is_normalized(float epsilon = EPSILON) const noexcept;
-
-        /**
-         * @brief Convert to string representation
-         * @return String in format "(x, y)"
-         */
-        std::string to_string() const;
-
-        /**
-         * @brief Get pointer to raw data
-         * @return Pointer to first component
-         */
-        const float* data() const noexcept;
-
-        /**
-         * @brief Get pointer to raw data (mutable)
-         * @return Pointer to first component
-         */
-        float* data() noexcept;
-
-        // ============================================================================
-        // Comparison Operators
-        // ============================================================================
-
-        /**
-         * @brief Equality comparison (approximate)
-         * @param rhs Right-hand side vector
-         * @return True if vectors are approximately equal
-         */
-        bool operator==(const float2& rhs) const noexcept;
-
-        /**
-         * @brief Inequality comparison
-         * @param rhs Right-hand side vector
-         * @return True if vectors are not approximately equal
-         */
-        bool operator!=(const float2& rhs) const noexcept;
+        const float* data() const noexcept { return &x; }
+        float* data() noexcept { return &x; }
     };
 
     // ============================================================================
-    // Global Operators
+    // Global Mathematical Functions (HLSL Style)
     // ============================================================================
 
-    /**
-     * @brief Component-wise vector multiplication
-     * @param lhs Left-hand side vector
-     * @param rhs Right-hand side vector
-     * @return Result of multiplication
-     */
-    inline float2 operator*(float2 lhs, const float2& rhs) noexcept;
+    // Vector operations
+    inline float2 operator*(float2 lhs, const float2& rhs) noexcept {
+        return float2(lhs.x * rhs.x, lhs.y * rhs.y);
+    }
 
-    /**
-     * @brief Component-wise vector division
-     * @param lhs Left-hand side vector
-     * @param rhs Right-hand side vector
-     * @return Result of division
-     */
-    inline float2 operator/(float2 lhs, const float2& rhs) noexcept;
+    inline float2 operator/(float2 lhs, const float2& rhs) noexcept {
+        return float2(lhs.x / rhs.x, lhs.y / rhs.y);
+    }
 
-    /**
-     * @brief Vector-scalar multiplication
-     * @param vec Vector to multiply
-     * @param scalar Scalar multiplier
-     * @return Scaled vector
-     */
-    inline float2 operator*(float2 vec, float scalar) noexcept;
+    inline float2 operator*(float2 vec, float scalar) noexcept {
+        return float2(vec.x * scalar, vec.y * scalar);
+    }
 
-    /**
-     * @brief Scalar-vector multiplication
-     * @param scalar Scalar multiplier
-     * @param vec Vector to multiply
-     * @return Scaled vector
-     */
-    inline float2 operator*(float scalar, float2 vec) noexcept;
+    inline float2 operator*(float scalar, float2 vec) noexcept {
+        return vec * scalar;
+    }
 
-    /**
-     * @brief Vector-scalar division
-     * @param vec Vector to divide
-     * @param scalar Scalar divisor
-     * @return Scaled vector
-     */
-    inline float2 operator/(float2 vec, float scalar) noexcept;
+    inline float2 operator/(float2 vec, float scalar) noexcept {
+        return vec * (1.0f / scalar);
+    }
 
-    /**
-     * @brief Scalar-vector addition
-     * @param scalar Scalar to add
-     * @param vec Vector to add to
-     * @return Result vector
-     */
-    inline float2 operator+(float scalar, float2 vec) noexcept;
+    inline float2 operator+(float scalar, float2 vec) noexcept {
+        return vec + scalar;
+    }
 
-    // ============================================================================
-    // Global Mathematical Functions
-    // ============================================================================
+    // Length and distance
+    inline float length(const float2& v) noexcept {
+        return std::sqrt(v.x * v.x + v.y * v.y);
+    }
 
-    /**
-     * @brief Compute distance between two points
-     * @param a First point
-     * @param b Second point
-     * @return Euclidean distance between points
-     */
-    float distance(const float2& a, const float2& b) noexcept;
+    inline float length_sq(const float2& v) noexcept {
+        return v.x * v.x + v.y * v.y;
+    }
 
-    /**
-     * @brief Compute squared distance between two points (faster)
-     * @param a First point
-     * @param b Second point
-     * @return Squared Euclidean distance
-     */
-    float distance_sq(const float2& a, const float2& b) noexcept;
+    inline float distance(const float2& a, const float2& b) noexcept {
+        float dx = a.x - b.x;
+        float dy = a.y - b.y;
+        return std::sqrt(dx * dx + dy * dy);
+    }
 
-    /**
-     * @brief Compute dot product of two vectors
-     * @param a First vector
-     * @param b Second vector
-     * @return Dot product result
-     */
-    float dot(const float2& a, const float2& b) noexcept;
+    inline float distance_sq(const float2& a, const float2& b) noexcept {
+        float dx = a.x - b.x;
+        float dy = a.y - b.y;
+        return dx * dx + dy * dy;
+    }
 
-    /**
-     * @brief Compute 2D cross product of two vectors
-     * @param a First vector
-     * @param b Second vector
-     * @return Cross product scalar
-     */
-    float cross(const float2& a, const float2& b) noexcept;
+    // Normalization
+    inline float2 normalize(const float2& v) noexcept {
+        float len = length(v);
+        if (len < EPSILON) {
+            return float2::zero();
+        }
+        return v / len;
+    }
 
-    /**
-     * @brief Check if two vectors are approximately equal
-     * @param a First vector
-     * @param b Second vector
-     * @param epsilon Comparison tolerance
-     * @return True if vectors are approximately equal
-     */
-    bool approximately(const float2& a, const float2& b, float epsilon) noexcept;
+    // Dot and cross products
+    inline float dot(const float2& a, const float2& b) noexcept {
+        return a.x * b.x + a.y * b.y;
+    }
 
-    /**
-     * @brief Check if vector contains valid finite values
-     * @param vec Vector to check
-     * @return True if vector is valid (finite values)
-     */
-    bool isValid(const float2& vec) noexcept;
+    inline float cross(const float2& a, const float2& b) noexcept {
+        return a.x * b.y - a.y * b.x;
+    }
 
-    /**
-     * @brief Linear interpolation between two vectors
-     * @param a Start vector
-     * @param b End vector
-     * @param t Interpolation factor [0, 1]
-     * @return Interpolated vector
-     */
-    float2 lerp(const float2& a, const float2& b, float t) noexcept;
+    inline bool isValid(const float2& v) noexcept {
+        return std::isfinite(v.x) && std::isfinite(v.y);
+    }
 
-    /**
-     * @brief Spherical linear interpolation (for directions)
-     * @param a Start vector (should be normalized)
-     * @param b End vector (should be normalized)
-     * @param t Interpolation factor [0, 1]
-     * @return Interpolated vector
-     */
-    float2 slerp(const float2& a, const float2& b, float t) noexcept;
+    // Interpolation
+    inline float2 lerp(const float2& a, const float2& b, float t) noexcept {
+        return a + (b - a) * t;
+    }
 
-    /**
-     * @brief Get perpendicular vector
-     * @param vec Input vector
-     * @return Perpendicular vector (-y, x)
-     */
-    float2 perpendicular(const float2& vec) noexcept;
+    inline float2 slerp(const float2& a, const float2& b, float t) noexcept {
+        // Normalize inputs
+        float2 na = normalize(a);
+        float2 nb = normalize(b);
 
-    /**
-     * @brief Compute reflection vector
-     * @param incident Incident vector
-     * @param normal Surface normal (must be normalized)
-     * @return Reflected vector
-     */
-    float2 reflect(const float2& incident, const float2& normal) noexcept;
+        // Compute angle between vectors
+        float dot_val = dot(na, nb);
+        dot_val = std::max(-1.0f, std::min(1.0f, dot_val));
 
-    /**
-     * @brief Compute refraction vector
-     * @param incident Incident vector
-     * @param normal Surface normal (must be normalized)
-     * @param eta Ratio of indices of refraction
-     * @return Refracted vector
-     */
-    float2 refract(const float2& incident, const float2& normal, float eta) noexcept;
+        float theta = std::acos(dot_val) * t;
+        float2 relative_vec = normalize(nb - na * dot_val);
 
-    /**
-     * @brief Rotate vector by angle
-     * @param vec Vector to rotate
-     * @param angle Rotation angle in radians
-     * @return Rotated vector
-     */
-    float2 rotate(const float2& vec, float angle) noexcept;
+        return na * std::cos(theta) + relative_vec * std::sin(theta);
+    }
 
-    /**
-     * @brief Compute angle between two vectors in radians
-     * @param a First vector
-     * @param b Second vector
-     * @return Angle in radians between [0, pi]
-     */
-    float angle_between(const float2& a, const float2& b) noexcept;
+    // Geometric operations
+    inline float2 perpendicular(const float2& v) noexcept {
+        return float2(-v.y, v.x);
+    }
 
-    /**
-     * @brief Compute signed angle between two vectors
-     * @param from Starting vector
-     * @param to Target vector
-     * @return Signed angle in radians between [-pi, pi]
-     */
-    float signed_angle_between(const float2& from, const float2& to) noexcept;
+    inline float2 reflect(const float2& incident, const float2& normal) noexcept {
+        return incident - 2.0f * dot(incident, normal) * normal;
+    }
 
-    /**
-     * @brief Project vector onto another vector
-     * @param vec Vector to project
-     * @param onto Vector to project onto
-     * @return Projected vector
-     */
-    float2 project(const float2& vec, const float2& onto) noexcept;
+    inline float2 refract(const float2& incident, const float2& normal, float eta) noexcept {
+        // eta = n_incident / n_transmitted
+        float cos_theta_i = -dot(incident, normal);
+        float sin_theta_i_sq = 1.0f - cos_theta_i * cos_theta_i;
+        float sin_theta_t_sq = (eta * eta) * sin_theta_i_sq;
 
-    /**
-     * @brief Reject vector from another vector (component perpendicular)
-     * @param vec Vector to reject
-     * @param from Vector to reject from
-     * @return Rejected vector
-     */
-    float2 reject(const float2& vec, const float2& from) noexcept;
+        // Total internal reflection
+        if (sin_theta_t_sq > 1.0f) {
+            return float2::zero();
+        }
+
+        float cos_theta_t = std::sqrt(1.0f - sin_theta_t_sq);
+        return eta * incident + (eta * cos_theta_i - cos_theta_t) * normal;
+    }
+
+    inline float2 rotate(const float2& v, float angle) noexcept {
+        float s = std::sin(angle);
+        float c = std::cos(angle);
+        return float2(v.x * c - v.y * s, v.x * s + v.y * c);
+    }
+
+    // Angle operations
+    inline float angle(const float2& v) noexcept {
+        return std::atan2(v.y, v.x);
+    }
+
+    inline float angle_between(const float2& a, const float2& b) noexcept {
+        float2 na = normalize(a);
+        float2 nb = normalize(b);
+        float dot_val = dot(na, nb);
+        dot_val = std::max(-1.0f, std::min(1.0f, dot_val));
+        return std::acos(dot_val);
+    }
+
+    inline float signed_angle_between(const float2& from, const float2& to) noexcept {
+        float2 nfrom = normalize(from);
+        float2 nto = normalize(to);
+        return std::atan2(cross(nfrom, nto), dot(nfrom, nto));
+    }
+
+    // Projection and rejection
+    inline float2 project(const float2& v, const float2& onto) noexcept {
+        float len_sq = length_sq(onto);
+        if (len_sq < EPSILON) {
+            return float2::zero();
+        }
+        return onto * (dot(v, onto) / len_sq);
+    }
+
+    inline float2 reject(const float2& v, const float2& from) noexcept {
+        return v - project(v, from);
+    }
 
     // ============================================================================
     // HLSL-like Global Functions
     // ============================================================================
 
-    /**
-     * @brief HLSL-like abs function (component-wise absolute value)
-     * @param vec Input vector
-     * @return Vector with absolute values of components
-     */
-    float2 abs(const float2& vec) noexcept;
+    inline float2 abs(const float2& v) noexcept {
+        return float2(std::abs(v.x), std::abs(v.y));
+    }
 
-    /**
-     * @brief HLSL-like sign function (component-wise sign)
-     * @param vec Input vector
-     * @return Vector with signs of components
-     */
-    float2 sign(const float2& vec) noexcept;
+    inline float2 sign(const float2& v) noexcept {
+        return float2(
+            (v.x > 0.0f) ? 1.0f : ((v.x < 0.0f) ? -1.0f : 0.0f),
+            (v.y > 0.0f) ? 1.0f : ((v.y < 0.0f) ? -1.0f : 0.0f)
+        );
+    }
 
-    /**
-     * @brief HLSL-like floor function (component-wise floor)
-     * @param vec Input vector
-     * @return Vector with floored components
-     */
-    float2 floor(const float2& vec) noexcept;
+    inline float2 floor(const float2& v) noexcept {
+        return float2(std::floor(v.x), std::floor(v.y));
+    }
 
-    /**
-     * @brief HLSL-like ceil function (component-wise ceiling)
-     * @param vec Input vector
-     * @return Vector with ceiling components
-     */
-    float2 ceil(const float2& vec) noexcept;
+    inline float2 ceil(const float2& v) noexcept {
+        return float2(std::ceil(v.x), std::ceil(v.y));
+    }
 
-    /**
-     * @brief HLSL-like round function (component-wise rounding)
-     * @param vec Input vector
-     * @return Vector with rounded components
-     */
-    float2 round(const float2& vec) noexcept;
+    inline float2 round(const float2& v) noexcept {
+        return float2(std::round(v.x), std::round(v.y));
+    }
 
-    /**
-     * @brief HLSL-like frac function (component-wise fractional part)
-     * @param vec Input vector
-     * @return Vector with fractional parts of components
-     */
-    float2 frac(const float2& vec) noexcept;
+    inline float2 frac(const float2& v) noexcept {
+        return float2(v.x - std::floor(v.x), v.y - std::floor(v.y));
+    }
 
-    /**
-     * @brief HLSL-like saturate function (clamp components to [0, 1])
-     * @param vec Input vector
-     * @return Saturated vector
-     */
-    float2 saturate(const float2& vec) noexcept;
+    inline float2 saturate(const float2& v) noexcept {
+        return float2(
+            std::max(0.0f, std::min(1.0f, v.x)),
+            std::max(0.0f, std::min(1.0f, v.y))
+        );
+    }
 
-    /**
-     * @brief HLSL-like step function (component-wise step)
-     * @param edge Edge value
-     * @param vec Input vector
-     * @return Step result vector
-     */
-    float2 step(float edge, const float2& vec) noexcept;
+    inline float2 step(float edge, const float2& v) noexcept {
+        return float2(
+            (v.x >= edge) ? 1.0f : 0.0f,
+            (v.y >= edge) ? 1.0f : 0.0f
+        );
+    }
 
-    /**
-     * @brief HLSL-like smoothstep function (smooth interpolation)
-     * @param edge0 Lower edge
-     * @param edge1 Upper edge
-     * @param vec Input vector
-     * @return Smoothly interpolated values
-     */
-    float2 smoothstep(float edge0, float edge1, const float2& vec) noexcept;
+    inline float2 smoothstep(float edge0, float edge1, const float2& v) noexcept {
+        auto smooth = [edge0, edge1](float t) {
+            t = std::max(0.0f, std::min(1.0f, (t - edge0) / (edge1 - edge0)));
+            return t * t * (3.0f - 2.0f * t);
+        };
+        return float2(smooth(v.x), smooth(v.y));
+    }
 
-    /**
-     * @brief HLSL-like clamp function (component-wise clamping)
-     * @param vec Vector to clamp
-     * @param min_val Minimum values
-     * @param max_val Maximum values
-     * @return Clamped vector
-     */
-    float2 clamp(const float2& vec, const float2& min_val, const float2& max_val) noexcept;
+    inline float2 clamp(const float2& v, const float2& min_val, const float2& max_val) noexcept {
+        return float2(
+            std::max(min_val.x, std::min(max_val.x, v.x)),
+            std::max(min_val.y, std::min(max_val.y, v.y))
+        );
+    }
 
-    /**
-     * @brief HLSL-like min function (component-wise minimum)
-     * @param a First vector
-     * @param b Second vector
-     * @return Component-wise minimum
-     */
-    float2 min(const float2& a, const float2& b) noexcept;
+    inline float2 min(const float2& a, const float2& b) noexcept {
+        return float2(std::min(a.x, b.x), std::min(a.y, b.y));
+    }
 
-    /**
-     * @brief HLSL-like max function (component-wise maximum)
-     * @param a First vector
-     * @param b Second vector
-     * @return Component-wise maximum
-     */
-    float2 max(const float2& a, const float2& b) noexcept;
+    inline float2 max(const float2& a, const float2& b) noexcept {
+        return float2(std::max(a.x, b.x), std::max(a.y, b.y));
+    }
 
     // ============================================================================
     // Utility Functions
     // ============================================================================
 
-    /**
-     * @brief Compute distance from point to line segment
-     * @param point Test point
-     * @param line_start Start point of line segment
-     * @param line_end End point of line segment
-     * @return Minimum distance from point to line segment
-     */
-    float distance_to_line_segment(const float2& point, const float2& line_start, const float2& line_end) noexcept;
+    inline float distance_to_line_segment(const float2& point,
+        const float2& line_start,
+        const float2& line_end) noexcept {
+        float2 line_vec = line_end - line_start;
+        float2 point_vec = point - line_start;
+
+        float line_length_sq = length_sq(line_vec);
+        if (line_length_sq < EPSILON) {
+            return distance(point, line_start);
+        }
+
+        float t = dot(point_vec, line_vec) / line_length_sq;
+        t = std::max(0.0f, std::min(1.0f, t));
+
+        float2 projection = line_start + line_vec * t;
+        return distance(point, projection);
+    }
 
     // ============================================================================
     // Useful Constants
     // ============================================================================
 
-    /**
-     * @brief Zero vector constant (0, 0)
-     */
-    extern const float2 float2_Zero;
+    inline const float2 float2_Zero(0.0f, 0.0f);
+    inline const float2 float2_One(1.0f, 1.0f);
+    inline const float2 float2_UnitX(1.0f, 0.0f);
+    inline const float2 float2_UnitY(0.0f, 1.0f);
+    inline const float2 float2_Right(1.0f, 0.0f);
+    inline const float2 float2_Left(-1.0f, 0.0f);
+    inline const float2 float2_Up(0.0f, 1.0f);
+    inline const float2 float2_Down(0.0f, -1.0f);
 
-    /**
-     * @brief One vector constant (1, 1)
-     */
-    extern const float2 float2_One;
+    // ============================================================================
+    // Comparison Operators (defined after all functions for completeness)
+    // ============================================================================
 
-    /**
-     * @brief Unit X vector constant (1, 0)
-     */
-    extern const float2 float2_UnitX;
+    inline bool approximately(const float2& a, const float2& b, float epsilon = EPSILON) noexcept {
+        return std::abs(a.x - b.x) <= epsilon && std::abs(a.y - b.y) <= epsilon;
+    }
 
-    /**
-     * @brief Unit Y vector constant (0, 1)
-     */
-    extern const float2 float2_UnitY;
+    inline bool approximately_zero(const float2& v, float epsilon = Constants::Constants<float>::Epsilon) noexcept {
+        return std::abs(v.x) <= epsilon && std::abs(v.y) <= epsilon;
+    }
 
-    /**
-     * @brief Right vector constant (1, 0)
-     */
-    extern const float2 float2_Right;
+    inline bool operator==(const float2& a, const float2& b) noexcept {
+        return approximately(a, b);
+    }
 
-    /**
-     * @brief Left vector constant (-1, 0)
-     */
-    extern const float2 float2_Left;
-
-    /**
-     * @brief Up vector constant (0, 1)
-     */
-    extern const float2 float2_Up;
-
-    /**
-     * @brief Down vector constant (0, -1)
-     */
-    extern const float2 float2_Down;
+    inline bool operator!=(const float2& a, const float2& b) noexcept {
+        return !approximately(a, b);
+    }
 
 } // namespace AfterMath
-
-// Include Implementation at the end
-#include "math_float2.inl"

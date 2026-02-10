@@ -152,23 +152,5 @@
     <None Include="AfterMath\math_aabb.inl">
       <Filter>Math\Implementation\Primitives\Axis aligned bounding box</Filter>
     </None>
-    <None Include="AfterMath\math_float2x2.inl">
-      <Filter>Math\Implementation\Primitives\Matrices</Filter>
-    </None>
-    <None Include="AfterMath\math_float3x3.inl">
-      <Filter>Math\Implementation\Primitives\Matrices</Filter>
-    </None>
-    <None Include="AfterMath\math_float4x4.inl">
-      <Filter>Math\Implementation\Primitives\Matrices</Filter>
-    </None>
-    <None Include="AfterMath\math_float2.inl">
-      <Filter>Math\Implementation\Primitives\Vectors\Float</Filter>
-    </None>
-    <None Include="AfterMath\math_float3.inl">
-      <Filter>Math\Implementation\Primitives\Vectors\Float</Filter>
-    </None>
-    <None Include="AfterMath\math_float4.inl">
-      <Filter>Math\Implementation\Primitives\Vectors\Float</Filter>
-    </None>
   </ItemGroup>
 </Project>

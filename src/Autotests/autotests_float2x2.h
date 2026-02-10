@@ -15,19 +15,19 @@ namespace AfterMathTests
         using namespace AfterMath;
 
         // ============================================================================
-        // 1. Конструкторы и базовые операции
+        // 1. Constructors and basic operations
         // ============================================================================
-        suite.section("Конструкторы и базовые операции");
+        suite.section("Constructors and basic operations");
 
-        // Тест конструктора по умолчанию (identity matrix)
+        // Test default constructor (identity matrix)
         suite.assert_equal(float2x2::identity(), float2x2(), "Default constructor returns identity");
 
-        // Тест конструктора с двумя строками
+        // Test constructor with two rows
         suite.assert_equal(float2x2(float2(1, 2), float2(3, 4)),
             float2x2(1, 2, 3, 4),
             "Constructor with two float2 rows");
 
-        // Тест конструктора с четырьмя значениями
+        // Test constructor with four values
         {
             float2x2 mat(1.0f, 2.0f, 3.0f, 4.0f);
             suite.assert_equal(mat(0, 0), 1.0f, "4-param constructor (0,0)");
@@ -36,7 +36,7 @@ namespace AfterMathTests
             suite.assert_equal(mat(1, 1), 4.0f, "4-param constructor (1,1)");
         }
 
-        // Тест конструктора из массива
+        // Test constructor from array
         {
             float data[4] = { 1, 2, 3, 4 };
             float2x2 mat(data);
@@ -46,7 +46,7 @@ namespace AfterMathTests
             suite.assert_equal(mat[1][1], 4.0f, "Array constructor [1][1]");
         }
 
-        // Тест скалярного конструктора
+        // Test scalar constructor
         {
             float2x2 mat(5.0f);
             suite.assert_equal(mat(0, 0), 5.0f, "Scalar constructor (0,0)");
@@ -55,7 +55,7 @@ namespace AfterMathTests
             suite.assert_equal(mat(1, 0), 0.0f, "Scalar constructor off-diagonal (1,0)");
         }
 
-        // Тест конструктора из вектора диагонали
+        // Test constructor from diagonal vector
         {
             float2 diag(2.0f, 3.0f);
             float2x2 mat(diag);
@@ -66,37 +66,27 @@ namespace AfterMathTests
         }
 
         // ============================================================================
-        // 2. Доступ к элементам
+        // 2. Element access
         // ============================================================================
-        suite.section("Доступ к элементам");
+        suite.section("Element access");
 
         float2x2 mat(1, 2, 3, 4);
 
-        // Проверка оператора []
+        // Check [] operator
         suite.assert_equal(mat[0], float2(1, 2), "Operator[] row0");
         suite.assert_equal(mat[1], float2(3, 4), "Operator[] row1");
 
-        // Проверка оператора ()
+        // Check () operator
         suite.assert_equal(mat(0, 0), 1.0f, "Operator() (0,0)");
         suite.assert_equal(mat(0, 1), 2.0f, "Operator() (0,1)");
         suite.assert_equal(mat(1, 0), 3.0f, "Operator() (1,0)");
         suite.assert_equal(mat(1, 1), 4.0f, "Operator() (1,1)");
 
-        // Проверка методов row/col
-        suite.assert_equal(mat.row0(), float2(1, 2), "row0()");
-        suite.assert_equal(mat.row1(), float2(3, 4), "row1()");
+        // Check col access methods
         suite.assert_equal(mat.col0(), float2(1, 3), "col0()");
         suite.assert_equal(mat.col1(), float2(2, 4), "col1()");
 
-        // Проверка set_row/set_col
-        {
-            float2x2 m;
-            m.set_row0(float2(10, 11));
-            m.set_row1(float2(12, 13));
-            suite.assert_equal(m.row0(), float2(10, 11), "set_row0");
-            suite.assert_equal(m.row1(), float2(12, 13), "set_row1");
-        }
-
+        // Check set_col
         {
             float2x2 m;
             m.set_col0(float2(10, 11));
@@ -105,7 +95,7 @@ namespace AfterMathTests
             suite.assert_equal(m.col1(), float2(12, 13), "set_col1");
         }
 
-        // Проверка SSE данных
+        // Check SSE data
         {
             __m128 sse = _mm_setr_ps(1, 2, 3, 4);
             float2x2 mat_sse(sse);
@@ -117,39 +107,39 @@ namespace AfterMathTests
         }
 
         // ============================================================================
-        // 3. Статические методы создания матриц
+        // 3. Static matrix creation methods
         // ============================================================================
-        suite.section("Статические методы создания матриц");
+        suite.section("Static matrix creation methods");
 
-        // Identity и Zero
-        suite.assert_true(float2x2::identity().is_identity(), "identity() creates identity matrix");
-        suite.assert_true(float2x2::zero().approximately_zero(), "zero() creates zero matrix");
+        // Identity and Zero
+        suite.assert_true(is_identity(float2x2::identity()), "identity() creates identity matrix");
+        suite.assert_true(approximately_zero(float2x2::zero()), "zero() creates zero matrix");
 
-        // Rotation матрица
+        // Rotation matrix
         {
-            float angle = Constants::Constants<float>::Pi / 4.0f; // 45 градусов
+            float angle = PI / 4.0f; // 45 degrees
             float2x2 rot = float2x2::rotation(angle);
 
-            // Проверка свойств матрицы вращения
-            suite.assert_true(rot.is_rotation(), "rotation() creates rotation matrix");
-            suite.assert_approximately_equal(rot.determinant(), 1.0f, "rotation determinant = 1", 1e-6f);
+            // Check rotation matrix properties
+            suite.assert_true(is_rotation(rot), "rotation() creates rotation matrix");
+            suite.assert_approximately_equal(determinant(rot), 1.0f, "rotation determinant = 1", 1e-6f);
 
-            // Проверка конкретных значений для 45 градусов
+            // Check specific values for 45 degrees
             float sqrt2_2 = std::sqrt(2.0f) / 2.0f;
             float2x2 expected_rot(sqrt2_2, -sqrt2_2,
                 sqrt2_2, sqrt2_2);
             suite.assert_approximately_equal(rot, expected_rot, "rotation 45 degrees");
 
-            // Вектор (1,0) должен перейти в (cos, sin)
+            // Vector (1,0) should transform to (cos, sin)
             float2 vec(1, 0);
             float2 transformed = rot * vec;
             suite.assert_approximately_equal(transformed, float2(sqrt2_2, sqrt2_2),
                 "rotation transforms (1,0) correctly");
         }
 
-        // Scaling матрицы
+        // Scaling matrices
         {
-            // Из вектора
+            // From vector
             float2 scale_vec(2, 3);
             float2x2 scale = float2x2::scaling(scale_vec);
             suite.assert_equal(scale(0, 0), 2.0f, "scaling(vector) (0,0)");
@@ -157,7 +147,7 @@ namespace AfterMathTests
             suite.assert_equal(scale(0, 1), 0.0f, "scaling(vector) off-diagonal (0,1)");
             suite.assert_equal(scale(1, 0), 0.0f, "scaling(vector) off-diagonal (1,0)");
 
-            // Из двух значений
+            // From two values
             float2x2 scale2 = float2x2::scaling(2.0f, 3.0f);
             suite.assert_equal(scale2, scale, "scaling(x,y) equals scaling(vector)");
 
@@ -169,7 +159,7 @@ namespace AfterMathTests
             suite.assert_equal(uniform_scale(1, 0), 0.0f, "uniform scaling off-diagonal (1,0)");
         }
 
-        // Shear матрица
+        // Shear matrix
         {
             float2 shear_vec(0.5f, 0.3f);
             float2x2 shear_mat = float2x2::shear(shear_vec);
@@ -179,65 +169,65 @@ namespace AfterMathTests
             suite.assert_equal(shear_mat(1, 0), 0.3f, "shear (1,0)");
             suite.assert_equal(shear_mat(1, 1), 1.0f, "shear (1,1)");
 
-            // Из двух значений
+            // From two values
             float2x2 shear_mat2 = float2x2::shear(0.5f, 0.3f);
             suite.assert_equal(shear_mat2, shear_mat, "shear(x,y) equals shear(vector)");
 
-            // Тест преобразования вектора
+            // Test vector transformation
             float2 vec(1, 1);
             float2 sheared = shear_mat * vec;
             suite.assert_equal(sheared, float2(1.5f, 1.3f), "shear transformation");
         }
 
         // ============================================================================
-        // 4. Арифметические операции
+        // 4. Arithmetic operations
         // ============================================================================
-        suite.section("Арифметические операции");
+        suite.section("Arithmetic operations");
 
         float2x2 A(1, 2, 3, 4);
         float2x2 B(5, 6, 7, 8);
 
-        // Сложение
+        // Addition
         {
             float2x2 sum = A + B;
             float2x2 expected(6, 8, 10, 12);
             suite.assert_equal(sum, expected, "Matrix addition");
 
-            // Проверка оператора +=
+            // Check += operator
             float2x2 A_copy = A;
             A_copy += B;
             suite.assert_equal(A_copy, expected, "Operator +=");
         }
 
-        // Вычитание
+        // Subtraction
         {
             float2x2 diff = A - B;
             float2x2 expected(-4, -4, -4, -4);
             suite.assert_equal(diff, expected, "Matrix subtraction");
 
-            // Проверка оператора -=
+            // Check -= operator
             float2x2 A_copy = A;
             A_copy -= B;
             suite.assert_equal(A_copy, expected, "Operator -=");
         }
 
-        // Умножение на скаляр
+        // Scalar multiplication
         {
             float2x2 scaled = A * 2.0f;
             float2x2 expected(2, 4, 6, 8);
             suite.assert_equal(scaled, expected, "Matrix * scalar");
 
-            // Проверка оператора *=
+            // Check *= operator
             float2x2 A_copy = A;
             A_copy *= 2.0f;
             suite.assert_equal(A_copy, expected, "Operator *=");
 
-            // Проверка скаляр * матрица
+            // Check scalar * matrix
             float2x2 scaled2 = 2.0f * A;
             suite.assert_equal(scaled2, expected, "Scalar * matrix");
         }
 
-        // Деление на скаляр
+        // Scalar division
         {
             float2x2 A_copy = A;
             A_copy /= 2.0f;
@@ -245,7 +235,7 @@ namespace AfterMathTests
             suite.assert_equal(A_copy, expected, "Operator /=");
         }
 
-        // Умножение матриц
+        // Matrix multiplication
         {
             float2x2 C(1, 0, 0, 2);
             float2x2 D(3, 0, 0, 4);
@@ -253,20 +243,20 @@ namespace AfterMathTests
             float2x2 expected(3, 0, 0, 8);
             suite.assert_equal(result, expected, "Matrix multiplication diagonal");
 
-            // Недиагональные матрицы
+            // Non-diagonal matrices
             float2x2 E(1, 2, 3, 4);
             float2x2 F(2, 0, 1, 2);
             float2x2 EF = E * F;
             float2x2 expected_EF(4, 4, 10, 8);
             suite.assert_equal(EF, expected_EF, "Matrix multiplication non-diagonal");
 
-            // Проверка оператора *=
+            // Check *= operator
             float2x2 C_copy = C;
             C_copy *= D;
             suite.assert_equal(C_copy, expected, "Operator *=");
         }
 
-        // Унарные операторы
+        // Unary operators
         {
             float2x2 neg = -A;
             for (int i = 0; i < 2; ++i) {
@@ -280,299 +270,272 @@ namespace AfterMathTests
         }
 
         // ============================================================================
-        // 5. Умножение на векторы
+        // 5. Vector multiplication
         // ============================================================================
-        suite.section("Умножение на векторы");
+        suite.section("Vector multiplication");
 
         float2x2 M(1, 2, 3, 4);
         float2 v(2, 3);
 
-        // Умножение матрицы на вектор (справа)
+        // Matrix * vector (right multiplication)
         {
             float2 result = M * v;
             float2 expected(8, 18); // (1*2 + 2*3, 3*2 + 4*3)
             suite.assert_equal(result, expected, "Matrix * vector");
         }
 
-        // Умножение вектора на матрицу (слева) - использует transform_vector
+        // Vector * matrix (left multiplication)
         {
             float2 result = v * M;
-            // Это должно быть эквивалентно v * M в смысле вектора-строки
-            // В реализации это M.transform_vector(v), что дает тот же результат
-            float2 expected = M * v;
-            suite.assert_equal(result, expected, "Vector * matrix");
+            float2 expected(11.0f, 16.0f);
+            suite.assert_equal(result, expected, "Vector * matrix (row vector multiplication)");
         }
 
-        // Тест transform_vector
+        // Test transform_vector (global function)
         {
-            float2 result = M.transform_vector(v);
+            float2 result = transform_vector(M, v);
             float2 expected = M * v;
             suite.assert_equal(result, expected, "transform_vector");
         }
 
-        // Тест transform_point (должен быть таким же как transform_vector для float2x2)
+        // Test transform_point (should be same as transform_vector for float2x2)
         {
-            float2 result = M.transform_point(v);
+            float2 result = transform_point(M, v);
             float2 expected = M * v;
             suite.assert_equal(result, expected, "transform_point");
         }
 
-        // Тест mul свободные функции
+        // Test mul free functions
         {
             float2 mul_vec = mul(v, M);
-            suite.assert_equal(mul_vec, M * v, "mul(vector, matrix)");
-
-            float2x2 mul_mat = mul(M, float2x2::identity());
-            suite.assert_equal(mul_mat, M, "mul(matrix, identity)");
+            float2 expected(11.0f, 16.0f);
+            suite.assert_equal(mul_vec, expected, "mul(vector, matrix) - row vector multiplication");
         }
 
         // ============================================================================
-        // 6. Матричные операции
+        // 6. Matrix operations
         // ============================================================================
-        suite.section("Матричные операции");
+        suite.section("Matrix operations");
 
-        // Транспонирование
+        // Transpose
         {
             float2x2 mat(1, 2, 3, 4);
-            float2x2 transposed = mat.transposed();
+            float2x2 transposed_mat = transpose(mat);
             float2x2 expected(1, 3, 2, 4);
-            suite.assert_equal(transposed, expected, "transposed");
+            suite.assert_equal(transposed_mat, expected, "transpose");
 
-            // Проверка что транспонирование дважды возвращает исходную матрицу
-            suite.assert_equal(transposed.transposed(), mat, "transpose twice returns original");
-
-            // Проверка свободной функции
-            suite.assert_equal(transpose(mat), transposed, "transpose() free function");
+            // Check that transpose twice returns original
+            suite.assert_equal(transpose(transposed_mat), mat, "transpose twice returns original");
         }
 
-        // Определитель
+        // Determinant
         {
             float2x2 identity = float2x2::identity();
-            suite.assert_approximately_equal(identity.determinant(), 1.0f, "identity determinant = 1");
+            suite.assert_approximately_equal(determinant(identity), 1.0f, "identity determinant = 1");
 
-            float2x2 zero = float2x2::zero();
-            suite.assert_approximately_equal(zero.determinant(), 0.0f, "zero determinant = 0");
+            float2x2 zero_mat = float2x2::zero();
+            suite.assert_approximately_equal(determinant(zero_mat), 0.0f, "zero determinant = 0");
 
             float2x2 mat(1, 2, 3, 4);
             float expected_det = 1 * 4 - 2 * 3; // -2
-            suite.assert_approximately_equal(mat.determinant(), expected_det, "2x2 determinant calculation");
-
-            // Проверка свободной функции
-            suite.assert_approximately_equal(determinant(mat), expected_det, "determinant() free function");
+            suite.assert_approximately_equal(determinant(mat), expected_det, "2x2 determinant calculation");
         }
 
-        // Присоединенная (adjugate) матрица
+        // Adjugate matrix
         {
             float2x2 mat(1, 2, 3, 4);
-            float2x2 adj = mat.adjugate();
+            float2x2 adj = adjugate(mat);
             float2x2 expected(4, -2, -3, 1);
             suite.assert_equal(adj, expected, "adjugate matrix");
 
-            // Проверка свойства: A * adj(A) = det(A) * I
+            // Check property: A * adj(A) = det(A) * I
             float2x2 product = mat * adj;
-            float2x2 det_times_identity = float2x2::identity() * mat.determinant();
+            float2x2 det_times_identity = float2x2::identity() * determinant(mat);
             suite.assert_approximately_equal(product, det_times_identity, "A * adj(A) = det(A) * I");
         }
 
-        // Обратная матрица
+        // Inverse matrix
         {
             float2x2 scale = float2x2::scaling(2, 3);
-            float2x2 invScale = scale.inverted();
+            float2x2 invScale = inverse(scale);
             float2x2 expected(0.5f, 0, 0, 1.0f / 3.0f);
             suite.assert_approximately_equal(invScale, expected, "inverse of scaling matrix");
 
-            // Проверка что A * A^(-1) = I
+            // Check that A * A^(-1) = I
             float2x2 product = scale * invScale;
-            suite.assert_true(product.is_identity(1e-5f), "A * A^(-1) = I for scaling");
+            suite.assert_true(is_identity(product, 1e-5f), "A * A^(-1) = I for scaling");
 
-            // Проверка матрицы вращения (обратная = транспонированная)
-            float angle = Constants::Constants<float>::Pi / 6.0f;
+            // Check rotation matrix (inverse = transpose)
+            float angle = PI / 6.0f;
             float2x2 rotation = float2x2::rotation(angle);
-            float2x2 invRotation = rotation.inverted();
-            float2x2 transposedRotation = rotation.transposed();
+            float2x2 invRotation = inverse(rotation);
+            float2x2 transposedRotation = transpose(rotation);
             suite.assert_approximately_equal(invRotation, transposedRotation,
                 "inverse of rotation = transpose", 1e-5f);
 
-            // Проверка свободной функции
-            suite.assert_approximately_equal(inverse(scale), expected, "inverse() free function");
-
-            // Матрица с нулевым определителем
-            float2x2 singular(1, 2, 2, 4); // Строки линейно зависимы
-            // Должна вернуть identity (как в реализации при нулевом определителе)
-            float2x2 invSingular = singular.inverted();
-            suite.assert_true(invSingular.is_identity(1e-5f), "singular matrix inverse returns identity");
+            // Singular matrix (zero determinant)
+            float2x2 singular(1, 2, 2, 4); // Linearly dependent rows
+            // Should return identity (as implemented for zero determinant)
+            float2x2 invSingular = inverse(singular);
+            suite.assert_true(is_identity(invSingular, 1e-5f), "singular matrix inverse returns identity");
         }
 
-        // След матрицы
+        // Trace
         {
             float2x2 mat(1, 2, 3, 4);
             float expectedTrace = 1 + 4;
-            suite.assert_approximately_equal(mat.trace(), expectedTrace, "trace");
-
-            // Проверка свободной функции
-            suite.assert_approximately_equal(trace(mat), expectedTrace, "trace() free function");
+            suite.assert_approximately_equal(trace(mat), expectedTrace, "trace");
         }
 
-        // Диагональ
+        // Diagonal
         {
             float2x2 mat(1, 2, 3, 4);
             float2 expectedDiag(1, 4);
-            suite.assert_equal(mat.diagonal(), expectedDiag, "diagonal");
-
-            // Проверка свободной функции
-            suite.assert_equal(diagonal(mat), expectedDiag, "diagonal() free function");
+            suite.assert_equal(diagonal(mat), expectedDiag, "diagonal");
         }
 
-        // Норма Фробениуса
+        // Frobenius norm
         {
             float2x2 mat(1, 0, 0, 2);
             float expectedNorm = std::sqrt(1.0f * 1.0f + 2.0f * 2.0f);
-            suite.assert_approximately_equal(mat.frobenius_norm(), expectedNorm, "frobenius_norm");
-
-            // Проверка свободной функции
-            suite.assert_approximately_equal(frobenius_norm(mat), expectedNorm, "frobenius_norm() free function");
+            suite.assert_approximately_equal(frobenius_norm(mat), expectedNorm, "frobenius_norm");
         }
 
         // ============================================================================
-        // 7. Специальные функции
+        // 7. Special functions
         // ============================================================================
-        suite.section("Специальные функции");
+        suite.section("Special functions");
 
+        // Get rotation angle
         {
-            float angle = Constants::Constants<float>::Pi / 3.0f; // 60 градусов
+            float angle = PI / 3.0f; // 60 degrees
             float2x2 rot = float2x2::rotation(angle);
-            float extracted = rot.get_rotation();
+            float extracted = get_rotation(rot);
             suite.assert_approximately_equal(extracted, angle, "get_rotation from pure rotation", 1e-5f);
 
-            // Матрица с РАВНОМЕРНЫМ масштабом и поворотом
+            // Matrix with UNIFORM scale and rotation
             float2x2 rot_scale = float2x2::scaling(2.0f) * float2x2::rotation(angle);
-            float extracted2 = rot_scale.get_rotation();
+            float extracted2 = get_rotation(rot_scale);
             suite.assert_approximately_equal(extracted2, angle, "get_rotation from uniform scaled rotation", 1e-5f);
 
-            // Матрица с отражением (отрицательный детерминант)
-            float2x2 reflect(1, 0, 0, -1); // Отражение по Y
-            float extracted3 = reflect.get_rotation();
-            // Для матриц с отражением get_rotation должен вернуть 0 (как в реализации)
+            // Matrix with reflection (negative determinant)
+            float2x2 reflect(1, 0, 0, -1); // Reflection across Y axis
+            float extracted3 = get_rotation(reflect);
+            // For matrices with reflection, get_rotation should return 0 (as per implementation)
             suite.assert_approximately_equal(extracted3, 0.0f, "get_rotation from reflection returns 0");
         }
 
-        // Извлечение масштаба
+        // Get scale
         {
             float2 scale_vec(2, 3);
             float2x2 scale_mat = float2x2::scaling(scale_vec);
-            float2 extracted = scale_mat.get_scale();
+            float2 extracted = get_scale(scale_mat);
             suite.assert_approximately_equal(extracted, scale_vec, "get_scale from scaling matrix");
 
-            // Для матрицы с поворотом и масштабом
-            float angle = Constants::Constants<float>::Pi / 4.0f;
+            // For matrix with rotation and scale
+            float angle = PI / 4.0f;
             float2x2 rot_scale = float2x2::rotation(angle) * float2x2::scaling(2, 3);
-            float2 extracted2 = rot_scale.get_scale();
-            // Масштаб должен извлекаться как длины столбцов
-            float2 expected2(rot_scale.col0().length(),
-                rot_scale.col1().length());
+            float2 extracted2 = get_scale(rot_scale);
+            // Scale should be extracted as column lengths
+            float2 expected2(length(rot_scale.col0()),
+                length(rot_scale.col1()));
             suite.assert_approximately_equal(extracted2, expected2, "get_scale from rotation+scaling");
         }
 
-        // Установка поворота
+        // Set rotation
         {
             float2x2 mat = float2x2::scaling(2, 3);
-            float new_angle = Constants::Constants<float>::Pi / 3.0f;
+            float new_angle = PI / 3.0f;
 
-            mat.set_rotation(new_angle);
-            float extracted = mat.get_rotation();
+            set_rotation(mat, new_angle);
+            float extracted = get_rotation(mat);
             suite.assert_approximately_equal(extracted, new_angle, "set_rotation", 1e-5f);
 
-            // Масштаб должен сохраниться
-            float2 scale = mat.get_scale();
+            // Scale should be preserved
+            float2 scale = get_scale(mat);
             suite.assert_approximately_equal(scale, float2(2, 3), "set_rotation preserves scale", 1e-5f);
         }
 
-        // Установка масштаба
+        // Set scale
         {
-            float2x2 mat = float2x2::rotation(Constants::Constants<float>::Pi / 4.0f);
+            float2x2 mat = float2x2::rotation(PI / 4.0f);
             float2 new_scale(3, 4);
 
-            mat.set_scale(new_scale);
-            float2 extracted = mat.get_scale();
+            set_scale(mat, new_scale);
+            float2 extracted = get_scale(mat);
             suite.assert_approximately_equal(extracted, new_scale, "set_scale", 1e-5f);
 
-            // Поворот должен сохраниться
-            float angle = mat.get_rotation();
-            suite.assert_approximately_equal(angle, Constants::Constants<float>::Pi / 4.0f,
+            // Rotation should be preserved
+            float angle = get_rotation(mat);
+            suite.assert_approximately_equal(angle, PI / 4.0f,
                 "set_scale preserves rotation", 1e-5f);
         }
 
         // ============================================================================
-        // 8. Проверки свойств
+        // 8. Property checks
         // ============================================================================
-        suite.section("Проверки свойств");
+        suite.section("Property checks");
 
-        // Проверка identity
-        suite.assert_true(float2x2::identity().is_identity(), "identity().is_identity()");
-        suite.assert_false(float2x2::zero().is_identity(), "zero().is_identity() returns false");
-        suite.assert_true(float2x2::scaling(1.0f).is_identity(), "uniform scaling(1) is identity");
+        // Identity check
+        suite.assert_true(is_identity(float2x2::identity()), "is_identity(identity())");
+        suite.assert_false(is_identity(float2x2::zero()), "is_identity(zero()) returns false");
+        suite.assert_true(is_identity(float2x2::scaling(1.0f)), "is_identity(uniform scaling(1))");
 
-        // Проверка orthogonality
+        // Orthogonality check
         {
-            float2x2 rotation = float2x2::rotation(Constants::Constants<float>::Pi / 3.0f);
-            suite.assert_true(rotation.is_orthogonal(), "rotation matrix is orthogonal");
+            float2x2 rotation = float2x2::rotation(PI / 3.0f);
+            suite.assert_true(is_orthogonal(rotation), "rotation matrix is orthogonal");
 
             float2x2 scale = float2x2::scaling(2, 3);
-            suite.assert_true(scale.is_orthogonal(), "scaling matrix is orthogonal");
+            suite.assert_true(is_orthogonal(scale), "scaling matrix is orthogonal");
 
             float2x2 non_ortho(1, 2, 3, 4);
-            suite.assert_false(non_ortho.is_orthogonal(), "non-orthogonal matrix detected");
-
-            // Проверка свободной функции
-            suite.assert_true(is_orthogonal(rotation), "is_orthogonal() free function");
+            suite.assert_false(is_orthogonal(non_ortho), "non-orthogonal matrix detected");
         }
 
-        // Проверка rotation
+        // Rotation check
         {
-            float2x2 rotation = float2x2::rotation(Constants::Constants<float>::Pi / 3.0f);
-            suite.assert_true(rotation.is_rotation(), "rotation matrix is rotation");
+            float2x2 rotation = float2x2::rotation(PI / 3.0f);
+            suite.assert_true(is_rotation(rotation), "rotation matrix is rotation");
 
             float2x2 scale = float2x2::scaling(2, 2);
-            suite.assert_false(scale.is_rotation(), "uniform scaling is not rotation (det != 1)");
+            suite.assert_false(is_rotation(scale), "uniform scaling is not rotation (det != 1)");
 
             float2x2 scale_non_uniform = float2x2::scaling(2, 3);
-            suite.assert_false(scale_non_uniform.is_rotation(), "non-uniform scaling is not rotation");
-
-            // Проверка свободной функции
-            suite.assert_true(is_rotation(rotation), "is_rotation() free function");
+            suite.assert_false(is_rotation(scale_non_uniform), "non-uniform scaling is not rotation");
         }
 
-        // Проверка approximately_zero
-        suite.assert_true(float2x2::zero().approximately_zero(), "zero().approximately_zero()");
-        suite.assert_false(float2x2::identity().approximately_zero(), "identity().approximately_zero() returns false");
+        // Approximately zero check
+        suite.assert_true(approximately_zero(float2x2::zero()), "approximately_zero(zero())");
+        suite.assert_false(approximately_zero(float2x2::identity()), "approximately_zero(identity()) returns false");
 
-        // Проверка approximately
+        // Approximately equal check
         {
             float2x2 mat1(1, 2, 3, 4);
 
-            // Матрица с небольшими различиями
+            // Matrix with small differences
             float2x2 mat2(1.000001f, 2.000001f, 3.000001f, 4.000001f);
 
-            // Проверяем, что с epsilon по умолчанию они считаются равными
-            suite.assert_true(mat1.approximately(mat2, Constants::Constants<float>::Epsilon),
+            // Check that with default epsilon they are considered equal
+            suite.assert_true(approximately(mat1, mat2, 1e-6f),
                 "matrices are approximately equal with default epsilon");
 
-            // И поэтому оператор == должен возвращать true
+            // Therefore operator == should return true
             suite.assert_true(mat1 == mat2, "operator == returns true for approximately equal matrices");
 
-            // А оператор != должен возвращать false
+            // And operator != should return false
             suite.assert_false(mat1 != mat2, "operator != returns false for approximately equal matrices");
 
-            // Теперь создадим матрицу, которая точно отличается
+            // Now create a matrix that is clearly different
             float2x2 mat3(2, 2, 3, 4);
 
             suite.assert_true(mat1 != mat3, "operator != returns true for different matrices");
         }
 
         // ============================================================================
-        // 9. Преобразования данных
+        // 9. Data conversions
         // ============================================================================
-        suite.section("Преобразования данных");
+        suite.section("Data conversions");
 
         // to_row_major
         {
@@ -607,88 +570,73 @@ namespace AfterMathTests
             float2x2 mat(1.5f, 2.5f, 3.5f, 4.5f);
 
             std::string str = mat.to_string();
-            // Проверяем что строка содержит ожидаемые значения
+            // Check that string contains expected values
             suite.assert_true(str.find("1.5000") != std::string::npos, "to_string contains 1.5000");
             suite.assert_true(str.find("4.5000") != std::string::npos, "to_string contains 4.5000");
         }
 
-        // isValid (неявно через assert_equal, но можем проверить с NaN)
+        // ============================================================================
+        // 10. Edge cases and special values
+        // ============================================================================
+        suite.section("Edge cases and special values");
+
+        // Very small values
         {
-            float2x2 validMat(1, 2, 3, 4);
-            // Поскольку в float2x2 нет метода isValid, пропускаем этот тест
-            suite.skip_test("isValid method", "float2x2 doesn't have isValid method");
-        }
-
-        // ============================================================================
-        // 10. Конструкторы из других типов
-        // ============================================================================
-        suite.section("Конструкторы из других типов");
-
-        // В float2x2 нет конструкторов из других матричных типов или кватернионов
-        // поэтому пропускаем этот раздел
-
-        // ============================================================================
-        // 11. Граничные случаи и особые значения
-        // ============================================================================
-        suite.section("Граничные случаи и особые значения");
-
-        // Очень маленькие значения
-        {
-            float epsilon = Constants::Constants<float>::Epsilon;
+            float epsilon = 1e-6f;
             float2x2 tinyMat(epsilon, 0, 0, epsilon);
 
-            suite.assert_true(tinyMat.approximately_zero(epsilon * 2),
+            suite.assert_true(approximately_zero(tinyMat, epsilon * 2),
                 "approximately_zero with tiny values");
         }
 
-        // Очень большие значения
+        // Very large values
         {
             float large = 1e10f;
             float2x2 largeMat(large, 0, 0, large);
 
-            // Обратная матрица должна иметь маленькие значения
-            float2x2 invLarge = largeMat.inverted();
+            // Inverse matrix should have small values
+            float2x2 invLarge = inverse(largeMat);
             float2x2 expected(1.0f / large, 0, 0, 1.0f / large);
             suite.assert_approximately_equal(invLarge, expected,
                 "inverse of large diagonal matrix", 1e-5f);
         }
 
-        // Нулевой угол вращения
+        // Zero rotation angle
         {
             float2x2 rot = float2x2::rotation(0.0f);
-            suite.assert_true(rot.is_identity(1e-5f), "rotation(0) returns identity");
+            suite.assert_true(is_identity(rot, 1e-5f), "rotation(0) returns identity");
         }
 
-        // Вращение на 90 градусов
+        // 90 degree rotation
         {
-            float2x2 rot90 = float2x2::rotation(Constants::Constants<float>::Pi / 2.0f);
+            float2x2 rot90 = float2x2::rotation(PI / 2.0f);
             float2 vec(1, 0);
             float2 transformed = rot90 * vec;
             suite.assert_approximately_equal(transformed, float2(0, 1), "rotation 90 degrees");
         }
 
-        // Вращение на 180 градусов
+        // 180 degree rotation
         {
-            float2x2 rot180 = float2x2::rotation(Constants::Constants<float>::Pi);
+            float2x2 rot180 = float2x2::rotation(PI);
             float2 vec(1, 0);
             float2 transformed = rot180 * vec;
             suite.assert_approximately_equal(transformed, float2(-1, 0), "rotation 180 degrees");
         }
 
-        // Вращение на 360 градусов
+        // 360 degree rotation
         {
-            float2x2 rot360 = float2x2::rotation(2.0f * Constants::Constants<float>::Pi);
-            suite.assert_true(rot360.is_identity(1e-5f), "rotation(2pi) returns identity");
+            float2x2 rot360 = float2x2::rotation(2.0f * PI);
+            suite.assert_true(is_identity(rot360, 1e-5f), "rotation(2pi) returns identity");
         }
 
-        // Деление на ноль
+        // Division by zero
         {
             float2x2 mat(1, 2, 3, 4);
 
             try {
                 mat /= 0.0f;
-                // Если не выброшено исключение, элементы должны быть inf или nan
-                // В реализации используется 1.0f / scalar, что даст inf
+                // If no exception thrown, elements should be inf or nan
+                // Implementation uses 1.0f / scalar, which gives inf
                 suite.assert_true(std::isinf(mat(0, 0)) || std::isnan(mat(0, 0)),
                     "division by zero produces inf/nan");
             }
@@ -697,10 +645,10 @@ namespace AfterMathTests
             }
         }
 
-        // Матрица с отрицательным масштабом (отражение)
+        // Matrix with negative scale (reflection)
         {
-            float2x2 reflect(-1, 0, 0, 1); // Отражение по X
-            suite.assert_approximately_equal(reflect.determinant(), -1.0f,
+            float2x2 reflect(-1, 0, 0, 1); // Reflection across X axis
+            suite.assert_approximately_equal(determinant(reflect), -1.0f,
                 "reflection has determinant -1");
 
             float2 vec(1, 1);
@@ -708,24 +656,24 @@ namespace AfterMathTests
             suite.assert_equal(reflected, float2(-1, 1), "reflection transformation");
         }
 
-        // Комплексное преобразование: поворот + масштаб + сдвиг
+        // Complex transformation: rotation + scale + shear
         {
-            float2x2 rot = float2x2::rotation(Constants::Constants<float>::Pi / 6.0f);
+            float2x2 rot = float2x2::rotation(PI / 6.0f);
             float2x2 scale = float2x2::scaling(2, 3);
-            float2x2 shear = float2x2::shear(0.1f, 0.2f);
+            float2x2 shear_mat = float2x2::shear(0.1f, 0.2f);
 
-            float2x2 complex = rot * scale * shear;
+            float2x2 complex = rot * scale * shear_mat;
 
-            // Проверка детерминанта
-            float det_complex = complex.determinant();
-            float det_expected = rot.determinant() * scale.determinant() * shear.determinant();
+            // Check determinant
+            float det_complex = determinant(complex);
+            float det_expected = determinant(rot) * determinant(scale) * determinant(shear_mat);
             suite.assert_approximately_equal(det_complex, det_expected,
                 "determinant of complex transformation", 1e-5f);
 
-            // Проверка инверсии
-            float2x2 inv_complex = complex.inverted();
+            // Check inverse
+            float2x2 inv_complex = inverse(complex);
             float2x2 product = complex * inv_complex;
-            suite.assert_true(product.is_identity(1e-4f),
+            suite.assert_true(is_identity(product, 1e-4f),
                 "complex transformation has valid inverse");
         }
 

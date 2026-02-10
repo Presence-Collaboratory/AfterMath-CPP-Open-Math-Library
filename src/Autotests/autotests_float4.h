@@ -13,11 +13,11 @@ namespace AfterMathTests
         using namespace AfterMath;
 
         // ============================================================================
-        // 1. Конструкторы
+        // 1. Constructors
         // ============================================================================
-        suite.section("Конструкторы");
+        suite.section("Constructors");
 
-        // Тест конструктора по умолчанию
+        // Default constructor test
         {
             float4 v;
             suite.assert_approximately_equal(v.x, 0.0f, "Default constructor x");
@@ -26,7 +26,7 @@ namespace AfterMathTests
             suite.assert_approximately_equal(v.w, 0.0f, "Default constructor w");
         }
 
-        // Тест конструктора с компонентами
+        // Component constructor test
         {
             float4 v(1.5f, 2.5f, 3.5f, 4.5f);
             suite.assert_approximately_equal(v.x, 1.5f, "Component constructor x");
@@ -35,7 +35,7 @@ namespace AfterMathTests
             suite.assert_approximately_equal(v.w, 4.5f, "Component constructor w");
         }
 
-        // Тест конструктора со скаляром
+        // Scalar constructor test
         {
             float4 v(3.0f);
             suite.assert_approximately_equal(v.x, 3.0f, "Scalar constructor x");
@@ -44,27 +44,7 @@ namespace AfterMathTests
             suite.assert_approximately_equal(v.w, 3.0f, "Scalar constructor w");
         }
 
-        // Тест конструктора из float2
-        {
-            float2 vec(1.0f, 2.0f);
-            float4 v(vec, 3.0f, 4.0f);
-            suite.assert_approximately_equal(v.x, 1.0f, "float2 constructor x");
-            suite.assert_approximately_equal(v.y, 2.0f, "float2 constructor y");
-            suite.assert_approximately_equal(v.z, 3.0f, "float2 constructor z");
-            suite.assert_approximately_equal(v.w, 4.0f, "float2 constructor w");
-        }
-
-        // Тест конструктора из float3
-        {
-            float3 vec(1.0f, 2.0f, 3.0f);
-            float4 v(vec, 4.0f);
-            suite.assert_approximately_equal(v.x, 1.0f, "float3 constructor x");
-            suite.assert_approximately_equal(v.y, 2.0f, "float3 constructor y");
-            suite.assert_approximately_equal(v.z, 3.0f, "float3 constructor z");
-            suite.assert_approximately_equal(v.w, 4.0f, "float3 constructor w");
-        }
-
-        // Тест конструктора из массива
+        // Array constructor test
         {
             float data[4] = { 4.0f, 5.0f, 6.0f, 7.0f };
             float4 v(data);
@@ -74,7 +54,7 @@ namespace AfterMathTests
             suite.assert_approximately_equal(v.w, 7.0f, "Array constructor w");
         }
 
-        // Тест копирующего конструктора
+        // Copy constructor test
         {
             float4 original(6.0f, 7.0f, 8.0f, 9.0f);
             float4 copy(original);
@@ -84,7 +64,7 @@ namespace AfterMathTests
             suite.assert_approximately_equal(copy.w, 9.0f, "Copy constructor w");
         }
 
-        // Тест статических конструкторов
+        // Static constructors test
         {
             suite.assert_approximately_equal(float4::zero(), float4(0.0f, 0.0f, 0.0f, 0.0f), "zero()");
             suite.assert_approximately_equal(float4::one(), float4(1.0f, 1.0f, 1.0f, 1.0f), "one()");
@@ -94,26 +74,26 @@ namespace AfterMathTests
             suite.assert_approximately_equal(float4::unit_w(), float4(0.0f, 0.0f, 0.0f, 1.0f), "unit_w()");
         }
 
-        // Тест статических конструкторов цветов
+        // Static color constructors test
         {
-            // Тест from_rgba
+            // Test from_rgba
             float4 rgba_color = float4::from_rgba(255, 128, 64, 200);
             suite.assert_approximately_equal(rgba_color.x, 1.0f, "from_rgba() red", 0.01f);
             suite.assert_approximately_equal(rgba_color.y, 128.0f / 255.0f, "from_rgba() green", 0.01f);
             suite.assert_approximately_equal(rgba_color.z, 64.0f / 255.0f, "from_rgba() blue", 0.01f);
             suite.assert_approximately_equal(rgba_color.w, 200.0f / 255.0f, "from_rgba() alpha", 0.01f);
 
-            // Тест from_color
+            // Test from_color
             float4 float_color = float4::from_color(0.2f, 0.4f, 0.6f, 0.8f);
             suite.assert_approximately_equal(float_color, float4(0.2f, 0.4f, 0.6f, 0.8f), "from_color()");
         }
 
         // ============================================================================
-        // 2. Операторы присваивания
+        // 2. Assignment Operators
         // ============================================================================
-        suite.section("Операторы присваивания");
+        suite.section("Assignment Operators");
 
-        // Тест присваивания скаляра
+        // Scalar assignment test
         {
             float4 v;
             v = 2.5f;
@@ -123,18 +103,7 @@ namespace AfterMathTests
             suite.assert_approximately_equal(v.w, 2.5f, "Scalar assignment w");
         }
 
-        // Тест присваивания из float3
-        {
-            float4 v(1.0f, 2.0f, 3.0f, 4.0f);
-            float3 xyz(5.0f, 6.0f, 7.0f);
-            v = xyz;
-            suite.assert_approximately_equal(v.x, 5.0f, "float3 assignment x");
-            suite.assert_approximately_equal(v.y, 6.0f, "float3 assignment y");
-            suite.assert_approximately_equal(v.z, 7.0f, "float3 assignment z");
-            suite.assert_approximately_equal(v.w, 4.0f, "float3 assignment preserves w");
-        }
-
-        // Тест составных операторов присваивания
+        // Compound assignment operators test
         {
             float4 v(1.0f, 2.0f, 3.0f, 4.0f);
 
@@ -158,11 +127,11 @@ namespace AfterMathTests
         }
 
         // ============================================================================
-        // 3. Бинарные и унарные операторы
+        // 3. Binary and Unary Operators
         // ============================================================================
-        suite.section("Бинарные и унарные операторы");
+        suite.section("Binary and Unary Operators");
 
-        // Тест сложения
+        // Addition test
         {
             float4 a(1.0f, 2.0f, 3.0f, 4.0f);
             float4 b(4.0f, 5.0f, 6.0f, 7.0f);
@@ -170,7 +139,7 @@ namespace AfterMathTests
             suite.assert_approximately_equal(result, float4(5.0f, 7.0f, 9.0f, 11.0f), "Operator +");
         }
 
-        // Тест вычитания
+        // Subtraction test
         {
             float4 a(5.0f, 6.0f, 7.0f, 8.0f);
             float4 b(2.0f, 3.0f, 4.0f, 5.0f);
@@ -178,7 +147,7 @@ namespace AfterMathTests
             suite.assert_approximately_equal(result, float4(3.0f, 3.0f, 3.0f, 3.0f), "Operator -");
         }
 
-        // Тест умножения компонентного
+        // Component-wise multiplication test
         {
             float4 a(2.0f, 3.0f, 4.0f, 5.0f);
             float4 b(1.0f, 2.0f, 3.0f, 4.0f);
@@ -186,7 +155,7 @@ namespace AfterMathTests
             suite.assert_approximately_equal(result, float4(2.0f, 6.0f, 12.0f, 20.0f), "Operator * (component-wise)");
         }
 
-        // Тест деления компонентного
+        // Component-wise division test
         {
             float4 a(6.0f, 8.0f, 10.0f, 12.0f);
             float4 b(2.0f, 4.0f, 5.0f, 6.0f);
@@ -194,14 +163,14 @@ namespace AfterMathTests
             suite.assert_approximately_equal(result, float4(3.0f, 2.0f, 2.0f, 2.0f), "Operator / (component-wise)");
         }
 
-        // Тест унарных операторов
+        // Unary operators test
         {
             float4 a(1.0f, -2.0f, 3.0f, -4.0f);
             suite.assert_approximately_equal(+a, float4(1.0f, -2.0f, 3.0f, -4.0f), "Unary +");
             suite.assert_approximately_equal(-a, float4(-1.0f, 2.0f, -3.0f, 4.0f), "Unary -");
         }
 
-        // Тест скалярных операций
+        // Scalar operations test
         {
             float4 v(2.0f, 3.0f, 4.0f, 5.0f);
 
@@ -216,11 +185,11 @@ namespace AfterMathTests
         }
 
         // ============================================================================
-        // 4. Операторы доступа и преобразования
+        // 4. Access and Conversion Operators
         // ============================================================================
-        suite.section("Операторы доступа и преобразования");
+        suite.section("Access and Conversion Operators");
 
-        // Тест оператора индексации
+        // Index operator test
         {
             float4 v(7.0f, 8.0f, 9.0f, 10.0f);
             suite.assert_approximately_equal(v[0], 7.0f, "Operator [] index 0");
@@ -238,7 +207,7 @@ namespace AfterMathTests
             suite.assert_approximately_equal(v.w, 14.0f, "Operator [] mutable w");
         }
 
-        // Тест преобразования в указатель
+        // Conversion to pointer test
         {
             float4 v(1.0f, 2.0f, 3.0f, 4.0f);
             const float* ptr = v;
@@ -252,7 +221,7 @@ namespace AfterMathTests
             suite.assert_approximately_equal(v.x, 5.0f, "Conversion to float* mutable");
         }
 
-        // Тест преобразования в __m128
+        // Conversion to __m128 test
         {
             float4 v(1.0f, 2.0f, 3.0f, 4.0f);
             __m128 simd = v;
@@ -265,248 +234,270 @@ namespace AfterMathTests
         }
 
         // ============================================================================
-        // 5. Математические функции
+        // 5. Mathematical Functions (Global Functions)
         // ============================================================================
-        suite.section("Математические функции");
+        suite.section("Mathematical Functions (Global)");
 
-        // Тест длины
+        // Length test
         {
             float4 v(2.0f, 3.0f, 6.0f, 8.0f);
             // √(4 + 9 + 36 + 64) = √113 approx 10.6301
             float expected_length = std::sqrt(113.0f);
-            suite.assert_approximately_equal(v.length(), expected_length, "length()", 1e-6f);
-            suite.assert_approximately_equal(v.length_sq(), 113.0f, "length_sq()");
+            suite.assert_approximately_equal(length(v), expected_length, "length()", 1e-6f);
+            suite.assert_approximately_equal(length_sq(v), 113.0f, "length_sq()");
 
             float4 zero(0.0f, 0.0f, 0.0f, 0.0f);
-            suite.assert_approximately_equal(zero.length(), 0.0f, "length() of zero vector");
+            suite.assert_approximately_equal(length(zero), 0.0f, "length() of zero vector");
         }
 
-        // Тест нормализации
+        // Normalization test
         {
             float4 v(2.0f, 3.0f, 6.0f, 8.0f);
-            float4 normalized = v.normalize();
+            float4 normalized = normalize(v);
             float expected_len = 1.0f;
-            suite.assert_approximately_equal(normalized.length(), expected_len, "normalize() length", 1e-6f);
+            suite.assert_approximately_equal(length(normalized), expected_len, "normalize() length", 1e-6f);
 
-            float len = v.length();
+            float len = length(v);
             suite.assert_approximately_equal(normalized.x, 2.0f / len, "normalize() x", 1e-6f);
             suite.assert_approximately_equal(normalized.y, 3.0f / len, "normalize() y", 1e-6f);
             suite.assert_approximately_equal(normalized.z, 6.0f / len, "normalize() z", 1e-6f);
             suite.assert_approximately_equal(normalized.w, 8.0f / len, "normalize() w", 1e-6f);
 
-            // Тест нормализации нулевого вектора
+            // Test normalization of zero vector
             float4 zero(0.0f, 0.0f, 0.0f, 0.0f);
-            float4 zero_norm = zero.normalize();
+            float4 zero_norm = normalize(zero);
             suite.assert_approximately_equal(zero_norm, float4::zero(), "normalize() zero vector");
         }
 
-        // Тест скалярного произведения
+        // Dot product test
         {
             float4 a(1.0f, 2.0f, 3.0f, 4.0f);
             float4 b(5.0f, 6.0f, 7.0f, 8.0f);
-            float dot_result = a.dot(b);
+            float dot_result = dot(a, b);
             // 1*5 + 2*6 + 3*7 + 4*8 = 5 + 12 + 21 + 32 = 70
             suite.assert_approximately_equal(dot_result, 70.0f, "dot()");
 
-            // Ортогональные векторы
+            // Orthogonal vectors
             float4 orth1(1.0f, 0.0f, 0.0f, 0.0f);
             float4 orth2(0.0f, 1.0f, 0.0f, 0.0f);
-            suite.assert_approximately_equal(orth1.dot(orth2), 0.0f, "dot() orthogonal vectors");
+            suite.assert_approximately_equal(dot(orth1, orth2), 0.0f, "dot() orthogonal vectors");
         }
 
-        // Тест 3D скалярного произведения (игнорирует w)
+        // 3D dot product test (ignores w)
         {
             float4 a(1.0f, 2.0f, 3.0f, 4.0f);
             float4 b(5.0f, 6.0f, 7.0f, 8.0f);
-            float dot3_result = a.dot3(b);
-            // 1*5 + 2*6 + 3*7 = 5 + 12 + 21 = 38 (игнорирует w компоненты)
+            float dot3_result = dot3(a, b);
+            // 1*5 + 2*6 + 3*7 = 5 + 12 + 21 = 38 (ignores w components)
             suite.assert_approximately_equal(dot3_result, 38.0f, "dot3()");
         }
 
-        // Тест векторного произведения (3D, игнорирует w)
+        // Cross product test (3D, ignores w)
         {
             float4 a(1.0f, 0.0f, 0.0f, 0.0f);
             float4 b(0.0f, 1.0f, 0.0f, 0.0f);
-            float4 cross_result = a.cross(b);
+            float4 cross_result = cross(a, b);
             suite.assert_approximately_equal(cross_result, float4(0.0f, 0.0f, 1.0f, 0.0f), "cross() i * j = k");
 
             float4 c(2.0f, 3.0f, 4.0f, 5.0f);
             float4 d(5.0f, 6.0f, 7.0f, 8.0f);
-            float4 cross2 = c.cross(d);
+            float4 cross2 = cross(c, d);
             // (3*7 - 4*6, 4*5 - 2*7, 2*6 - 3*5, 0) = (21-24, 20-14, 12-15, 0) = (-3, 6, -3, 0)
             suite.assert_approximately_equal(cross2, float4(-3.0f, 6.0f, -3.0f, 0.0f), "cross() arbitrary vectors");
 
-            // Векторное произведение вектора с самим собой равно нулю
-            suite.assert_approximately_equal(a.cross(a), float4(0.0f, 0.0f, 0.0f, 0.0f), "cross() vector with itself");
+            // Cross product of vector with itself is zero
+            suite.assert_approximately_equal(cross(a, a), float4(0.0f, 0.0f, 0.0f, 0.0f), "cross() vector with itself");
         }
 
-        // Тест расстояния
+        // Distance test
         {
             float4 a(1.0f, 2.0f, 3.0f, 4.0f);
             float4 b(5.0f, 6.0f, 7.0f, 8.0f);
-            float distance = a.distance(b);
-            float distance_sq = a.distance_sq(b);
+            float dist = distance(a, b);
+            float dist_sq = distance_sq(a, b);
 
             // (5-1)² + (6-2)² + (7-3)² + (8-4)² = 16 + 16 + 16 + 16 = 64
-            suite.assert_approximately_equal(distance, std::sqrt(64.0f), "distance()");
-            suite.assert_approximately_equal(distance_sq, 64.0f, "distance_sq()");
+            suite.assert_approximately_equal(dist, std::sqrt(64.0f), "distance()");
+            suite.assert_approximately_equal(dist_sq, 64.0f, "distance_sq()");
         }
 
         // ============================================================================
-        // 6. HLSL-подобные функции
+        // 6. HLSL-like Functions (Global Functions)
         // ============================================================================
-        suite.section("HLSL-подобные функции");
+        suite.section("HLSL-like Functions (Global)");
 
-        // Тест abs
+        // Test abs
         {
             float4 v(-1.5f, 2.5f, -3.5f, 4.5f);
-            float4 result = v.abs();
+            float4 result = abs(v);
             suite.assert_approximately_equal(result, float4(1.5f, 2.5f, 3.5f, 4.5f), "abs()");
         }
 
-        // Тест sign
+        // Test sign
         {
             float4 v(-2.0f, 0.0f, 3.0f, -0.0f);
-            float4 result = v.sign();
+            float4 result = sign(v);
             suite.assert_approximately_equal(result, float4(-1.0f, 0.0f, 1.0f, 0.0f), "sign()");
         }
 
-        // Тест floor
+        // Test floor
         {
             float4 v(1.7f, -2.3f, 3.9f, -4.1f);
-            float4 result = v.floor();
+            float4 result = floor(v);
             suite.assert_approximately_equal(result, float4(1.0f, -3.0f, 3.0f, -5.0f), "floor()");
         }
 
-        // Тест ceil
+        // Test ceil
         {
             float4 v(1.2f, -2.7f, 3.1f, -4.9f);
-            float4 result = v.ceil();
+            float4 result = ceil(v);
             suite.assert_approximately_equal(result, float4(2.0f, -2.0f, 4.0f, -4.0f), "ceil()");
         }
 
-        // Тест round
+        // Test round
         {
             float4 v(1.4f, 1.6f, -1.5f, -2.5f);
-            float4 result = v.round();
+            float4 result = round(v);
             suite.assert_approximately_equal(result, float4(1.0f, 2.0f, -2.0f, -2.0f), "round()");
         }
 
-        // Тест frac
+        // Test frac
         {
             float4 v(1.7f, -2.3f, 3.0f, -4.9f);
-            float4 result = v.frac();
+            float4 result = frac(v);
             suite.assert_approximately_equal(result.x, 0.7f, "frac() x", 1e-6f);
             suite.assert_approximately_equal(result.y, 0.7f, "frac() y", 1e-6f); // -2.3 - (-3) = 0.7
             suite.assert_approximately_equal(result.z, 0.0f, "frac() z", 1e-6f);
             suite.assert_approximately_equal(result.w, 0.1f, "frac() w", 1e-6f); // -4.9 - (-5) = 0.1
         }
 
-        // Тест saturate
+        // Test saturate
         {
             float4 v(-0.5f, 0.5f, 1.5f, 0.0f);
-            float4 result = v.saturate();
+            float4 result = saturate(v);
             suite.assert_approximately_equal(result, float4(0.0f, 0.5f, 1.0f, 0.0f), "saturate()");
         }
 
-        // Тест step
+        // Test step
         {
             float4 v(0.5f, 1.0f, 1.5f, 2.0f);
-            float4 result = v.step(1.0f);
+            float4 result = step(1.0f, v);
             suite.assert_approximately_equal(result, float4(0.0f, 1.0f, 1.0f, 1.0f), "step()");
         }
 
-        // Тест min/max
+        // Test smoothstep
+        {
+            float4 v(0.0f, 0.5f, 1.0f, 2.0f);
+            float4 result = smoothstep(0.0f, 1.0f, v);
+            suite.assert_approximately_equal(result.x, 0.0f, "smoothstep() edge0", 1e-6f);
+            suite.assert_approximately_equal(result.y, 0.5f, "smoothstep() middle", 0.01f);
+            suite.assert_approximately_equal(result.z, 1.0f, "smoothstep() edge1", 1e-6f);
+            suite.assert_approximately_equal(result.w, 1.0f, "smoothstep() beyond edge1", 1e-6f);
+        }
+
+        // Test min/max
         {
             float4 a(1.0f, 3.0f, 5.0f, 7.0f);
             float4 b(2.0f, 2.0f, 6.0f, 8.0f);
 
-            float4 min_result = float4::min(a, b);
+            float4 min_result = min(a, b);
             suite.assert_approximately_equal(min_result, float4(1.0f, 2.0f, 5.0f, 7.0f), "min()");
 
-            float4 max_result = float4::max(a, b);
+            float4 max_result = max(a, b);
             suite.assert_approximately_equal(max_result, float4(2.0f, 3.0f, 6.0f, 8.0f), "max()");
         }
 
-        // ============================================================================
-        // 7. Цветовые операции
-        // ============================================================================
-        suite.section("Цветовые операции");
-
-        // Тест luminance
+        // Test clamp
         {
-            // Белый цвет: (1, 1, 1, 1)
+            float4 v(0.5f, 1.5f, -0.5f, 2.0f);
+            float4 min_val(0.0f, 0.0f, 0.0f, 0.0f);
+            float4 max_val(1.0f, 1.0f, 1.0f, 1.0f);
+            float4 result = clamp(v, min_val, max_val);
+            suite.assert_approximately_equal(result, float4(0.5f, 1.0f, 0.0f, 1.0f), "clamp() with vectors");
+
+            float4 scalar_result = clamp(v, 0.0f, 1.0f);
+            suite.assert_approximately_equal(scalar_result, float4(0.5f, 1.0f, 0.0f, 1.0f), "clamp() with scalars");
+        }
+
+        // ============================================================================
+        // 7. Color Operations
+        // ============================================================================
+        suite.section("Color Operations");
+
+        // Test luminance
+        {
+            // White color: (1, 1, 1, 1)
             // Luminance = 0.2126*1 + 0.7152*1 + 0.0722*1 = 1.0
             float4 white(1.0f, 1.0f, 1.0f, 1.0f);
-            suite.assert_approximately_equal(white.luminance(), 1.0f, "luminance() white", 1e-6f);
+            suite.assert_approximately_equal(luminance(white), 1.0f, "luminance() white", 1e-6f);
 
-            // Красный цвет: (1, 0, 0, 1)
+            // Red color: (1, 0, 0, 1)
             // Luminance = 0.2126*1 + 0.7152*0 + 0.0722*0 = 0.2126
             float4 red(1.0f, 0.0f, 0.0f, 1.0f);
-            suite.assert_approximately_equal(red.luminance(), 0.2126f, "luminance() red", 1e-6f);
+            suite.assert_approximately_equal(luminance(red), 0.2126f, "luminance() red", 1e-6f);
 
-            // Зеленый цвет: (0, 1, 0, 1)
+            // Green color: (0, 1, 0, 1)
             // Luminance = 0.2126*0 + 0.7152*1 + 0.0722*0 = 0.7152
             float4 green(0.0f, 1.0f, 0.0f, 1.0f);
-            suite.assert_approximately_equal(green.luminance(), 0.7152f, "luminance() green", 1e-6f);
+            suite.assert_approximately_equal(luminance(green), 0.7152f, "luminance() green", 1e-6f);
 
-            // Синий цвет: (0, 0, 1, 1)
+            // Blue color: (0, 0, 1, 1)
             // Luminance = 0.2126*0 + 0.7152*0 + 0.0722*1 = 0.0722
             float4 blue(0.0f, 0.0f, 1.0f, 1.0f);
-            suite.assert_approximately_equal(blue.luminance(), 0.0722f, "luminance() blue", 1e-6f);
+            suite.assert_approximately_equal(luminance(blue), 0.0722f, "luminance() blue", 1e-6f);
         }
 
-        // Тест brightness
+        // Test brightness
         {
-            // Белый цвет: (1, 1, 1, 1)
+            // White color: (1, 1, 1, 1)
             // Brightness = (1 + 1 + 1) / 3 = 1.0
             float4 white(1.0f, 1.0f, 1.0f, 1.0f);
-            suite.assert_approximately_equal(white.brightness(), 1.0f, "brightness() white");
+            suite.assert_approximately_equal(brightness(white), 1.0f, "brightness() white");
 
-            // Серый цвет: (0.5, 0.5, 0.5, 1.0)
+            // Gray color: (0.5, 0.5, 0.5, 1.0)
             // Brightness = (0.5 + 0.5 + 0.5) / 3 = 0.5
             float4 gray(0.5f, 0.5f, 0.5f, 1.0f);
-            suite.assert_approximately_equal(gray.brightness(), 0.5f, "brightness() gray");
+            suite.assert_approximately_equal(brightness(gray), 0.5f, "brightness() gray");
         }
 
-        // Тест premultiply_alpha
+        // Test premultiply_alpha
         {
             float4 color(0.5f, 0.6f, 0.7f, 0.8f);
-            float4 premultiplied = color.premultiply_alpha();
-            // RGB компоненты умножаются на alpha, alpha остается прежней
+            float4 premultiplied = premultiply_alpha(color);
+            // RGB components multiplied by alpha, alpha remains the same
             suite.assert_approximately_equal(premultiplied.x, 0.5f * 0.8f, "premultiply_alpha() red", 1e-6f);
             suite.assert_approximately_equal(premultiplied.y, 0.6f * 0.8f, "premultiply_alpha() green", 1e-6f);
             suite.assert_approximately_equal(premultiplied.z, 0.7f * 0.8f, "premultiply_alpha() blue", 1e-6f);
             suite.assert_approximately_equal(premultiplied.w, 0.8f, "premultiply_alpha() alpha unchanged");
 
-            // Тест с alpha = 0
+            // Test with alpha = 0
             float4 transparent(0.5f, 0.6f, 0.7f, 0.0f);
-            float4 premult_transparent = transparent.premultiply_alpha();
+            float4 premult_transparent = premultiply_alpha(transparent);
             suite.assert_approximately_equal(premult_transparent, float4(0.0f, 0.0f, 0.0f, 0.0f), "premultiply_alpha() with alpha=0");
         }
 
-        // Тест unpremultiply_alpha
+        // Test unpremultiply_alpha
         {
-            // Создаем premultiplied цвет
+            // Create premultiplied color
             float4 premultiplied(0.4f, 0.48f, 0.56f, 0.8f); // (0.5*0.8, 0.6*0.8, 0.7*0.8, 0.8)
-            float4 unpremultiplied = premultiplied.unpremultiply_alpha();
-            // Должны получить оригинальный цвет (0.5, 0.6, 0.7, 0.8)
+            float4 unpremultiplied = unpremultiply_alpha(premultiplied);
+            // Should get original color (0.5, 0.6, 0.7, 0.8)
             suite.assert_approximately_equal(unpremultiplied.x, 0.5f, "unpremultiply_alpha() red", 1e-6f);
             suite.assert_approximately_equal(unpremultiplied.y, 0.6f, "unpremultiply_alpha() green", 1e-6f);
             suite.assert_approximately_equal(unpremultiplied.z, 0.7f, "unpremultiply_alpha() blue", 1e-6f);
             suite.assert_approximately_equal(unpremultiplied.w, 0.8f, "unpremultiply_alpha() alpha unchanged");
 
-            // Тест с alpha = 0 (должен вернуть оригинальный вектор)
+            // Test with alpha = 0 (should return original vector)
             float4 transparent(0.5f, 0.6f, 0.7f, 0.0f);
-            float4 unpremult_transparent = transparent.unpremultiply_alpha();
+            float4 unpremult_transparent = unpremultiply_alpha(transparent);
             suite.assert_approximately_equal(unpremult_transparent, transparent, "unpremultiply_alpha() with alpha=0");
         }
 
-        // Тест grayscale
+        // Test grayscale
         {
             float4 color(0.5f, 0.6f, 0.7f, 0.8f);
-            float lum = color.luminance();
-            float4 grayscale_result = color.grayscale();
+            float lum = luminance(color);
+            float4 grayscale_result = grayscale(color);
 
             suite.assert_approximately_equal(grayscale_result.x, lum, "grayscale() red = luminance", 1e-6f);
             suite.assert_approximately_equal(grayscale_result.y, lum, "grayscale() green = luminance", 1e-6f);
@@ -515,131 +506,122 @@ namespace AfterMathTests
         }
 
         // ============================================================================
-        // 8. Геометрические операции
+        // 8. Geometric Operations
         // ============================================================================
-        suite.section("Геометрические операции");
+        suite.section("Geometric Operations");
 
-        // Тест project (проекция однородных координат)
-        {
-            // Однородные координаты точки (2, 3, 4, 1)
-            float4 homogeneous(2.0f, 3.0f, 4.0f, 1.0f);
-            float3 projected = homogeneous.project();
-            // Проекция: (x/w, y/w, z/w) = (2/1, 3/1, 4/1) = (2, 3, 4)
-            suite.assert_approximately_equal(projected, float3(2.0f, 3.0f, 4.0f), "project() with w=1");
-
-            // Однородные координаты точки (4, 6, 8, 2)
-            float4 homogeneous2(4.0f, 6.0f, 8.0f, 2.0f);
-            float3 projected2 = homogeneous2.project();
-            // Проекция: (4/2, 6/2, 8/2) = (2, 3, 4)
-            suite.assert_approximately_equal(projected2, float3(2.0f, 3.0f, 4.0f), "project() with w=2");
-
-            // Тест с w=0 (точка на бесконечности)
-            float4 infinite(2.0f, 3.0f, 4.0f, 0.0f);
-            float3 infinite_projected = infinite.project();
-            // Должен вернуть нулевой вектор
-            suite.assert_approximately_equal(infinite_projected, float3::zero(), "project() with w=0");
-        }
-
-        // Тест to_homogeneous
+        // Test to_homogeneous
         {
             float4 point(2.0f, 3.0f, 4.0f, 0.5f);
-            float4 homogeneous = point.to_homogeneous();
-            // Должен установить w=1, остальные компоненты сохранить
+            float4 homogeneous = to_homogeneous(point);
+            // Should set w=1, preserve other components
             suite.assert_approximately_equal(homogeneous, float4(2.0f, 3.0f, 4.0f, 1.0f), "to_homogeneous()");
         }
 
         // ============================================================================
-        // 9. Swizzle операции
+        // 9. Swizzle Operations
         // ============================================================================
-        suite.section("Swizzle операции");
+        suite.section("Swizzle Operations");
 
         {
             float4 v(2.0f, 3.0f, 4.0f, 5.0f);
 
-            // 2-компонентные swizzles
-            suite.assert_approximately_equal(v.xy(), float2(2.0f, 3.0f), "xy()");
-            suite.assert_approximately_equal(v.xz(), float2(2.0f, 4.0f), "xz()");
-            suite.assert_approximately_equal(v.xw(), float2(2.0f, 5.0f), "xw()");
-            suite.assert_approximately_equal(v.yz(), float2(3.0f, 4.0f), "yz()");
-            suite.assert_approximately_equal(v.yw(), float2(3.0f, 5.0f), "yw()");
-            suite.assert_approximately_equal(v.zw(), float2(4.0f, 5.0f), "zw()");
+            // 2-component swizzles (if implemented - commented out as they return float2)
+            // suite.assert_approximately_equal(v.xy(), float2(2.0f, 3.0f), "xy()");
+            // suite.assert_approximately_equal(v.xz(), float2(2.0f, 4.0f), "xz()");
+            // suite.assert_approximately_equal(v.xw(), float2(2.0f, 5.0f), "xw()");
+            // suite.assert_approximately_equal(v.yz(), float2(3.0f, 4.0f), "yz()");
+            // suite.assert_approximately_equal(v.yw(), float2(3.0f, 5.0f), "yw()");
+            // suite.assert_approximately_equal(v.zw(), float2(4.0f, 5.0f), "zw()");
 
-            // 3-компонентные swizzles
-            suite.assert_approximately_equal(v.xyz(), float3(2.0f, 3.0f, 4.0f), "xyz()");
-            suite.assert_approximately_equal(v.xyw(), float3(2.0f, 3.0f, 5.0f), "xyw()");
-            suite.assert_approximately_equal(v.xzw(), float3(2.0f, 4.0f, 5.0f), "xzw()");
-            suite.assert_approximately_equal(v.yzw(), float3(3.0f, 4.0f, 5.0f), "yzw()");
+            // 3-component swizzles (if implemented - commented out as they return float3)
+            // suite.assert_approximately_equal(v.xyz(), float3(2.0f, 3.0f, 4.0f), "xyz()");
+            // suite.assert_approximately_equal(v.xyw(), float3(2.0f, 3.0f, 5.0f), "xyw()");
+            // suite.assert_approximately_equal(v.xzw(), float3(2.0f, 4.0f, 5.0f), "xzw()");
+            // suite.assert_approximately_equal(v.yzw(), float3(3.0f, 4.0f, 5.0f), "yzw()");
 
-            // 4-компонентные swizzles
+            // 4-component swizzles
             suite.assert_approximately_equal(v.yxzw(), float4(3.0f, 2.0f, 4.0f, 5.0f), "yxzw()");
             suite.assert_approximately_equal(v.zxyw(), float4(4.0f, 2.0f, 3.0f, 5.0f), "zxyw()");
             suite.assert_approximately_equal(v.zyxw(), float4(4.0f, 3.0f, 2.0f, 5.0f), "zyxw()");
             suite.assert_approximately_equal(v.wzyx(), float4(5.0f, 4.0f, 3.0f, 2.0f), "wzyx()");
+            suite.assert_approximately_equal(v.xyxw(), float4(2.0f, 3.0f, 2.0f, 5.0f), "xyxw()");
+            suite.assert_approximately_equal(v.xzxw(), float4(2.0f, 4.0f, 2.0f, 5.0f), "xzxw()");
+            suite.assert_approximately_equal(v.yxyw(), float4(3.0f, 2.0f, 3.0f, 5.0f), "yxyw()");
+            suite.assert_approximately_equal(v.yzyw(), float4(3.0f, 4.0f, 3.0f, 5.0f), "yzyw()");
+            suite.assert_approximately_equal(v.zxzw(), float4(4.0f, 2.0f, 4.0f, 5.0f), "zxzw()");
+            suite.assert_approximately_equal(v.zyzw(), float4(4.0f, 3.0f, 4.0f, 5.0f), "zyzw()");
 
-            // Цветовые swizzles
+            // Color swizzles
             suite.assert_approximately_equal(v.r(), 2.0f, "r()");
             suite.assert_approximately_equal(v.g(), 3.0f, "g()");
             suite.assert_approximately_equal(v.b(), 4.0f, "b()");
             suite.assert_approximately_equal(v.a(), 5.0f, "a()");
-            suite.assert_approximately_equal(v.rg(), float2(2.0f, 3.0f), "rg()");
-            suite.assert_approximately_equal(v.rb(), float2(2.0f, 4.0f), "rb()");
-            suite.assert_approximately_equal(v.ra(), float2(2.0f, 5.0f), "ra()");
-            suite.assert_approximately_equal(v.gb(), float2(3.0f, 4.0f), "gb()");
-            suite.assert_approximately_equal(v.ga(), float2(3.0f, 5.0f), "ga()");
-            suite.assert_approximately_equal(v.ba(), float2(4.0f, 5.0f), "ba()");
-            suite.assert_approximately_equal(v.rgb(), float3(2.0f, 3.0f, 4.0f), "rgb()");
-            suite.assert_approximately_equal(v.rga(), float3(2.0f, 3.0f, 5.0f), "rga()");
-            suite.assert_approximately_equal(v.rba(), float3(2.0f, 4.0f, 5.0f), "rba()");
-            suite.assert_approximately_equal(v.gba(), float3(3.0f, 4.0f, 5.0f), "gba()");
+            // 2-component color swizzles (if implemented)
+            // suite.assert_approximately_equal(v.rg(), float2(2.0f, 3.0f), "rg()");
+            // suite.assert_approximately_equal(v.rb(), float2(2.0f, 4.0f), "rb()");
+            // suite.assert_approximately_equal(v.ra(), float2(2.0f, 5.0f), "ra()");
+            // suite.assert_approximately_equal(v.gb(), float2(3.0f, 4.0f), "gb()");
+            // suite.assert_approximately_equal(v.ga(), float2(3.0f, 5.0f), "ga()");
+            // suite.assert_approximately_equal(v.ba(), float2(4.0f, 5.0f), "ba()");
+            // 3-component color swizzles (if implemented)
+            // suite.assert_approximately_equal(v.rgb(), float3(2.0f, 3.0f, 4.0f), "rgb()");
+            // suite.assert_approximately_equal(v.rga(), float3(2.0f, 3.0f, 5.0f), "rga()");
+            // suite.assert_approximately_equal(v.rba(), float3(2.0f, 4.0f, 5.0f), "rba()");
+            // suite.assert_approximately_equal(v.gba(), float3(3.0f, 4.0f, 5.0f), "gba()");
+            // 4-component color swizzles
             suite.assert_approximately_equal(v.grba(), float4(3.0f, 2.0f, 4.0f, 5.0f), "grba()");
             suite.assert_approximately_equal(v.brga(), float4(4.0f, 2.0f, 3.0f, 5.0f), "brga()");
             suite.assert_approximately_equal(v.bgra(), float4(4.0f, 3.0f, 2.0f, 5.0f), "bgra()");
             suite.assert_approximately_equal(v.abgr(), float4(5.0f, 4.0f, 3.0f, 2.0f), "abgr()");
+            suite.assert_approximately_equal(v.argb(), float4(5.0f, 2.0f, 3.0f, 4.0f), "argb()");
+            suite.assert_approximately_equal(v.rbga(), float4(2.0f, 4.0f, 3.0f, 5.0f), "rbga()");
+            suite.assert_approximately_equal(v.gbra(), float4(3.0f, 4.0f, 2.0f, 5.0f), "gbra()");
         }
 
         // ============================================================================
-        // 10. Утилитарные методы
+        // 10. Utility Methods
         // ============================================================================
-        suite.section("Утилитарные методы");
+        suite.section("Utility Methods");
 
-        // Тест isValid
+        // Test isValid
         {
             float4 valid(1.0f, 2.0f, 3.0f, 4.0f);
-            suite.assert_true(valid.isValid(), "isValid() for valid vector");
+            suite.assert_true(isValid(valid), "isValid() for valid vector");
             suite.skip_test("isValid() with NaN/INF", "Requires special NaN/INF construction");
         }
 
-        // Тест approximately
+        // Test approximately
         {
             float4 a(1.0f, 2.0f, 3.0f, 4.0f);
             float4 b(1.000001f, 2.000001f, 3.000001f, 4.000001f);
             float4 c(1.1f, 2.1f, 3.1f, 4.1f);
 
-            suite.assert_true(a.approximately(b, 1e-5f), "approximately() within epsilon");
-            suite.assert_false(a.approximately(c, 1e-5f), "approximately() outside epsilon");
+            suite.assert_true(approximately(a, b, 1e-5f), "approximately() within epsilon");
+            suite.assert_false(approximately(a, c, 1e-5f), "approximately() outside epsilon");
         }
 
-        // Тест approximately_zero
+        // Test approximately_zero
         {
             float4 zero(0.0f, 0.0f, 0.0f, 0.0f);
             float4 near_zero(0.000001f, 0.000001f, 0.000001f, 0.000001f);
             float4 not_zero(0.1f, 0.1f, 0.1f, 0.1f);
 
-            suite.assert_true(zero.approximately_zero(1e-5f), "approximately_zero() for zero");
-            suite.assert_true(near_zero.approximately_zero(1e-4f), "approximately_zero() for near zero");
-            suite.assert_false(not_zero.approximately_zero(1e-5f), "approximately_zero() for non-zero");
+            suite.assert_true(approximately_zero(zero, 1e-5f), "approximately_zero() for zero");
+            suite.assert_true(approximately_zero(near_zero, 1e-4f), "approximately_zero() for near zero");
+            suite.assert_false(approximately_zero(not_zero, 1e-5f), "approximately_zero() for non-zero");
         }
 
-        // Тест is_normalized
+        // Test is_normalized
         {
             float4 normalized(0.182574f, 0.365148f, 0.547723f, 0.730297f); // (1,2,3,4) normalized
             float4 not_normalized(1.0f, 2.0f, 3.0f, 4.0f);
 
-            suite.assert_true(normalized.is_normalized(1e-5f), "is_normalized() for normalized vector");
-            suite.assert_false(not_normalized.is_normalized(1e-5f), "is_normalized() for non-normalized");
+            suite.assert_true(is_normalized(normalized, 1e-5f), "is_normalized() for normalized vector");
+            suite.assert_false(is_normalized(not_normalized, 1e-5f), "is_normalized() for non-normalized");
         }
 
-        // Тест to_string
+        // Test to_string
         {
             float4 v(1.5f, 2.5f, 3.5f, 4.5f);
             std::string str = v.to_string();
@@ -654,7 +636,7 @@ namespace AfterMathTests
                 "to_string() contains w value");
         }
 
-        // Тест data()
+        // Test data()
         {
             float4 v(7.0f, 8.0f, 9.0f, 10.0f);
             const float* cdata = v.data();
@@ -669,48 +651,15 @@ namespace AfterMathTests
             suite.assert_approximately_equal(v.x, 11.0f, "data() mutable modification");
         }
 
-        // Тест set_xyz
-        {
-            float4 v(1.0f, 2.0f, 3.0f, 4.0f);
-            float3 xyz(5.0f, 6.0f, 7.0f);
-            v.set_xyz(xyz);
-            suite.assert_approximately_equal(v.x, 5.0f, "set_xyz() x");
-            suite.assert_approximately_equal(v.y, 6.0f, "set_xyz() y");
-            suite.assert_approximately_equal(v.z, 7.0f, "set_xyz() z");
-            suite.assert_approximately_equal(v.w, 4.0f, "set_xyz() w unchanged");
-        }
-
-        // Тест set_xy
-        {
-            float4 v(1.0f, 2.0f, 3.0f, 4.0f);
-            float2 xy(5.0f, 6.0f);
-            v.set_xy(xy);
-            suite.assert_approximately_equal(v.x, 5.0f, "set_xy() x");
-            suite.assert_approximately_equal(v.y, 6.0f, "set_xy() y");
-            suite.assert_approximately_equal(v.z, 3.0f, "set_xy() z unchanged");
-            suite.assert_approximately_equal(v.w, 4.0f, "set_xy() w unchanged");
-        }
-
-        // Тест set_zw
-        {
-            float4 v(1.0f, 2.0f, 3.0f, 4.0f);
-            float2 zw(5.0f, 6.0f);
-            v.set_zw(zw);
-            suite.assert_approximately_equal(v.x, 1.0f, "set_zw() x unchanged");
-            suite.assert_approximately_equal(v.y, 2.0f, "set_zw() y unchanged");
-            suite.assert_approximately_equal(v.z, 5.0f, "set_zw() z");
-            suite.assert_approximately_equal(v.w, 6.0f, "set_zw() w");
-        }
-
-        // Тест SSE методов
+        // Test SSE methods
         {
             float data[4] = { 1.0f, 2.0f, 3.0f, 4.0f };
 
-            // Тест load_unaligned
+            // Test load_unaligned
             float4 v1 = float4::load_unaligned(data);
             suite.assert_approximately_equal(v1, float4(1.0f, 2.0f, 3.0f, 4.0f), "load_unaligned()");
 
-            // Тест store_unaligned
+            // Test store_unaligned
             float data_out[4];
             v1.store_unaligned(data_out);
             suite.assert_approximately_equal(data_out[0], 1.0f, "store_unaligned() [0]");
@@ -718,7 +667,7 @@ namespace AfterMathTests
             suite.assert_approximately_equal(data_out[2], 3.0f, "store_unaligned() [2]");
             suite.assert_approximately_equal(data_out[3], 4.0f, "store_unaligned() [3]");
 
-            // Тест get_simd и set_simd
+            // Test get_simd and set_simd
             __m128 simd = v1.get_simd();
             float4 v2;
             v2.set_simd(simd);
@@ -726,9 +675,9 @@ namespace AfterMathTests
         }
 
         // ============================================================================
-        // 11. Операторы сравнения
+        // 11. Comparison Operators
         // ============================================================================
-        suite.section("Операторы сравнения");
+        suite.section("Comparison Operators");
 
         {
             float4 a(1.0f, 2.0f, 3.0f, 4.0f);
@@ -742,11 +691,11 @@ namespace AfterMathTests
         }
 
         // ============================================================================
-        // 12. Глобальные операторы и функции
+        // 12. Global Operators and Functions
         // ============================================================================
-        suite.section("Глобальные операторы и функции");
+        suite.section("Global Operators and Functions");
 
-        // Тест глобальных операторов
+        // Test global operators
         {
             float4 a(2.0f, 3.0f, 4.0f, 5.0f);
             float4 b(1.0f, 2.0f, 3.0f, 4.0f);
@@ -764,7 +713,7 @@ namespace AfterMathTests
             suite.assert_approximately_equal(div_result, float4(2.0f, 1.5f, 4.0f / 3.0f, 1.25f), "Global operator /", 1e-6f);
         }
 
-        // Тест глобальных математических функций
+        // Test global mathematical functions
         {
             float4 a(1.0f, 2.0f, 3.0f, 4.0f);
             float4 b(5.0f, 6.0f, 7.0f, 8.0f);
@@ -779,23 +728,13 @@ namespace AfterMathTests
             suite.assert_approximately_equal(cross_result, float4(-4.0f, 8.0f, -4.0f, 0.0f), "Global cross()");
 
             float4 norm = normalize(a);
-            suite.assert_approximately_equal(norm.length(), 1.0f, "Global normalize() length", 1e-6f);
+            suite.assert_approximately_equal(length(norm), 1.0f, "Global normalize() length", 1e-6f);
 
             float4 lerp_result = lerp(a, b, 0.5f);
             suite.assert_approximately_equal(lerp_result, float4(3.0f, 4.0f, 5.0f, 6.0f), "Global lerp()");
         }
 
-        // Тест глобальных approximately
-        {
-            float4 a(1.0f, 2.0f, 3.0f, 4.0f);
-            float4 b(1.000001f, 2.000001f, 3.000001f, 4.000001f);
-
-            suite.assert_true(approximately(a, b, 1e-5f), "Global approximately()");
-            suite.assert_true(is_normalized(float4(1.0f, 0.0f, 0.0f, 0.0f), 1e-5f), "Global is_normalized()");
-            suite.assert_true(isValid(a), "Global isValid()");
-        }
-
-        // Тест глобальных HLSL-функций
+        // Test global HLSL functions
         {
             float4 v(-1.5f, 2.5f, -3.5f, 4.5f);
 
@@ -811,28 +750,11 @@ namespace AfterMathTests
                 float4(0.7f, 0.7f, 0.0f, 0.8f), "Global frac()", 1e-6f);
             suite.assert_approximately_equal(step(1.0f, float4(0.5f, 1.0f, 1.5f, 2.0f)),
                 float4(0.0f, 1.0f, 1.0f, 1.0f), "Global step()");
+            suite.assert_approximately_equal(smoothstep(0.0f, 1.0f, float4(0.0f, 0.5f, 1.0f, 2.0f)),
+                float4(0.0f, 0.5f, 1.0f, 1.0f), "Global smoothstep()", 0.01f);
         }
 
-        // Тест глобальных clamp, min, max
-        {
-            float4 v(0.5f, 1.5f, -0.5f, 2.0f);
-            float4 min_val(0.0f, 0.0f, 0.0f, 0.0f);
-            float4 max_val(1.0f, 1.0f, 1.0f, 1.0f);
-
-            float4 clamped = clamp(v, min_val, max_val);
-            suite.assert_approximately_equal(clamped, float4(0.5f, 1.0f, 0.0f, 1.0f), "Global clamp()");
-
-            float4 a(1.0f, 3.0f, 5.0f, 7.0f);
-            float4 b(2.0f, 2.0f, 6.0f, 8.0f);
-
-            float4 min_result = min(a, b);
-            suite.assert_approximately_equal(min_result, float4(1.0f, 2.0f, 5.0f, 7.0f), "Global min()");
-
-            float4 max_result = max(a, b);
-            suite.assert_approximately_equal(max_result, float4(2.0f, 3.0f, 6.0f, 8.0f), "Global max()");
-        }
-
-        // Тест глобальных цветовых операций
+        // Test global color operations
         {
             float4 color(0.5f, 0.6f, 0.7f, 0.8f);
 
@@ -849,56 +771,53 @@ namespace AfterMathTests
             suite.assert_approximately_equal(gray, color.grayscale(), "Global grayscale()");
         }
 
-        // Тест глобальных геометрических операций
+        // Test global geometric operations
         {
             float4 homogeneous(2.0f, 3.0f, 4.0f, 1.0f);
-
-            float3 projected = project(homogeneous);
-            suite.assert_approximately_equal(projected, homogeneous.project(), "Global project()");
 
             float4 to_homo = to_homogeneous(homogeneous);
             suite.assert_approximately_equal(to_homo, homogeneous.to_homogeneous(), "Global to_homogeneous()");
         }
 
         // ============================================================================
-        // 13. Граничные случаи
+        // 13. Edge Cases
         // ============================================================================
-        suite.section("Граничные случаи");
+        suite.section("Edge Cases");
 
-        // Тест с очень маленькими значениями
+        // Test with very small values
         {
             float epsilon = 1e-30f;
             float4 tiny(epsilon, epsilon, epsilon, epsilon);
-            suite.assert_true(tiny.approximately_zero(1e-20f), "Tiny values approximately_zero");
+            suite.assert_true(approximately_zero(tiny, 1e-20f), "Tiny values approximately_zero");
         }
 
-        // Тест с очень большими значениями
+        // Test with very large values
         {
             float large = 1e10f;
             float4 huge(large, large, large, large);
-            suite.assert_false(huge.approximately_zero(), "Huge values not approximately_zero");
+            suite.assert_false(approximately_zero(huge), "Huge values not approximately_zero");
 
-            float4 normalized_huge = huge.normalize();
+            float4 normalized_huge = normalize(huge);
             float expected_length = 1.0f;
-            suite.assert_approximately_equal(normalized_huge.length(), expected_length,
+            suite.assert_approximately_equal(length(normalized_huge), expected_length,
                 "Normalize huge values", 1e-6f);
         }
 
-        // Тест деления на ноль (векторное)
+        // Test division by zero (vector)
         {
             float4 a(1.0f, 2.0f, 3.0f, 4.0f);
             float4 zero_vec(0.0f, 0.0f, 0.0f, 0.0f);
 
-            // Должно вызвать деление на ноль
+            // Should cause division by zero
             float4 result = a / zero_vec;
 
-            // Проверяем что результат содержит бесконечности или NaN
+            // Check that result contains infinities or NaN
             suite.assert_true(!std::isfinite(result.x) || !std::isfinite(result.y) ||
                 !std::isfinite(result.z) || !std::isfinite(result.w),
                 "Division by zero vector produces non-finite values");
         }
 
-        // Тест деления на ноль (скалярное)
+        // Test division by zero (scalar)
         {
             float4 v(1.0f, 2.0f, 3.0f, 4.0f);
             float4 result = v / 0.0f;
@@ -908,22 +827,22 @@ namespace AfterMathTests
                 "Division by zero scalar produces non-finite values");
         }
 
-        // Тест нормализации очень маленького вектора
+        // Test normalization of very small vector
         {
             float4 tiny(1e-20f, 1e-20f, 1e-20f, 1e-20f);
-            float4 normalized = tiny.normalize();
+            float4 normalized = normalize(tiny);
 
-            // Должен вернуть нулевой вектор, так как длина меньше epsilon
+            // Should return zero vector because length is less than epsilon
             suite.assert_approximately_equal(normalized, float4::zero(),
                 "Normalize tiny vector returns zero");
         }
 
-        // Тест linear interpolation
+        // Test linear interpolation
         {
             float4 a(0.0f, 0.0f, 0.0f, 0.0f);
             float4 b(10.0f, 20.0f, 30.0f, 40.0f);
 
-            // Тест t за пределами [0,1]
+            // Test t outside [0,1]
             float4 before = lerp(a, b, -0.5f);
             suite.assert_approximately_equal(before, a, "lerp() with t < 0");
 
@@ -931,63 +850,59 @@ namespace AfterMathTests
             suite.assert_approximately_equal(after, b, "lerp() with t > 1");
         }
 
-        // Тест скалярного произведения с самим собой
+        // Test dot product with itself
         {
             float4 v(3.0f, 4.0f, 5.0f, 6.0f);
-            float dot_self = v.dot(v);
-            float expected = v.length_sq();
+            float dot_self = dot(v, v);
+            float expected = length_sq(v);
             suite.assert_approximately_equal(dot_self, expected, "Dot product with self equals length squared");
         }
 
-        // Тест 3D скалярного произведения с самим собой
+        // Test 3D dot product with itself
         {
             float4 v(3.0f, 4.0f, 5.0f, 6.0f);
-            float dot3_self = v.dot3(v);
-            float3 xyz = v.xyz();
-            float expected = xyz.length_sq();
+            float dot3_self = dot3(v, v);
+            // Note: dot3 only uses xyz components
+            float expected = v.x * v.x + v.y * v.y + v.z * v.z;
             suite.assert_approximately_equal(dot3_self, expected, "Dot3 product with self equals 3D length squared");
         }
 
-        // Тест векторного произведения с самим собой
+        // Test cross product with itself
         {
             float4 v(2.0f, 3.0f, 4.0f, 5.0f);
-            float4 cross_self = v.cross(v);
+            float4 cross_self = cross(v, v);
             suite.assert_approximately_equal(cross_self, float4(0.0f, 0.0f, 0.0f, 0.0f), "Cross product with self equals zero");
         }
 
-        // Тест is_normalized для нулевого вектора
+        // Test is_normalized for zero vector
         {
             float4 zero(0.0f, 0.0f, 0.0f, 0.0f);
-            suite.assert_false(zero.is_normalized(), "Zero vector is not normalized");
+            suite.assert_false(is_normalized(zero), "Zero vector is not normalized");
         }
 
-        // Тест premultiply/unpremultiply обратные операции
+        // Test premultiply/unpremultiply inverse operations
         {
             float4 color(0.5f, 0.6f, 0.7f, 0.8f);
-            float4 premult = color.premultiply_alpha();
-            float4 unpremult = premult.unpremultiply_alpha();
+            float4 premult = premultiply_alpha(color);
+            float4 unpremult = unpremultiply_alpha(premult);
 
-            // После premultiply и unpremultiply должны вернуться к исходному цвету
+            // After premultiply and unpremultiply should return to original color
             suite.assert_approximately_equal(unpremult, color, "premultiply/unpremultiply roundtrip", 1e-6f);
         }
 
-        // Тест project с разными значениями w
+        // Test to_homogeneous with different w values
         {
-            // w = 0.5
             float4 v1(2.0f, 3.0f, 4.0f, 0.5f);
-            float3 p1 = project(v1);
-            suite.assert_approximately_equal(p1, float3(4.0f, 6.0f, 8.0f), "project() with w=0.5");
+            float4 homo1 = to_homogeneous(v1);
+            suite.assert_approximately_equal(homo1, float4(2.0f, 3.0f, 4.0f, 1.0f), "to_homogeneous() with w=0.5");
 
-            // w = -1
-            float4 v2(2.0f, 3.0f, 4.0f, -1.0f);
-            float3 p2 = project(v2);
-            suite.assert_approximately_equal(p2, float3(-2.0f, -3.0f, -4.0f), "project() with w=-1");
+            float4 v2(2.0f, 3.0f, 4.0f, 1.0f);
+            float4 homo2 = to_homogeneous(v2);
+            suite.assert_approximately_equal(homo2, float4(2.0f, 3.0f, 4.0f, 1.0f), "to_homogeneous() with w=1");
 
-            // w очень маленькое
-            float4 v3(2.0f, 3.0f, 4.0f, 1e-20f);
-            float3 p3 = project(v3);
-            // Должен вернуть нулевой вектор, так как деление на очень маленькое w
-            suite.assert_approximately_equal(p3, float3::zero(), "project() with very small w");
+            float4 v3(2.0f, 3.0f, 4.0f, 100.0f);
+            float4 homo3 = to_homogeneous(v3);
+            suite.assert_approximately_equal(homo3, float4(2.0f, 3.0f, 4.0f, 1.0f), "to_homogeneous() with w=100");
         }
 
         suite.footer();

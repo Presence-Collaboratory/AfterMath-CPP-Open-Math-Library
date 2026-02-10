@@ -1,5 +1,5 @@
 ﻿// Author: DeepSeek
-// Test suite for AfterMath::float3 class
+// Test suite for AfterMath::float3 class with HLSL-like syntax
 
 #include "AutotestCore.h"
 
@@ -13,11 +13,11 @@ namespace AfterMathTests
         using namespace AfterMath;
 
         // ============================================================================
-        // 1. Конструкторы
+        // 1. Constructors
         // ============================================================================
-        suite.section("Конструкторы");
+        suite.section("Constructors");
 
-        // Тест конструктора по умолчанию
+        // Default constructor test
         {
             float3 v;
             suite.assert_approximately_equal(v.x, 0.0f, "Default constructor x");
@@ -25,7 +25,7 @@ namespace AfterMathTests
             suite.assert_approximately_equal(v.z, 0.0f, "Default constructor z");
         }
 
-        // Тест конструктора с компонентами
+        // Component constructor test
         {
             float3 v(1.5f, 2.5f, 3.5f);
             suite.assert_approximately_equal(v.x, 1.5f, "Component constructor x");
@@ -33,7 +33,7 @@ namespace AfterMathTests
             suite.assert_approximately_equal(v.z, 3.5f, "Component constructor z");
         }
 
-        // Тест конструктора со скаляром
+        // Scalar constructor test
         {
             float3 v(3.0f);
             suite.assert_approximately_equal(v.x, 3.0f, "Scalar constructor x");
@@ -41,16 +41,7 @@ namespace AfterMathTests
             suite.assert_approximately_equal(v.z, 3.0f, "Scalar constructor z");
         }
 
-        // Тест конструктора из float2
-        {
-            float2 vec(1.0f, 2.0f);
-            float3 v(vec, 3.0f);
-            suite.assert_approximately_equal(v.x, 1.0f, "float2 constructor x");
-            suite.assert_approximately_equal(v.y, 2.0f, "float2 constructor y");
-            suite.assert_approximately_equal(v.z, 3.0f, "float2 constructor z");
-        }
-
-        // Тест конструктора из массива
+        // Constructor from array
         {
             float data[3] = { 4.0f, 5.0f, 6.0f };
             float3 v(data);
@@ -59,7 +50,7 @@ namespace AfterMathTests
             suite.assert_approximately_equal(v.z, 6.0f, "Array constructor z");
         }
 
-        // Тест копирующего конструктора
+        // Copy constructor test
         {
             float3 original(6.0f, 7.0f, 8.0f);
             float3 copy(original);
@@ -68,7 +59,7 @@ namespace AfterMathTests
             suite.assert_approximately_equal(copy.z, 8.0f, "Copy constructor z");
         }
 
-        // Тест статических конструкторов
+        // Static constructors test
         {
             suite.assert_approximately_equal(float3::zero(), float3(0.0f, 0.0f, 0.0f), "zero()");
             suite.assert_approximately_equal(float3::one(), float3(1.0f, 1.0f, 1.0f), "one()");
@@ -81,11 +72,11 @@ namespace AfterMathTests
         }
 
         // ============================================================================
-        // 2. Операторы присваивания
+        // 2. Assignment operators
         // ============================================================================
-        suite.section("Операторы присваивания");
+        suite.section("Assignment operators");
 
-        // Тест присваивания скаляра
+        // Scalar assignment test
         {
             float3 v;
             v = 2.5f;
@@ -94,7 +85,7 @@ namespace AfterMathTests
             suite.assert_approximately_equal(v.z, 2.5f, "Scalar assignment z");
         }
 
-        // Тест составных операторов присваивания
+        // Compound assignment operators test
         {
             float3 v(1.0f, 2.0f, 3.0f);
 
@@ -118,11 +109,11 @@ namespace AfterMathTests
         }
 
         // ============================================================================
-        // 3. Бинарные и унарные операторы
+        // 3. Binary and unary operators
         // ============================================================================
-        suite.section("Бинарные и унарные операторы");
+        suite.section("Binary and unary operators");
 
-        // Тест сложения
+        // Addition test
         {
             float3 a(1.0f, 2.0f, 3.0f);
             float3 b(4.0f, 5.0f, 6.0f);
@@ -130,7 +121,7 @@ namespace AfterMathTests
             suite.assert_approximately_equal(result, float3(5.0f, 7.0f, 9.0f), "Operator +");
         }
 
-        // Тест вычитания
+        // Subtraction test
         {
             float3 a(5.0f, 6.0f, 7.0f);
             float3 b(2.0f, 3.0f, 4.0f);
@@ -138,7 +129,7 @@ namespace AfterMathTests
             suite.assert_approximately_equal(result, float3(3.0f, 3.0f, 3.0f), "Operator -");
         }
 
-        // Тест умножения компонентного
+        // Component-wise multiplication test
         {
             float3 a(2.0f, 3.0f, 4.0f);
             float3 b(1.0f, 2.0f, 3.0f);
@@ -146,7 +137,7 @@ namespace AfterMathTests
             suite.assert_approximately_equal(result, float3(2.0f, 6.0f, 12.0f), "Operator * (component-wise)");
         }
 
-        // Тест деления компонентного
+        // Component-wise division test
         {
             float3 a(6.0f, 8.0f, 10.0f);
             float3 b(2.0f, 4.0f, 5.0f);
@@ -154,14 +145,14 @@ namespace AfterMathTests
             suite.assert_approximately_equal(result, float3(3.0f, 2.0f, 2.0f), "Operator / (component-wise)");
         }
 
-        // Тест унарных операторов
+        // Unary operators test
         {
             float3 a(1.0f, -2.0f, 3.0f);
             suite.assert_approximately_equal(+a, float3(1.0f, -2.0f, 3.0f), "Unary +");
             suite.assert_approximately_equal(-a, float3(-1.0f, 2.0f, -3.0f), "Unary -");
         }
 
-        // Тест скалярных операций
+        // Scalar operations test
         {
             float3 v(2.0f, 3.0f, 4.0f);
 
@@ -179,11 +170,11 @@ namespace AfterMathTests
         }
 
         // ============================================================================
-        // 4. Операторы доступа и преобразования
+        // 4. Access and conversion operators
         // ============================================================================
-        suite.section("Операторы доступа и преобразования");
+        suite.section("Access and conversion operators");
 
-        // Тест оператора индексации
+        // Index operator test
         {
             float3 v(7.0f, 8.0f, 9.0f);
             suite.assert_approximately_equal(v[0], 7.0f, "Operator [] index 0");
@@ -198,7 +189,7 @@ namespace AfterMathTests
             suite.assert_approximately_equal(v.z, 12.0f, "Operator [] mutable z");
         }
 
-        // Тест преобразования в указатель
+        // Pointer conversion test
         {
             float3 v(1.0f, 2.0f, 3.0f);
             const float* ptr = v;
@@ -211,7 +202,7 @@ namespace AfterMathTests
             suite.assert_approximately_equal(v.x, 4.0f, "Conversion to float* mutable");
         }
 
-        // Тест преобразования в __m128
+        // __m128 conversion test
         {
             float3 v(1.0f, 2.0f, 3.0f);
             __m128 simd = v;
@@ -223,361 +214,427 @@ namespace AfterMathTests
         }
 
         // ============================================================================
-        // 5. Математические функции
+        // 5. Mathematical functions (HLSL-style syntax)
         // ============================================================================
-        suite.section("Математические функции");
+        suite.section("Mathematical functions (HLSL-style syntax)");
 
-        // Тест длины
+        // Length test
         {
             float3 v(2.0f, 3.0f, 6.0f);
             // √(4 + 9 + 36) = √49 = 7
-            suite.assert_approximately_equal(v.length(), 7.0f, "length()");
-            suite.assert_approximately_equal(v.length_sq(), 49.0f, "length_sq()");
+            suite.assert_approximately_equal(length(v), 7.0f, "length()");
+            suite.assert_approximately_equal(length_sq(v), 49.0f, "length_sq()");
 
             float3 zero(0.0f, 0.0f, 0.0f);
-            suite.assert_approximately_equal(zero.length(), 0.0f, "length() of zero vector");
+            suite.assert_approximately_equal(length(zero), 0.0f, "length() of zero vector");
         }
 
-        // Тест нормализации
+        // Normalization test
         {
             float3 v(2.0f, 3.0f, 6.0f);
-            float3 normalized = v.normalize();
+            float3 normalized = normalize(v);
             float expected_len = 1.0f;
-            suite.assert_approximately_equal(normalized.length(), expected_len, "normalize() length", 1e-6f);
+            suite.assert_approximately_equal(length(normalized), expected_len, "normalize() length", 1e-6f);
             suite.assert_approximately_equal(normalized.x, 2.0f / 7.0f, "normalize() x", 1e-6f);
             suite.assert_approximately_equal(normalized.y, 3.0f / 7.0f, "normalize() y", 1e-6f);
             suite.assert_approximately_equal(normalized.z, 6.0f / 7.0f, "normalize() z", 1e-6f);
 
-            // Тест нормализации нулевого вектора
+            // Zero vector normalization test
             float3 zero(0.0f, 0.0f, 0.0f);
-            float3 zero_norm = zero.normalize();
+            float3 zero_norm = normalize(zero);
             suite.assert_approximately_equal(zero_norm, float3::zero(), "normalize() zero vector");
         }
 
-        // Тест скалярного произведения
+        // Dot product test
         {
             float3 a(1.0f, 2.0f, 3.0f);
             float3 b(4.0f, 5.0f, 6.0f);
-            float dot_result = a.dot(b);
+            float dot_result = dot(a, b);
             suite.assert_approximately_equal(dot_result, 32.0f, "dot()"); // 1*4 + 2*5 + 3*6 = 4 + 10 + 18 = 32
 
-            // Ортогональные векторы
+            // Orthogonal vectors
             float3 orth1(1.0f, 0.0f, 0.0f);
             float3 orth2(0.0f, 1.0f, 0.0f);
-            suite.assert_approximately_equal(orth1.dot(orth2), 0.0f, "dot() orthogonal vectors");
+            suite.assert_approximately_equal(dot(orth1, orth2), 0.0f, "dot() orthogonal vectors");
         }
 
-        // Тест векторного произведения
+        // Cross product test
         {
             float3 a(1.0f, 0.0f, 0.0f);
             float3 b(0.0f, 1.0f, 0.0f);
-            float3 cross_result = a.cross(b);
+            float3 cross_result = cross(a, b);
             suite.assert_approximately_equal(cross_result, float3(0.0f, 0.0f, 1.0f), "cross() i * j = k");
 
             float3 c(2.0f, 3.0f, 4.0f);
             float3 d(5.0f, 6.0f, 7.0f);
-            float3 cross2 = c.cross(d);
+            float3 cross2 = cross(c, d);
             // (3*7 - 4*6, 4*5 - 2*7, 2*6 - 3*5) = (21-24, 20-14, 12-15) = (-3, 6, -3)
             suite.assert_approximately_equal(cross2, float3(-3.0f, 6.0f, -3.0f), "cross() arbitrary vectors");
 
-            // Векторное произведение вектора с самим собой равно нулю
-            suite.assert_approximately_equal(a.cross(a), float3::zero(), "cross() vector with itself");
+            // Cross product of vector with itself is zero
+            suite.assert_approximately_equal(cross(a, a), float3::zero(), "cross() vector with itself");
         }
 
-        // Тест расстояния
+        // Distance test
         {
             float3 a(1.0f, 2.0f, 3.0f);
             float3 b(4.0f, 6.0f, 8.0f);
-            float distance = a.distance(b);
-            float distance_sq = a.distance_sq(b);
+            float dist = distance(a, b);
+            float dist_sq = distance_sq(a, b);
 
             // (4-1)² + (6-2)² + (8-3)² = 9 + 16 + 25 = 50
-            suite.assert_approximately_equal(distance, std::sqrt(50.0f), "distance()");
-            suite.assert_approximately_equal(distance_sq, 50.0f, "distance_sq()");
+            suite.assert_approximately_equal(dist, std::sqrt(50.0f), "distance()");
+            suite.assert_approximately_equal(dist_sq, 50.0f, "distance_sq()");
         }
 
         // ============================================================================
-        // 6. HLSL-подобные функции
+        // 6. HLSL-like functions
         // ============================================================================
-        suite.section("HLSL-подобные функции");
+        suite.section("HLSL-like functions");
 
-        // Тест abs
+        // abs test
         {
             float3 v(-1.5f, 2.5f, -3.5f);
-            float3 result = v.abs();
+            float3 result = abs(v);
             suite.assert_approximately_equal(result, float3(1.5f, 2.5f, 3.5f), "abs()");
         }
 
-        // Тест sign
+        // sign test
         {
             float3 v(-2.0f, 0.0f, 3.0f);
-            float3 result = v.sign();
+            float3 result = sign(v);
             suite.assert_approximately_equal(result, float3(-1.0f, 0.0f, 1.0f), "sign()");
         }
 
-        // Тест floor
+        // floor test
         {
             float3 v(1.7f, -2.3f, 3.9f);
-            float3 result = v.floor();
+            float3 result = floor(v);
             suite.assert_approximately_equal(result, float3(1.0f, -3.0f, 3.0f), "floor()");
         }
 
-        // Тест ceil
+        // ceil test
         {
             float3 v(1.2f, -2.7f, 3.1f);
-            float3 result = v.ceil();
+            float3 result = ceil(v);
             suite.assert_approximately_equal(result, float3(2.0f, -2.0f, 4.0f), "ceil()");
         }
 
-        // Тест round
+        // round test
         {
             float3 v(1.4f, 1.6f, -1.5f);
-            float3 result = v.round();
+            float3 result = round(v);
             suite.assert_approximately_equal(result, float3(1.0f, 2.0f, -2.0f), "round()");
         }
 
-        // Тест frac
+        // frac test
         {
             float3 v(1.7f, -2.3f, 3.0f);
-            float3 result = v.frac();
+            float3 result = frac(v);
             suite.assert_approximately_equal(result.x, 0.7f, "frac() x", 1e-6f);
             suite.assert_approximately_equal(result.y, 0.7f, "frac() y", 1e-6f); // -2.3 - (-3) = 0.7
             suite.assert_approximately_equal(result.z, 0.0f, "frac() z", 1e-6f);
         }
 
-        // Тест saturate
+        // saturate test
         {
             float3 v(-0.5f, 0.5f, 1.5f);
-            float3 result = v.saturate();
+            float3 result = saturate(v);
             suite.assert_approximately_equal(result, float3(0.0f, 0.5f, 1.0f), "saturate()");
         }
 
-        // Тест step
+        // step test
         {
             float3 v(0.5f, 1.0f, 1.5f);
-            float3 result = v.step(1.0f);
+            float3 result = step(1.0f, v);
             suite.assert_approximately_equal(result, float3(0.0f, 1.0f, 1.0f), "step()");
         }
 
-        // Тест clamp (компонентный)
+        // clamp test (component-wise)
         {
             float3 v(0.5f, 1.5f, -0.5f);
             float3 min_val(0.0f, 0.0f, 0.0f);
             float3 max_val(1.0f, 1.0f, 1.0f);
-            float3 result = float3::clamp(v, min_val, max_val);
+            float3 result = clamp(v, min_val, max_val);
             suite.assert_approximately_equal(result, float3(0.5f, 1.0f, 0.0f), "clamp() component-wise");
         }
 
-        // Тест clamp (скалярный)
+        // clamp test (scalar)
         {
             float3 v(0.5f, 1.5f, -0.5f);
-            float3 result = float3::clamp(v, 0.0f, 1.0f);
+            float3 result = clamp(v, 0.0f, 1.0f);
             suite.assert_approximately_equal(result, float3(0.5f, 1.0f, 0.0f), "clamp() scalar");
         }
 
-        // Тест min/max
+        // min/max test
         {
             float3 a(1.0f, 3.0f, 5.0f);
             float3 b(2.0f, 2.0f, 6.0f);
 
-            float3 min_result = float3::min(a, b);
+            float3 min_result = min(a, b);
             suite.assert_approximately_equal(min_result, float3(1.0f, 2.0f, 5.0f), "min()");
 
-            float3 max_result = float3::max(a, b);
+            float3 max_result = max(a, b);
             suite.assert_approximately_equal(max_result, float3(2.0f, 3.0f, 6.0f), "max()");
         }
 
-        // ============================================================================
-        // 7. Геометрические операции
-        // ============================================================================
-        suite.section("Геометрические операции");
-
-        // Тест отражения
+        // smoothstep test
         {
-            float3 incident(1.0f, -1.0f, 0.0f);
-            float3 normal(0.0f, 1.0f, 0.0f); // Нормаль вверх
-            normal = normal.normalize();
-            float3 reflected = incident.reflect(normal);
-            // R = I - 2*(I·N)*N = (1,-1,0) - 2*(-1)*(0,1,0) = (1,-1,0) + (0,2,0) = (1,1,0)
-            suite.assert_approximately_equal(reflected, float3(1.0f, 1.0f, 0.0f), "reflect()");
+            float3 v(0.25f, 0.5f, 0.75f);
+            float3 result = smoothstep(0.0f, 1.0f, v);
+            // smoothstep formula: t*t*(3-2t) for t in [0,1]
+            float expected_x = 0.25f * 0.25f * (3.0f - 2.0f * 0.25f); // ~0.15625
+            float expected_y = 0.5f; // 0.5*0.5*(3-1) = 0.25*2 = 0.5
+            float expected_z = 0.75f * 0.75f * (3.0f - 2.0f * 0.75f); // 0.5625*(3-1.5)=0.5625*1.5=0.84375
 
-            // Статическая версия
-            float3 reflected2 = float3::reflect(incident, normal);
-            suite.assert_approximately_equal(reflected2, float3(1.0f, 1.0f, 0.0f), "static reflect()");
+            suite.assert_approximately_equal(result.x, expected_x, "smoothstep() x", 1e-6f);
+            suite.assert_approximately_equal(result.y, expected_y, "smoothstep() y", 1e-6f);
+            suite.assert_approximately_equal(result.z, expected_z, "smoothstep() z", 1e-6f);
         }
 
-        // Тест отражения
+        // ============================================================================
+        // 7. Geometric operations
+        // ============================================================================
+        suite.section("Geometric operations");
+
+        // Reflection test
         {
-            // Для перехода из ВОДЫ (n=1.33) в ВОЗДУХ (n=1.0)
-            float eta_water_to_air = 1.33f; // вода → воздух
+            float3 incident(1.0f, -1.0f, 0.0f);
+            float3 normal(0.0f, 1.0f, 0.0f); // Up normal
+            normal = normalize(normal);
+            float3 reflected = reflect(incident, normal);
+            // R = I - 2*(I·N)*N = (1,-1,0) - 2*(-1)*(0,1,0) = (1,-1,0) + (0,2,0) = (1,1,0)
+            suite.assert_approximately_equal(reflected, float3(1.0f, 1.0f, 0.0f), "reflect()");
+        }
 
-            // Проверим условие полного внутреннего отражения:
-            // Критический угол: θ_c = arcsin(1/eta) = arcsin(1/1.33) approx 48.8°
-            // Угол 60° > 48.8° → должно быть полное внутреннее отражение
+        // Refraction test (total internal reflection)
+        {
+            // Water to air transition: n_water = 1.33, n_air = 1.0
+            // eta = n_incident / n_transmitted = 1.33 / 1.0 = 1.33
+            float eta_water_to_air = 1.33f;
 
-            float3 incident_large(0.866f, -0.5f, 0.0f); // 60° угол
+            // Critical angle: θ_c = arcsin(1/eta) = arcsin(1/1.33) ≈ 48.8°
+            // 60° > 48.8° → total internal reflection expected
+            float3 incident_large(0.866f, -0.5f, 0.0f); // 60° angle
             float3 normal(0.0f, 1.0f, 0.0f);
-            normal = normal.normalize();
+            normal = normalize(normal);
 
-            float3 total_reflection = incident_large.refract(normal, eta_water_to_air);
-
-            // Должен вернуть нулевой вектор
+            float3 total_reflection = refract(incident_large, normal, eta_water_to_air);
+            // Should return zero vector for total internal reflection
             suite.assert_approximately_equal(total_reflection, float3::zero(),
                 "refract() total internal reflection", 1e-6f);
         }
 
-        // Тест проекции
+        // Projection test
         {
             float3 v(2.0f, 3.0f, 4.0f);
-            float3 onto(1.0f, 0.0f, 0.0f); // Ось X
+            float3 onto(1.0f, 0.0f, 0.0f); // X axis
 
-            float3 projected = v.project(onto);
+            float3 projected = project(v, onto);
             suite.assert_approximately_equal(projected, float3(2.0f, 0.0f, 0.0f), "project() onto X axis");
 
-            // Проекция на себя должна дать себя
-            float3 self_projected = v.project(v);
+            // Projection onto itself should return itself
+            float3 self_projected = project(v, v);
             suite.assert_approximately_equal(self_projected, v, "project() onto itself");
         }
 
-        // Тест отклонения
+        // Rejection test
         {
             float3 v(2.0f, 3.0f, 4.0f);
-            float3 onto(1.0f, 0.0f, 0.0f); // Ось X
+            float3 onto(1.0f, 0.0f, 0.0f); // X axis
 
-            float3 rejected = v.reject(onto);
-            // v = (2,3,4), проекция на X = (2,0,0), отклонение = (0,3,4)
+            float3 rejected = reject(v, onto);
+            // v = (2,3,4), projection on X = (2,0,0), rejection = (0,3,4)
             suite.assert_approximately_equal(rejected, float3(0.0f, 3.0f, 4.0f), "reject() from X axis");
 
-            // Отклонение от себя должно дать 0
-            float3 self_rejected = v.reject(v);
+            // Rejection from itself should return zero
+            float3 self_rejected = reject(v, v);
             suite.assert_approximately_equal(self_rejected, float3::zero(), "reject() from itself");
         }
 
-        // Тест линейной интерполяции
+        // Linear interpolation test
         {
             float3 a(0.0f, 0.0f, 0.0f);
             float3 b(10.0f, 20.0f, 30.0f);
 
-            float3 lerp_result = float3::lerp(a, b, 0.5f);
+            float3 lerp_result = lerp(a, b, 0.5f);
             suite.assert_approximately_equal(lerp_result, float3(5.0f, 10.0f, 15.0f), "lerp() at 0.5");
 
-            float3 lerp_start = float3::lerp(a, b, 0.0f);
+            float3 lerp_start = lerp(a, b, 0.0f);
             suite.assert_approximately_equal(lerp_start, a, "lerp() at 0.0");
 
-            float3 lerp_end = float3::lerp(a, b, 1.0f);
+            float3 lerp_end = lerp(a, b, 1.0f);
             suite.assert_approximately_equal(lerp_end, b, "lerp() at 1.0");
         }
 
-        // Тест сферической линейной интерполяции
+        // Spherical linear interpolation test
         {
             float3 a(1.0f, 0.0f, 0.0f);
             float3 b(0.0f, 1.0f, 0.0f);
 
-            a = a.normalize();
-            b = b.normalize();
+            a = normalize(a);
+            b = normalize(b);
 
-            float3 slerp_result = float3::slerp(a, b, 0.5f);
+            float3 slerp_result = slerp(a, b, 0.5f);
             float expected_length = 1.0f;
-            suite.assert_approximately_equal(slerp_result.length(), expected_length, "slerp() length", 1e-6f);
+            suite.assert_approximately_equal(length(slerp_result), expected_length, "slerp() length", 1e-6f);
 
-            // В середине между (1,0,0) и (0,1,0) должно быть примерно (√2/2, √2/2, 0)
+            // Midpoint between (1,0,0) and (0,1,0) should be approximately (√2/2, √2/2, 0)
             float expected_val = std::sqrt(2.0f) / 2.0f;
             suite.assert_approximately_equal(slerp_result.x, expected_val, "slerp() x at 0.5", 1e-6f);
             suite.assert_approximately_equal(slerp_result.y, expected_val, "slerp() y at 0.5", 1e-6f);
             suite.assert_approximately_equal(slerp_result.z, 0.0f, "slerp() z at 0.5", 1e-6f);
         }
 
+        // Angle between test
+        {
+            float3 a(1.0f, 0.0f, 0.0f);
+            float3 b(0.0f, 1.0f, 0.0f);
+            float angle = angle_between(a, b);
+            suite.assert_approximately_equal(angle, PI / 2.0f, "angle_between() 90 degrees", 1e-6f);
+        }
+
         // ============================================================================
-        // 8. Swizzle операции
-        // ============================================================================
-        suite.section("Swizzle операции");
+// 8. Swizzle operations
+// ============================================================================
+        suite.section("Swizzle operations");
 
         {
             float3 v(2.0f, 3.0f, 4.0f);
 
-            // 2-компонентные swizzles
+            // 2-component swizzles
+            suite.assert_approximately_equal(v.xx(), float2(2.0f, 2.0f), "xx()");
             suite.assert_approximately_equal(v.xy(), float2(2.0f, 3.0f), "xy()");
             suite.assert_approximately_equal(v.xz(), float2(2.0f, 4.0f), "xz()");
-            suite.assert_approximately_equal(v.yz(), float2(3.0f, 4.0f), "yz()");
             suite.assert_approximately_equal(v.yx(), float2(3.0f, 2.0f), "yx()");
+            suite.assert_approximately_equal(v.yy(), float2(3.0f, 3.0f), "yy()");
+            suite.assert_approximately_equal(v.yz(), float2(3.0f, 4.0f), "yz()");
             suite.assert_approximately_equal(v.zx(), float2(4.0f, 2.0f), "zx()");
             suite.assert_approximately_equal(v.zy(), float2(4.0f, 3.0f), "zy()");
+            suite.assert_approximately_equal(v.zz(), float2(4.0f, 4.0f), "zz()");
 
-            // 3-компонентные swizzles
-            suite.assert_approximately_equal(v.yxz(), float3(3.0f, 2.0f, 4.0f), "yxz()");
-            suite.assert_approximately_equal(v.zxy(), float3(4.0f, 2.0f, 3.0f), "zxy()");
-            suite.assert_approximately_equal(v.zyx(), float3(4.0f, 3.0f, 2.0f), "zyx()");
-            suite.assert_approximately_equal(v.xzy(), float3(2.0f, 4.0f, 3.0f), "xzy()");
+            // 3-component swizzles (selected ones)
+            suite.assert_approximately_equal(v.xxx(), float3(2.0f, 2.0f, 2.0f), "xxx()");
+            suite.assert_approximately_equal(v.xxy(), float3(2.0f, 2.0f, 3.0f), "xxy()");
+            suite.assert_approximately_equal(v.xxz(), float3(2.0f, 2.0f, 4.0f), "xxz()");
             suite.assert_approximately_equal(v.xyx(), float3(2.0f, 3.0f, 2.0f), "xyx()");
+            suite.assert_approximately_equal(v.xyy(), float3(2.0f, 3.0f, 3.0f), "xyy()");
             suite.assert_approximately_equal(v.xyz(), float3(2.0f, 3.0f, 4.0f), "xyz()");
             suite.assert_approximately_equal(v.xzx(), float3(2.0f, 4.0f, 2.0f), "xzx()");
-            suite.assert_approximately_equal(v.yxy(), float3(3.0f, 2.0f, 3.0f), "yxy()");
-            suite.assert_approximately_equal(v.yzy(), float3(3.0f, 4.0f, 3.0f), "yzy()");
-            suite.assert_approximately_equal(v.zxz(), float3(4.0f, 2.0f, 4.0f), "zxz()");
-            suite.assert_approximately_equal(v.zyz(), float3(4.0f, 3.0f, 4.0f), "zyz()");
+            suite.assert_approximately_equal(v.xzy(), float3(2.0f, 4.0f, 3.0f), "xzy()");
+            suite.assert_approximately_equal(v.xzz(), float3(2.0f, 4.0f, 4.0f), "xzz()");
 
-            // Цветовые swizzles
+            suite.assert_approximately_equal(v.yxx(), float3(3.0f, 2.0f, 2.0f), "yxx()");
+            suite.assert_approximately_equal(v.yxy(), float3(3.0f, 2.0f, 3.0f), "yxy()");
+            suite.assert_approximately_equal(v.yxz(), float3(3.0f, 2.0f, 4.0f), "yxz()");
+            suite.assert_approximately_equal(v.yyx(), float3(3.0f, 3.0f, 2.0f), "yyx()");
+            suite.assert_approximately_equal(v.yyy(), float3(3.0f, 3.0f, 3.0f), "yyy()");
+            suite.assert_approximately_equal(v.yyz(), float3(3.0f, 3.0f, 4.0f), "yyz()");
+            suite.assert_approximately_equal(v.yzx(), float3(3.0f, 4.0f, 2.0f), "yzx()");
+            suite.assert_approximately_equal(v.yzy(), float3(3.0f, 4.0f, 3.0f), "yzy()");
+            suite.assert_approximately_equal(v.yzz(), float3(3.0f, 4.0f, 4.0f), "yzz()");
+
+            suite.assert_approximately_equal(v.zxx(), float3(4.0f, 2.0f, 2.0f), "zxx()");
+            suite.assert_approximately_equal(v.zxy(), float3(4.0f, 2.0f, 3.0f), "zxy()");
+            suite.assert_approximately_equal(v.zxz(), float3(4.0f, 2.0f, 4.0f), "zxz()");
+            suite.assert_approximately_equal(v.zyx(), float3(4.0f, 3.0f, 2.0f), "zyx()");
+            suite.assert_approximately_equal(v.zyy(), float3(4.0f, 3.0f, 3.0f), "zyy()");
+            suite.assert_approximately_equal(v.zyz(), float3(4.0f, 3.0f, 4.0f), "zyz()");
+            suite.assert_approximately_equal(v.zzx(), float3(4.0f, 4.0f, 2.0f), "zzx()");
+            suite.assert_approximately_equal(v.zzy(), float3(4.0f, 4.0f, 3.0f), "zzy()");
+            suite.assert_approximately_equal(v.zzz(), float3(4.0f, 4.0f, 4.0f), "zzz()");
+
+            // Color swizzles (1-component)
             suite.assert_approximately_equal(v.r(), 2.0f, "r()");
             suite.assert_approximately_equal(v.g(), 3.0f, "g()");
             suite.assert_approximately_equal(v.b(), 4.0f, "b()");
+
+            // Color swizzles (2-component)
+            suite.assert_approximately_equal(v.rr(), float2(2.0f, 2.0f), "rr()");
             suite.assert_approximately_equal(v.rg(), float2(2.0f, 3.0f), "rg()");
             suite.assert_approximately_equal(v.rb(), float2(2.0f, 4.0f), "rb()");
+            suite.assert_approximately_equal(v.gr(), float2(3.0f, 2.0f), "gr()");
+            suite.assert_approximately_equal(v.gg(), float2(3.0f, 3.0f), "gg()");
             suite.assert_approximately_equal(v.gb(), float2(3.0f, 4.0f), "gb()");
+            suite.assert_approximately_equal(v.br(), float2(4.0f, 2.0f), "br()");
+            suite.assert_approximately_equal(v.bg(), float2(4.0f, 3.0f), "bg()");
+            suite.assert_approximately_equal(v.bb(), float2(4.0f, 4.0f), "bb()");
+
+            // Color swizzles (3-component - selected ones)
+            suite.assert_approximately_equal(v.rrr(), float3(2.0f, 2.0f, 2.0f), "rrr()");
             suite.assert_approximately_equal(v.rgb(), float3(2.0f, 3.0f, 4.0f), "rgb()");
             suite.assert_approximately_equal(v.bgr(), float3(4.0f, 3.0f, 2.0f), "bgr()");
             suite.assert_approximately_equal(v.gbr(), float3(3.0f, 4.0f, 2.0f), "gbr()");
+            suite.assert_approximately_equal(v.brg(), float3(4.0f, 2.0f, 3.0f), "brg()");
+            suite.assert_approximately_equal(v.grb(), float3(3.0f, 2.0f, 4.0f), "grb()");
+            suite.assert_approximately_equal(v.rbg(), float3(2.0f, 4.0f, 3.0f), "rbg()");
+
+            // Texture coordinate swizzles
+            suite.assert_approximately_equal(v.st(), float2(2.0f, 3.0f), "st()");
+            suite.assert_approximately_equal(v.ts(), float2(3.0f, 2.0f), "ts()");
+            suite.assert_approximately_equal(v.sp(), float2(2.0f, 4.0f), "sp()");
+            suite.assert_approximately_equal(v.ps(), float2(4.0f, 2.0f), "ps()");
+
+            // Utility swizzle functions
+            suite.assert_approximately_equal(v.max_component(), 4.0f, "max_component()");
+            suite.assert_approximately_equal(v.min_component(), 2.0f, "min_component()");
+            suite.assert_equal(v.max_component_index(), 2, "max_component_index()");
+            suite.assert_equal(v.min_component_index(), 0, "min_component_index()");
+            suite.assert_approximately_equal(v.sum(), 9.0f, "sum()");
+            suite.assert_approximately_equal(v.product(), 24.0f, "product()");
+            suite.assert_approximately_equal(v.average(), 3.0f, "average()");
         }
 
         // ============================================================================
-        // 9. Утилитарные методы
+        // 9. Utility methods
         // ============================================================================
-        suite.section("Утилитарные методы");
+        suite.section("Utility methods");
 
-        // Тест isValid
+        // isValid test
         {
             float3 valid(1.0f, 2.0f, 3.0f);
-            suite.assert_true(valid.isValid(), "isValid() for valid vector");
+            suite.assert_true(isValid(valid), "isValid() for valid vector");
 
-            // Note: Для тестов с NaN и INF нужно специальное создание
             suite.skip_test("isValid() with NaN/INF", "Requires special NaN/INF construction");
         }
 
-        // Тест approximately
+        // approximately test
         {
             float3 a(1.0f, 2.0f, 3.0f);
             float3 b(1.000001f, 2.000001f, 3.000001f);
             float3 c(1.1f, 2.1f, 3.1f);
 
-            suite.assert_true(a.approximately(b, 1e-5f), "approximately() within epsilon");
-            suite.assert_false(a.approximately(c, 1e-5f), "approximately() outside epsilon");
+            suite.assert_true(approximately(a, b, 1e-5f), "approximately() within epsilon");
+            suite.assert_false(approximately(a, c, 1e-5f), "approximately() outside epsilon");
         }
 
-        // Тест approximately_zero
+        // approximately_zero test
         {
             float3 zero(0.0f, 0.0f, 0.0f);
             float3 near_zero(0.000001f, 0.000001f, 0.000001f);
             float3 not_zero(0.1f, 0.1f, 0.1f);
 
-            suite.assert_true(zero.approximately_zero(1e-5f), "approximately_zero() for zero");
-            suite.assert_true(near_zero.approximately_zero(1e-4f), "approximately_zero() for near zero");
-            suite.assert_false(not_zero.approximately_zero(1e-5f), "approximately_zero() for non-zero");
+            // Using length_sq for comparison
+            suite.assert_true(length_sq(zero) <= 1e-10f, "Zero vector has zero length_sq");
+            suite.assert_true(length_sq(near_zero) <= 1e-8f, "Near zero vector has small length_sq");
+            suite.assert_false(length_sq(not_zero) <= 1e-10f, "Non-zero vector doesn't have small length_sq");
         }
 
-        // Тест is_normalized
+        // is_normalized test
         {
             float3 normalized(0.267261f, 0.534522f, 0.801784f); // (1,2,3) normalized
             float3 not_normalized(1.0f, 2.0f, 3.0f);
 
-            suite.assert_true(normalized.is_normalized(1e-5f), "is_normalized() for normalized vector");
-            suite.assert_false(not_normalized.is_normalized(1e-5f), "is_normalized() for non-normalized");
+            suite.assert_true(is_normalized(normalized, 1e-5f), "is_normalized() for normalized vector");
+            suite.assert_false(is_normalized(not_normalized, 1e-5f), "is_normalized() for non-normalized");
         }
 
-        // Тест to_string
+        // to_string test
         {
             float3 v(1.5f, 2.5f, 3.5f);
             std::string str = v.to_string();
 
-            // Проверяем наличие ожидаемых значений в строке
+            // Check for expected values in string
             suite.assert_true(str.find("1.5") != std::string::npos || str.find("1.500") != std::string::npos,
                 "to_string() contains x value");
             suite.assert_true(str.find("2.5") != std::string::npos || str.find("2.500") != std::string::npos,
@@ -586,7 +643,7 @@ namespace AfterMathTests
                 "to_string() contains z value");
         }
 
-        // Тест data()
+        // data() test
         {
             float3 v(7.0f, 8.0f, 9.0f);
             const float* cdata = v.data();
@@ -600,17 +657,7 @@ namespace AfterMathTests
             suite.assert_approximately_equal(v.x, 10.0f, "data() mutable modification");
         }
 
-        // Тест set_xy
-        {
-            float3 v(1.0f, 2.0f, 3.0f);
-            float2 xy(4.0f, 5.0f);
-            v.set_xy(xy);
-            suite.assert_approximately_equal(v.x, 4.0f, "set_xy() x");
-            suite.assert_approximately_equal(v.y, 5.0f, "set_xy() y");
-            suite.assert_approximately_equal(v.z, 3.0f, "set_xy() z unchanged");
-        }
-
-        // Тест операций с компонентами
+        // Component operations test
         {
             float3 v(2.0f, 3.0f, 4.0f);
 
@@ -623,7 +670,7 @@ namespace AfterMathTests
             suite.assert_approximately_equal(v.average(), 3.0f, "average()");
         }
 
-        // Тест has_nan, has_infinite, all_finite
+        // has_nan, has_infinite, all_finite test
         {
             float3 v(1.0f, 2.0f, 3.0f);
             suite.assert_false(v.has_nan(), "has_nan() for normal vector");
@@ -635,9 +682,9 @@ namespace AfterMathTests
         }
 
         // ============================================================================
-        // 10. Операторы сравнения
+        // 10. Comparison operators
         // ============================================================================
-        suite.section("Операторы сравнения");
+        suite.section("Comparison operators");
 
         {
             float3 a(1.0f, 2.0f, 3.0f);
@@ -651,11 +698,11 @@ namespace AfterMathTests
         }
 
         // ============================================================================
-        // 11. Глобальные операторы и функции
+        // 11. Global operators and functions
         // ============================================================================
-        suite.section("Глобальные операторы и функции");
+        suite.section("Global operators and functions");
 
-        // Тест глобальных операторов
+        // Test global operators (already tested above)
         {
             float3 a(2.0f, 3.0f, 4.0f);
             float3 b(1.0f, 2.0f, 3.0f);
@@ -673,7 +720,7 @@ namespace AfterMathTests
             suite.assert_approximately_equal(div_result, float3(2.0f, 1.5f, 4.0f / 3.0f), "Global operator /", 1e-6f);
         }
 
-        // Тест глобальных математических функций
+        // Test global mathematical functions (already tested above)
         {
             float3 a(1.0f, 2.0f, 3.0f);
             float3 b(4.0f, 6.0f, 8.0f);
@@ -687,13 +734,13 @@ namespace AfterMathTests
             suite.assert_approximately_equal(cross_result, float3(-2.0f, 4.0f, -2.0f), "Global cross()");
 
             float3 norm = normalize(a);
-            suite.assert_approximately_equal(norm.length(), 1.0f, "Global normalize() length", 1e-6f);
+            suite.assert_approximately_equal(length(norm), 1.0f, "Global normalize() length", 1e-6f);
 
             float3 lerp_result = lerp(a, b, 0.5f);
             suite.assert_approximately_equal(lerp_result, float3(2.5f, 4.0f, 5.5f), "Global lerp()");
         }
 
-        // Тест глобальных approximately
+        // Test global approximately and other utilities
         {
             float3 a(1.0f, 2.0f, 3.0f);
             float3 b(1.000001f, 2.000001f, 3.000001f);
@@ -703,7 +750,7 @@ namespace AfterMathTests
             suite.assert_true(isValid(a), "Global isValid()");
         }
 
-        // Тест глобальных геометрических функций
+        // Test global geometric functions
         {
             float3 incident(1.0f, -1.0f, 0.0f);
             float3 normal(0.0f, 1.0f, 0.0f);
@@ -720,15 +767,9 @@ namespace AfterMathTests
 
             float3 rejected = reject(v, onto);
             suite.assert_approximately_equal(rejected, float3(0.0f, 3.0f, 4.0f), "Global reject()");
-
-            float3 a(1.0f, 0.0f, 0.0f);
-            float3 b(0.0f, 1.0f, 0.0f);
-            float angle = angle_between(a, b);
-            suite.assert_approximately_equal(angle, Constants::Constants<float>::Pi / 2.0f,
-                "Global angle_between() 90 degrees", 1e-6f);
         }
 
-        // Тест глобальных HLSL-функций
+        // Test global HLSL functions (already tested above)
         {
             float3 v(-1.5f, 2.5f, -3.5f);
 
@@ -740,7 +781,7 @@ namespace AfterMathTests
                 float3(0.0f, 0.5f, 1.0f), "Global saturate()");
         }
 
-        // Тест глобальных clamp, min, max
+        // Test global clamp, min, max
         {
             float3 v(0.5f, 1.5f, -0.5f);
             float3 min_val(0.0f, 0.0f, 0.0f);
@@ -759,7 +800,7 @@ namespace AfterMathTests
             suite.assert_approximately_equal(max_result, float3(2.0f, 3.0f, 6.0f), "Global max()");
         }
 
-        // Тест глобальных операций с компонентами
+        // Test global component operations
         {
             float3 v(2.0f, 3.0f, 4.0f);
 
@@ -771,43 +812,44 @@ namespace AfterMathTests
         }
 
         // ============================================================================
-        // 12. Граничные случаи
+        // 12. Edge cases
         // ============================================================================
-        suite.section("Граничные случаи");
+        suite.section("Edge cases");
 
-        // Тест с очень маленькими значениями
+        // Test with very small values
         {
             float epsilon = 1e-30f;
             float3 tiny(epsilon, epsilon, epsilon);
-            suite.assert_true(tiny.approximately_zero(1e-20f), "Tiny values approximately_zero");
+            // Use length_sq for comparison
+            suite.assert_true(length_sq(tiny) <= 1e-50f, "Tiny values have very small length_sq");
         }
 
-        // Тест с очень большими значениями
+        // Test with very large values
         {
             float large = 1e10f;
             float3 huge(large, large, large);
-            suite.assert_false(huge.approximately_zero(), "Huge values not approximately_zero");
+            suite.assert_false(length_sq(huge) <= 1.0f, "Huge values don't have small length_sq");
 
-            float3 normalized_huge = huge.normalize();
+            float3 normalized_huge = normalize(huge);
             float expected_length = 1.0f;
-            suite.assert_approximately_equal(normalized_huge.length(), expected_length,
+            suite.assert_approximately_equal(length(normalized_huge), expected_length,
                 "Normalize huge values", 1e-6f);
         }
 
-        // Тест деления на ноль (векторное)
+        // Test division by zero (vector)
         {
             float3 a(1.0f, 2.0f, 3.0f);
             float3 zero_vec(0.0f, 0.0f, 0.0f);
 
-            // Должно вызвать деление на ноль, но мы проверим что происходит
+            // Should produce infinities or NaN
             float3 result = a / zero_vec;
 
-            // Проверяем что результат содержит бесконечности или NaN
+            // Check that result contains non-finite values
             suite.assert_true(!std::isfinite(result.x) || !std::isfinite(result.y) || !std::isfinite(result.z),
                 "Division by zero vector produces non-finite values");
         }
 
-        // Тест деления на ноль (скалярное)
+        // Test division by zero (scalar)
         {
             float3 v(1.0f, 2.0f, 3.0f);
             float3 result = v / 0.0f;
@@ -816,80 +858,80 @@ namespace AfterMathTests
                 "Division by zero scalar produces non-finite values");
         }
 
-        // Тест нормализации очень маленького вектора
+        // Test normalization of very small vector
         {
             float3 tiny(1e-20f, 1e-20f, 1e-20f);
-            float3 normalized = tiny.normalize();
+            float3 normalized = normalize(tiny);
 
-            // Должен вернуть нулевой вектор, так как длина меньше epsilon
+            // Should return zero vector since length is less than epsilon
             suite.assert_approximately_equal(normalized, float3::zero(),
                 "Normalize tiny vector returns zero");
         }
 
-        // Тест slerp с параллельными векторами
+        // Test slerp with parallel vectors
         {
             float3 a(1.0f, 0.0f, 0.0f);
-            float3 b(2.0f, 0.0f, 0.0f); // Коллинеарный, но не нормализованный
+            float3 b(2.0f, 0.0f, 0.0f); // Collinear but not normalized
 
-            a = a.normalize();
-            b = b.normalize();
+            a = normalize(a);
+            b = normalize(b);
 
             float3 slerp_result = slerp(a, b, 0.5f);
-            suite.assert_approximately_equal(slerp_result.length(), 1.0f,
+            suite.assert_approximately_equal(length(slerp_result), 1.0f,
                 "slerp() with parallel vectors length", 1e-6f);
             suite.assert_approximately_equal(slerp_result, a,
                 "slerp() with parallel vectors returns first", 1e-6f);
         }
 
-        // Тест slerp с противоположными векторами
+        // Test slerp with opposite vectors
         {
             float3 a(1.0f, 0.0f, 0.0f);
             float3 b(-1.0f, 0.0f, 0.0f);
 
-            a = a.normalize();
-            b = b.normalize();
+            a = normalize(a);
+            b = normalize(b);
 
             float3 slerp_result = slerp(a, b, 0.5f);
-            // При противоположных векторах slerp должен работать корректно
-            suite.assert_approximately_equal(slerp_result.length(), 1.0f,
+            // With opposite vectors, slerp should work correctly
+            suite.assert_approximately_equal(length(slerp_result), 1.0f,
                 "slerp() with opposite vectors length", 1e-6f);
         }
 
-        // Тест отражения от нулевой нормали
+        // Test reflection with zero normal
         {
             float3 v(1.0f, 2.0f, 3.0f);
             float3 zero_normal(0.0f, 0.0f, 0.0f);
 
-            float3 reflected = v.reflect(zero_normal);
+            float3 reflected = reflect(v, zero_normal);
             // R = I - 2*(I·N)*N = I - 0 = I
             suite.assert_approximately_equal(reflected, v, "Reflect with zero normal returns original");
         }
 
-        // Тест проекции на нулевой вектор
+        // Test projection onto zero vector
         {
             float3 v(1.0f, 2.0f, 3.0f);
             float3 zero(0.0f, 0.0f, 0.0f);
 
-            float3 projected = v.project(zero);
+            float3 projected = project(v, zero);
             suite.assert_approximately_equal(projected, float3::zero(), "Project onto zero vector returns zero");
         }
 
-        // Тест отклонения от нулевого вектора
+        // Test rejection from zero vector
         {
             float3 v(1.0f, 2.0f, 3.0f);
             float3 zero(0.0f, 0.0f, 0.0f);
 
-            float3 rejected = v.reject(zero);
+            float3 rejected = reject(v, zero);
             suite.assert_approximately_equal(rejected, v, "Reject from zero vector returns original");
         }
 
-        // Тест is_normalized для нулевого вектора
+        // Test is_normalized for zero vector
         {
             float3 zero(0.0f, 0.0f, 0.0f);
-            suite.assert_false(zero.is_normalized(), "Zero vector is not normalized");
+            suite.assert_false(is_normalized(zero), "Zero vector is not normalized");
         }
 
-        // Тест are_orthogonal и is_orthonormal_basis
+        // Test are_orthogonal and is_orthonormal_basis
         {
             float3 x(1.0f, 0.0f, 0.0f);
             float3 y(0.0f, 1.0f, 0.0f);

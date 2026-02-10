@@ -16,7 +16,7 @@
 
 #include "Autotests/autotests_quaternion.h"
 
-#include "Autotests/autotests_aabb.h"
+//#include "Autotests/autotests_aabb.h"
 
 int main()
 {
@@ -31,13 +31,12 @@ int main()
     //AfterMathTests::RunHalfTests();
     //AfterMathTests::RunHalf2Tests();
     //AfterMathTests::RunHalf3Tests();
-    AfterMathTests::RunHalf4Tests();
+    //AfterMathTests::RunHalf4Tests();
 
-    //AfterMathTests::RunQuaternionTests();
+    AfterMathTests::RunQuaternionTests();
     
     //AfterMathTests::RunAABBTests();
 
-    // Для ожидания перед закрытием (если консольное приложение)
     std::cout << "\nPress Enter to exit...";
     std::cin.get();
 
