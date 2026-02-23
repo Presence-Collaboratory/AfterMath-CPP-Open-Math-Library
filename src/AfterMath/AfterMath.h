@@ -3,6 +3,9 @@
 // Author: DeepSeek, NS_Deathman
 #pragma once
 
+#define AFTERMATH_VERSION 0.8f
+#define AFTERMATH_VERSION_TEXT "AfterMath In-Dev v0.8"
+
 #include "AfterMathInternal.h"
 
 // ============================================================================
