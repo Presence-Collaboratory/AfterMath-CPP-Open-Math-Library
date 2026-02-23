@@ -226,16 +226,59 @@ if (approximately_zero(x - y)) {              // also true
 }
 ```
 
-7. **Half‑precision vectors (memory‑saving)**
-```cpp
-half2 texCoord(0.5f, 0.75f);
-half3 normal = normalize(half3(1.0f, 2.0f, 3.0f));
+### 6. Working with half‑precision types (`half`, `half2`, `half3`, `half4`)
 
-// Convert back to float for computations
-float2 f_tex = to_float2(texCoord);
+Half‑precision types are **not** backed by native CPU 16‑bit arithmetic (which is rarely available on general‑purpose processors).  
+Instead, they are **simulated** by converting values to/from 32‑bit `float` on every operation.  
+As a result, using `half` for calculations introduces significant conversion overhead and should be **avoided in hot computational paths**.
+
+The main purpose of `half` is **data storage and memory bandwidth reduction**.  
+Each `half` occupies only 2 bytes (vs. 4 bytes for `float`), so you can store twice as many values in the same memory space.  
+This makes them ideal for:
+- Large vertex buffers (normals, texture coordinates, colors)
+- GPU data transfer where bandwidth is critical
+- Persistent data that is infrequently processed on the CPU
+
+#### Precision limitations
+
+Half‑precision offers about **3 decimal digits of precision** (the mantissa has 10 bits, giving approximately 1 part in 2048 resolution).  
+For example, a `half` can represent numbers like `1.23` accurately, but adding `0.001` to `10.0` may not be representable.
+
+```cpp
+half a = 1.23f;
+half b = 1.24f;          // still distinguishable
+half c = 1000.0f;
+half d = 1000.1f;        // may be rounded to the same value as c
 ```
 
-8. **Matrix transformations**
+Usage example – storing and converting
+```cpp
+// Create half vectors (memory efficient)
+half2 texCoord(0.5f, 0.75f);
+half3 normal = normalize(half3(1.0f, 2.0f, 3.0f));   // OK for initialization
+
+// When you need to perform calculations, convert to float
+float2 f_tex = to_float2(texCoord);
+float3 f_norm = to_float3(normal);
+
+// Now do heavy math with float...
+float3 result = f_norm * 2.0f + float3(f_tex, 0.0f);
+
+// Convert back to half only for storage (e.g., write to a buffer)
+half3 h_result = to_half3(result);
+```
+
+Memory footprint comparison
+Type	Size (bytes)	Use case
+float3	12	active calculations
+half3	6	storage / GPU transfer
+float4	16	homogeneous coords / colors
+half4	8	compact color or position storage
+
+Note: Always convert to float before performing sequences of arithmetic operations.
+Operations like h1 + h2 * h3 internally convert each operand to float, compute, and convert back – this is much slower than working directly with floats.
+
+7. **Matrix transformations**
 ```cpp
 float3 position(10.0f, 20.0f, 30.0f);
 
@@ -248,7 +291,7 @@ float4x4 world = float4x4::translation(position) *
 float3 worldPos = world * position;
 ```
 
-9. **Quaternions**
+8. **Quaternions**
 ```cpp
 quaternion q = quaternion_axis_angle(float3(0,1,0), PI/2);  // 90° around Y
 float3 v(1,0,0);
@@ -260,7 +303,7 @@ quaternion q2 = quaternion_euler(0, PI, 0);
 quaternion qSlerp = slerp(q1, q2, 0.5f);
 ```
 
-10. **Ray‑AABB intersection**
+9. **Ray‑AABB intersection**
 ```cpp
 AABB box(float3(0,0,0), float3(10,10,10));
 float3 origin(5,5,-5);
@@ -271,7 +314,7 @@ if (box.intersect_ray(origin, dir, tMin, tMax)) {
 }
 ```
 
-11. **Fast math approximations**
+10. **Fast math approximations**
 ```cpp
 float angle = 45.0f; // degrees
 float s = FastMath::fast_sin(angle);   // table lookup
