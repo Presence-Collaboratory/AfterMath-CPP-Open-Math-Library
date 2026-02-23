@@ -55,6 +55,12 @@
     <Filter Include="Autotests\Primitives\Vectors\Half">
       <UniqueIdentifier>{095d0656-45e0-4e1d-afac-6e04396b6305}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Math\Implementation\Primitives\Vectors\Custom vector">
+      <UniqueIdentifier>{c7da1882-0865-4b69-b161-698edf800706}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Math\Internal">
+      <UniqueIdentifier>{b4322771-302b-4acb-9d77-0c83e3161fe9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Autotests\AutotestCore.h">
@@ -146,6 +152,21 @@
     </ClInclude>
     <ClInclude Include="Autotests\autotests_half4.h">
       <Filter>Autotests\Primitives\Vectors\Half</Filter>
+    </ClInclude>
+    <ClInclude Include="AfterMath\math_custom_template_vector.h">
+      <Filter>Math\Implementation\Primitives\Vectors\Custom vector</Filter>
+    </ClInclude>
+    <ClInclude Include="AfterMath\math_template_vector2.h">
+      <Filter>Math\Implementation\Primitives\Vectors\Custom vector</Filter>
+    </ClInclude>
+    <ClInclude Include="AfterMath\math_template_vector3.h">
+      <Filter>Math\Implementation\Primitives\Vectors\Custom vector</Filter>
+    </ClInclude>
+    <ClInclude Include="AfterMath\AfterMathInternal.h">
+      <Filter>Math\Internal</Filter>
+    </ClInclude>
+    <ClInclude Include="AfterMath\math_template_vector4.h">
+      <Filter>Math\Implementation\Primitives\Vectors\Custom vector</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

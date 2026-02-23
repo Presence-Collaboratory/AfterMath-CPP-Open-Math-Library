@@ -159,6 +159,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AfterMath\AfterMath.h" />
+    <ClInclude Include="AfterMath\AfterMathInternal.h" />
     <ClInclude Include="AfterMath\math_aabb.h" />
     <ClInclude Include="AfterMath\math_config.h" />
     <ClInclude Include="AfterMath\math_constants.h" />
@@ -174,7 +175,11 @@
     <ClInclude Include="AfterMath\math_half2.h" />
     <ClInclude Include="AfterMath\math_half3.h" />
     <ClInclude Include="AfterMath\math_half4.h" />
+    <ClInclude Include="AfterMath\math_custom_template_vector.h" />
     <ClInclude Include="AfterMath\math_quaternion.h" />
+    <ClInclude Include="AfterMath\math_template_vector2.h" />
+    <ClInclude Include="AfterMath\math_template_vector3.h" />
+    <ClInclude Include="AfterMath\math_template_vector4.h" />
     <ClInclude Include="Autotests\AutotestCore.h" />
     <ClInclude Include="Autotests\autotests_aabb.h" />
     <ClInclude Include="Autotests\autotests_float2.h" />
