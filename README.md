@@ -278,18 +278,185 @@ half4	8	compact color or position storage
 Note: Always convert to float before performing sequences of arithmetic operations.
 Operations like h1 + h2 * h3 internally convert each operand to float, compute, and convert back – this is much slower than working directly with floats.
 
-7. **Matrix transformations**
+### 7. Working with matrices (`float2x2`, `float3x3`, `float4x4`)
+
+AfterMath provides fixed‑size matrix types with row‑major storage (compatible with HLSL).  
+All matrices support the usual arithmetic operations, as well as HLSL‑style constructors for transformations.
+
+---
+
+#### 7.1 `float2x2` – 2×2 matrices (for 2D transformations)
+
 ```cpp
-float3 position(10.0f, 20.0f, 30.0f);
+// Identity and zero matrices
+float2x2 identity = float2x2::identity();   // [1 0; 0 1]
+float2x2 zero = float2x2::zero();           // [0 0; 0 0]
 
-// Build world matrix: translation, rotation around Y, scaling
-float4x4 world = float4x4::translation(position) *
-                 float4x4::rotation_y(PI / 2.0f) *
-                 float4x4::scaling(2.0f);
+// Construct from rows or components
+float2x2 m1(float2(1,2), float2(3,4));      // rows: [1 2; 3 4]
+float2x2 m2(1,2,3,4);                       // same
 
-// Transform a point
-float3 worldPos = world * position;
+// Access elements
+float a00 = m1(0,0);                         // 1
+float2 row0 = m1[0];                          // (1,2)
+
+// Arithmetic
+float2x2 sum = m1 + m2;
+float2x2 diff = m1 - m2;
+float2x2 scaled = m1 * 2.0f;
+float2x2 product = m1 * m2;                   // matrix multiplication
+
+// Determinant and inverse
+float det = determinant(m1);
+float2x2 inv = inverse(m1);                    // if det != 0
+
+// Transpose
+float2x2 trans = transpose(m1);                // [1 3; 2 4]
+
+// Static constructors
+float2x2 rot = float2x2::rotation(angle);      // rotation matrix (radians)
+float2x2 scale = float2x2::scaling(2.0f, 3.0f); // [2 0; 0 3]
+float2x2 shear = float2x2::shear(0.5f, 0.0f);   // [1 0.5; 0 1]
+
+// Transform a vector
+float2 vec(1,2);
+float2 transformed = rot * vec;                 // matrix * column vector
+float2 transformed2 = vec * rot;                 // row vector * matrix (less common)
 ```
+
+7.2 float3x3 – 3×3 matrices (for 3D linear transformations)
+```cpp
+float3x3 identity = float3x3::identity();
+float3x3 zero = float3x3::zero();
+
+// Construct from rows
+float3x3 m(float3(1,2,3), float3(4,5,6), float3(7,8,9));
+
+// Access columns
+float3 col0 = m.col0();   // (1,4,7)
+float3 col1 = m.col1();   // (2,5,8)
+float3 col2 = m.col2();   // (3,6,9)
+
+// Matrix multiplication
+float3x3 product = m * transpose(m);
+
+// Determinant and inverse
+float det = determinant(m);
+float3x3 inv = inverse(m);
+
+// Rotation matrices (angles in radians)
+float3x3 rotX = float3x3::rotation_x(PI/2);
+float3x3 rotY = float3x3::rotation_y(PI/2);
+float3x3 rotZ = float3x3::rotation_z(PI/2);
+float3x3 rotEuler = float3x3::rotation_euler(float3(PI/2, 0, 0)); // Z*Y*X
+
+// Scaling matrix
+float3x3 scale = float3x3::scaling(2.0f, 3.0f, 4.0f); // diag(2,3,4)
+
+// Extract scale and rotation from a matrix
+float3 scales = extract_scale(m);
+float3x3 rotPart = extract_rotation(m);
+
+// Transform vectors
+float3 vec(1,2,3);
+float3 transformed = m * vec;                 // matrix * column vector
+float3 transformed2 = vec * m;                 // row vector * matrix
+```
+
+7.3 float4x4 – 4×4 matrices (for full 3D transformations including translation)
+```cpp
+float4x4 identity = float4x4::identity();
+float4x4 zero = float4x4::zero();
+
+// Build common transformation matrices
+float3 position(10,20,30);
+float3 scale(2,1,3);
+float3 eulerAngles(PI/2, 0, PI/4);
+
+float4x4 T = float4x4::translation(position);
+float4x4 S = float4x4::scaling(scale);
+float4x4 R = float4x4::rotation_euler(eulerAngles); // Z*Y*X
+
+// Combined matrix: world = translation * rotation * scaling
+float4x4 world = T * R * S;
+
+// Perspective projection (left‑handed, zero‑to‑one depth)
+float4x4 proj = float4x4::perspective_lh_zo(
+    radians(45.0f),  // field of view in radians
+    16.0f/9.0f,      // aspect ratio
+    0.1f,            // near plane
+    1000.0f          // far plane
+);
+
+// Orthographic projection
+float4x4 ortho = float4x4::orthographic_lh_zo(20.0f, 15.0f, 0.1f, 100.0f);
+
+// Look‑at matrix (view matrix)
+float3 eye(0,5,-10);
+float3 target(0,0,0);
+float3 up(0,1,0);
+float4x4 view = float4x4::look_at_lh(eye, target, up);
+
+// Combine into view‑projection matrix
+float4x4 viewProj = proj * view;   // note: projection * view
+
+// Transform points and vectors
+float3 point(1,2,3);
+float3 pointWorld = world * point;                 // applies translation, rotation, scale
+float4 pointHomogeneous = float4(point, 1.0f);
+float4 transformedH = world * pointHomogeneous;    // same as above
+
+float3 dir(0,0,1);
+float3 dirWorld = transform_vector(world, dir);    // ignores translation (w=0)
+
+// Matrix properties
+float det = determinant(world);
+float4x4 invWorld = inverse(world);                 // requires matrix to be invertible
+bool affine = is_affine(world);                      // true if last row is (0,0,0,1)
+
+// Decompose transformation
+float3 trans = get_translation(world);
+float3 scaleVec = get_scale(world);
+float3x3 rotMat = extract_rotation(world);           // 3x3 rotation part
+```
+
+7.4 HLSL‑style global matrix functions
+```cpp
+float4x4 a, b;
+
+float4x4 sum = a + b;
+float4x4 prod = a * b;                // matrix multiplication
+float4x4 transposed = transpose(a);
+float4x4 adj = adjugate(a);
+float traceVal = trace(a);
+float4 diag = diagonal(a);             // (a00, a11, a22, a33)
+
+// Compare matrices with tolerance
+if (approximately(a, b)) { /* equal */ }
+
+// Multiply vector by matrix (HLSL style)
+float4 vec(1,2,3,1);
+float4 result = mul(a, vec);           // same as a * vec
+float3 point3(1,2,3);
+float3 result3 = mul(a, point3);       // transforms point (w=1)
+float3 dir3(0,1,0);
+float3 resultDir = mul(a, dir3);       // transforms direction (w=0)
+```
+
+7.5 Row‑major vs. column‑major storage
+AfterMath stores matrices row‑major – the first four elements in memory are the first row.
+This matches HLSL, GLSL (default), and many game engines.
+If you need to pass matrices to APIs that expect column‑major (e.g., OpenGL without transpose flag), use the to_column_major() function:
+
+```cpp
+float4x4 m = ...;
+float data[16];
+m.to_column_major(data);  // fills data in column‑major order
+```
+
+All matrix operations (multiplication, vector transformation) are implemented consistently with row‑major storage, so you don't need to worry about transposition in your math.
+
+These examples cover the most frequent matrix operations. AfterMath also provides additional utilities like frobenius_norm, symmetric_part, skew_symmetric_part, and more – refer to the headers for details.
 
 8. **Quaternions**
 ```cpp
