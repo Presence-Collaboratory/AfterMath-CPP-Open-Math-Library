@@ -70,7 +70,7 @@ GCC/clang: -msse4.2
 ---
 ## Usage Examples
 1. **Vector arithmetic**
-
+```cpp
 float3 a(1.0f, 2.0f, 3.0f);
 float3 b(4.0f, 5.0f, 6.0f);
 
@@ -79,15 +79,17 @@ float3 d = a * 2.0f;            // (2, 4, 6)
 float  dot = dot(a, b);         // 32
 float3 cross = cross(a, b);     // (-3, 6, -3)
 float3 norm = normalize(a);     // unit vector
-
+```
 2. **Half‑precision vectors (memory‑saving)**
+```cpp
 half2 texCoord(0.5f, 0.75f);
 half3 normal = normalize(half3(1.0f, 2.0f, 3.0f));
 
 // Convert back to float for computations
 float2 f_tex = to_float2(texCoord);
-
+```
 3. **Matrix transformations**
+```cpp
 float3 position(10.0f, 20.0f, 30.0f);
 
 // Build world matrix: translation, rotation around Y, scaling
@@ -97,8 +99,9 @@ float4x4 world = float4x4::translation(position) *
 
 // Transform a point
 float3 worldPos = world * position;
-
+```
 4. **Quaternions**
+```cpp
 quaternion q = quaternion_axis_angle(float3(0,1,0), PI/2);  // 90° around Y
 float3 v(1,0,0);
 float3 rotated = q * v;              // (0,0,-1)
@@ -107,8 +110,9 @@ float3 rotated = q * v;              // (0,0,-1)
 quaternion q1 = identity_quaternion();
 quaternion q2 = quaternion_euler(0, PI, 0);
 quaternion qSlerp = slerp(q1, q2, 0.5f);
-
+```
 5. **Ray‑AABB intersection**
+```cpp
 AABB box(float3(0,0,0), float3(10,10,10));
 float3 origin(5,5,-5);
 float3 dir(0,0,1);
@@ -116,13 +120,14 @@ float tMin, tMax;
 if (box.intersect_ray(origin, dir, tMin, tMax)) {
     printf("Hit at distance %f\n", tMin);
 }
-
+```
 6. **Fast math approximations**
+```cpp
 float angle = 45.0f; // degrees
 float s = FastMath::fast_sin(angle);   // table lookup
 float c = FastMath::fast_cos(angle);
 float isqrt = FastMath::fast_inv_sqrt(2.0f); // ≈ 0.707
-
+```
 ---
 **Performance Notes**
 Vector operations on float3 and float4 are implemented using SSE intrinsics.
