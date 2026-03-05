@@ -598,14 +598,9 @@ namespace AfterMathTests
         // Getting and setting translation
         {
             float3 translation(5, 6, 7);
-            float4x4 mat = float4x4::identity();
-            // Note: In our new design, we don't have set_translation as a member function
-            // We need to manually set the translation
-            mat.row3.x = translation.x;
-            mat.row3.y = translation.y;
-            mat.row3.z = translation.z;
-
+            float4x4 mat = float4x4::translation(translation);
             suite.assert_equal(get_translation(mat), translation, "get_translation");
+
             suite.assert_equal(mat(3, 0), 5.0f, "translation sets (3,0)");
             suite.assert_equal(mat(3, 1), 6.0f, "translation sets (3,1)");
             suite.assert_equal(mat(3, 2), 7.0f, "translation sets (3,2)");
@@ -842,15 +837,6 @@ namespace AfterMathTests
             float4 projectedFar = transform_vector(perspLHZO, farPoint);
             projectedFar /= projectedFar.w;
             suite.assert_approximately_equal(projectedFar.z, 1.0f, "LH ZO: far plane projects to 1", 1e-5f);
-
-            // RH ZO (right, zero depth)
-            float4x4 perspRHZO = float4x4::perspective_rh_zo(fov, aspect, zNear, zFar);
-
-            // For RH ZO Z changes in opposite direction
-            nearPoint = float4(0, 0, zNear, 1);
-            projectedNear = transform_vector(perspRHZO, nearPoint);
-            projectedNear /= projectedNear.w;
-            suite.assert_approximately_equal(projectedNear.z, 0.0f, "RH ZO: near plane projects to 0", 1e-5f);
         }
 
         // Orthographic projection

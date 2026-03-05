@@ -233,10 +233,12 @@ public:
     static float4x4 zero() noexcept { return float4x4(0.0f); }
 
     static float4x4 translation(float x, float y, float z) noexcept {
-        return float4x4(1.0f, 0.0f, 0.0f, 0.0f,
+        return float4x4(
+            1.0f, 0.0f, 0.0f, 0.0f,
             0.0f, 1.0f, 0.0f, 0.0f,
             0.0f, 0.0f, 1.0f, 0.0f,
-            x, y, z, 1.0f);
+            x,    y,    z,    1.0f
+        );
     }
 
     static float4x4 translation(const float3& t) noexcept {
@@ -245,9 +247,9 @@ public:
 
     static float4x4 scaling(float x, float y, float z) noexcept {
         return float4x4(x, 0.0f, 0.0f, 0.0f,
-            0.0f, y, 0.0f, 0.0f,
-            0.0f, 0.0f, z, 0.0f,
-            0.0f, 0.0f, 0.0f, 1.0f);
+                        0.0f, y, 0.0f, 0.0f,
+                        0.0f, 0.0f, z, 0.0f,
+                        0.0f, 0.0f, 0.0f, 1.0f);
     }
 
     static float4x4 scaling(const float3& s) noexcept {
@@ -261,21 +263,18 @@ public:
     static float4x4 rotation_x(float angle) noexcept;
     static float4x4 rotation_y(float angle) noexcept;
     static float4x4 rotation_z(float angle) noexcept;
-    //static float4x4 rotation_axis(const float3& axis, float angle) noexcept;
     static float4x4 rotation_euler(const float3& angles) noexcept;
 
-    static float4x4 perspective_lh_zo(float fovY, float aspect, float zNear, float zFar) noexcept;
-    static float4x4 perspective_rh_zo(float fovY, float aspect, float zNear, float zFar) noexcept;
-    static float4x4 perspective_lh_no(float fovY, float aspect, float zNear, float zFar) noexcept;
-    static float4x4 perspective_rh_no(float fovY, float aspect, float zNear, float zFar) noexcept;
-    static float4x4 perspective(float fovY, float aspect, float zNear, float zFar) noexcept;
-    static float4x4 orthographic_lh_zo(float width, float height, float zNear, float zFar) noexcept;
-    static float4x4 orthographic_off_center_lh_zo(float left, float right, float bottom, float top, float zNear, float zFar) noexcept;
-    static float4x4 orthographic(float w, float h, float zn, float zf) noexcept;
+    static float4x4 perspective_lh_zo(float fovY, float aspect, float = 0.01f, float zFar = 100.0f) noexcept;
+    static float4x4 perspective_rh_zo(float fovY, float aspect, float = 0.01f, float zFar = 100.0f) noexcept;
+    static float4x4 perspective_lh_no(float fovY, float aspect, float = 0.01f, float zFar = 100.0f) noexcept;
+    static float4x4 perspective(float fovY, float aspect, float zNear = 0.01f, float zFar = 100.0f) noexcept;
+    static float4x4 orthographic_lh_zo(float width, float height, float zNear = 0.01f, float zFar = 100.0f) noexcept;
+    static float4x4 orthographic_off_center_lh_zo(float left, float right, float bottom, float top, float zNear = 0.01f, float zFar = 100.0f) noexcept;
+    static float4x4 orthographic(float w, float h, float zNear = 0.01f, float zFar = 100.0f) noexcept;
 
-    static float4x4 look_at_lh(const float3& eye, const float3& target, const float3& up) noexcept;
-    static float4x4 look_at_rh(const float3& eye, const float3& target, const float3& up) noexcept;
-    static float4x4 look_at(const float3& eye, const float3& target, const float3& up) noexcept;
+    static float4x4 look_at_lh(const float3& eye, const float3& target, const float3& up);
+    static float4x4 look_at(const float3& eye, const float3& target, const float3& up);
 
     // ============================================================================
     // Utility Methods
@@ -353,25 +352,20 @@ inline float4x4 operator*(const float4x4& a, const float4x4& b) noexcept {
 }
 
 // Matrix-vector multiplication
-inline float4 operator*(const float4x4& mat, const float4& vec) noexcept {
-    __m128 result = _mm_mul_ps(_mm_set1_ps(vec.x), mat.row0.get_simd());
-    result = _mm_add_ps(result, _mm_mul_ps(_mm_set1_ps(vec.y), mat.row1.get_simd()));
-    result = _mm_add_ps(result, _mm_mul_ps(_mm_set1_ps(vec.z), mat.row2.get_simd()));
-    result = _mm_add_ps(result, _mm_mul_ps(_mm_set1_ps(vec.w), mat.row3.get_simd()));
-    return float4(result);
+inline float4 operator*(const float4& vec, const float4x4& mat) noexcept
+{
+    float4 result;
+    result.x = vec.x * mat.row0.x + vec.y * mat.row1.x + vec.z * mat.row2.x + vec.w * mat.row3.x;
+    result.y = vec.x * mat.row0.y + vec.y * mat.row1.y + vec.z * mat.row2.y + vec.w * mat.row3.y;
+    result.z = vec.x * mat.row0.z + vec.y * mat.row1.z + vec.z * mat.row2.z + vec.w * mat.row3.z;
+    result.w = vec.x * mat.row0.w + vec.y * mat.row1.w + vec.z * mat.row2.w + vec.w * mat.row3.w;
+    return result;
 }
 
-inline float4 operator*(const float4& vec, const float4x4& mat) noexcept {
-    return mat * vec;
-}
-
-inline float3 operator*(const float4x4& mat, const float3& vec) noexcept {
-    float4 r = mat * float4(vec.x, vec.y, vec.z, 1.0f);
+inline float3 operator*(const float3& point, const float4x4& mat) noexcept 
+{
+    float4 r = float4(point.x, point.y, point.z, 1.0f) * mat;
     return float3(r.x / r.w, r.y / r.w, r.z / r.w);
-}
-
-inline float3 operator*(const float3& point, const float4x4& mat) noexcept {
-    return mat * point;
 }
 
 // Matrix properties and transformations
@@ -402,10 +396,10 @@ inline float determinant(const float4x4& mat) noexcept {
     float iokm = i * o - k * m;
     float in_jm = i * n - j * m;
 
-    return a * (f * kplo - g * jpln + h * jokn) -
-        b * (e * kplo - g * iplm + h * iokm) +
-        c * (e * jpln - f * iplm + h * in_jm) -
-        d * (e * jokn - f * iokm + g * in_jm);
+    return  a * (f * kplo - g * jpln + h * jokn) -
+            b * (e * kplo - g * iplm + h * iokm) +
+            c * (e * jpln - f * iplm + h * in_jm) -
+            d * (e * jokn - f * iokm + g * in_jm);
 }
 
 inline float4x4 inverse_affine(const float4x4& mat) noexcept {
@@ -415,7 +409,6 @@ inline float4x4 inverse_affine(const float4x4& mat) noexcept {
     const float3 t = float3(mat.row3.x, mat.row3.y, mat.row3.z);
 
     const float det = dot(r0, cross(r1, r2));
-
     if (std::abs(det) < 1e-8f) {
         return float4x4::identity();
     }
@@ -426,12 +419,14 @@ inline float4x4 inverse_affine(const float4x4& mat) noexcept {
     const float3 c1 = cross(r2, r0) * inv_det;
     const float3 c2 = cross(r0, r1) * inv_det;
 
-    const float3 inv_t = float3(-dot(c0, t), -dot(c1, t), -dot(c2, t));
+    float3 inv_t = float3(-dot(c0, t), -dot(c1, t), -dot(c2, t));
 
-    return float4x4(c0.x, c1.x, c2.x, 0.0f,
-        c0.y, c1.y, c2.y, 0.0f,
-        c0.z, c1.z, c2.z, 0.0f,
-        inv_t.x, inv_t.y, inv_t.z, 1.0f);
+    return float4x4(
+        c0.x,    c1.x,    c2.x,    0.0f,
+        c0.y,    c1.y,    c2.y,    0.0f,
+        c0.z,    c1.z,    c2.z,    0.0f,
+        inv_t.x, inv_t.y, inv_t.z, 1.0f
+    );
 }
 
 inline float4x4 adjugate(const float4x4& mat) noexcept {
@@ -460,28 +455,28 @@ inline float4x4 adjugate(const float4x4& mat) noexcept {
     float ej_fi = e * j - f * i;
 
     return float4x4(f * kplo - g * jpln + h * jokn,
-        -b * kplo + c * jpln - d * jokn,
-        b * gpho - c * fphn + d * fogn,
-        -b * gl_hk + c * fl_hj - d * fk_gj,
-        -e * kplo + g * iplm - h * iokm,
-        a * kplo - c * iplm + d * iokm,
-        -a * gpho + c * ep_hm - d * eogm,
-        a * gl_hk - c * el_hi + d * ek_gi,
-        e * jpln - f * iplm + h * in_jm,
-        -a * jpln + b * iplm - d * in_jm,
-        a * fphn - b * ep_hm + d * en_fm,
-        -a * fl_hj + b * el_hi - d * ej_fi,
-        -e * jokn + f * iokm - g * in_jm,
-        a * jokn - b * iokm + c * in_jm,
-        -a * fogn + b * eogm - c * en_fm,
-        a * fk_gj - b * ek_gi + c * ej_fi);
+                    -b * kplo + c * jpln - d * jokn,
+                    b * gpho - c * fphn + d * fogn,
+                    -b * gl_hk + c * fl_hj - d * fk_gj,
+                    -e * kplo + g * iplm - h * iokm,
+                    a * kplo - c * iplm + d * iokm,
+                    -a * gpho + c * ep_hm - d * eogm,
+                    a * gl_hk - c * el_hi + d * ek_gi,
+                    e * jpln - f * iplm + h * in_jm,
+                    -a * jpln + b * iplm - d * in_jm,
+                    a * fphn - b * ep_hm + d * en_fm,
+                    -a * fl_hj + b * el_hi - d * ej_fi,
+                    -e * jokn + f * iokm - g * in_jm,
+                    a * jokn - b * iokm + c * in_jm,
+                    -a * fogn + b * eogm - c * en_fm,
+                    a * fk_gj - b * ek_gi + c * ej_fi);
 }
 
 inline bool is_affine(const float4x4& mat, float epsilon = 1e-6f) noexcept {
     return std::abs(mat.row0.w) < epsilon &&
-        std::abs(mat.row1.w) < epsilon &&
-        std::abs(mat.row2.w) < epsilon &&
-        std::abs(mat.row3.w - 1.0f) < epsilon;
+           std::abs(mat.row1.w) < epsilon &&
+           std::abs(mat.row2.w) < epsilon &&
+           std::abs(mat.row3.w - 1.0f) < epsilon;
 }
 
 inline float4x4 inverse(const float4x4& mat) noexcept {
@@ -511,16 +506,16 @@ inline float frobenius_norm(const float4x4& mat) noexcept {
 
 // Vector transformations
 inline float4 transform_vector(const float4x4& mat, const float4& vec) noexcept {
-    return mat * vec;
+    return vec * mat;
 }
 
 inline float3 transform_point(const float4x4& mat, const float3& point) noexcept {
-    float4 r = mat * float4(point.x, point.y, point.z, 1.0f);
+    float4 r = float4(point.x, point.y, point.z, 1.0f) * mat;
     return float3(r.x / r.w, r.y / r.w, r.z / r.w);
 }
 
 inline float3 transform_vector(const float4x4& mat, const float3& vec) noexcept {
-    float4 r = mat * float4(vec.x, vec.y, vec.z, 0.0f);
+    float4 r = float4(vec.x, vec.y, vec.z, 0.0f) * mat;
     return float3(r.x, r.y, r.z);
 }
 
@@ -541,10 +536,10 @@ inline float3 get_scale(const float4x4& mat) noexcept {
 }
 
 inline bool is_identity(const float4x4& mat, float epsilon = 1e-6f) noexcept {
-    return approximately(mat.row0, float4(1.0f, 0.0f, 0.0f, 0.0f), epsilon) &&
-        approximately(mat.row1, float4(0.0f, 1.0f, 0.0f, 0.0f), epsilon) &&
-        approximately(mat.row2, float4(0.0f, 0.0f, 1.0f, 0.0f), epsilon) &&
-        approximately(mat.row3, float4(0.0f, 0.0f, 0.0f, 1.0f), epsilon);
+    return  approximately(mat.row0, float4(1.0f, 0.0f, 0.0f, 0.0f), epsilon) &&
+            approximately(mat.row1, float4(0.0f, 1.0f, 0.0f, 0.0f), epsilon) &&
+            approximately(mat.row2, float4(0.0f, 0.0f, 1.0f, 0.0f), epsilon) &&
+            approximately(mat.row3, float4(0.0f, 0.0f, 0.0f, 1.0f), epsilon);
 }
 
 inline bool is_orthogonal(const float4x4& mat, float epsilon = 1e-6f) noexcept {
@@ -566,16 +561,16 @@ inline bool is_orthogonal(const float4x4& mat, float epsilon = 1e-6f) noexcept {
     float len1 = length_sq(r1);
     float len2 = length_sq(r2);
 
-    return approximately(len0, 1.0f, epsilon) &&
-        approximately(len1, 1.0f, epsilon) &&
-        approximately(len2, 1.0f, epsilon);
+    return  approximately(len0, 1.0f, epsilon) &&
+            approximately(len1, 1.0f, epsilon) &&
+            approximately(len2, 1.0f, epsilon);
 }
 
 inline bool approximately(const float4x4& a, const float4x4& b, float epsilon = 1e-6f) noexcept {
-    return approximately(a.row0, b.row0, epsilon) &&
-        approximately(a.row1, b.row1, epsilon) &&
-        approximately(a.row2, b.row2, epsilon) &&
-        approximately(a.row3, b.row3, epsilon);
+    return  approximately(a.row0, b.row0, epsilon) &&
+            approximately(a.row1, b.row1, epsilon) &&
+            approximately(a.row2, b.row2, epsilon) &&
+            approximately(a.row3, b.row3, epsilon);
 }
 
 inline bool approximately_zero(const float4x4& mat, float epsilon = 1e-6f) noexcept {
@@ -583,99 +578,67 @@ inline bool approximately_zero(const float4x4& mat, float epsilon = 1e-6f) noexc
 }
 
 // HLSL-like functions
-inline float4x4 mul(const float4x4& a, const float4x4& b) noexcept {
-    return a * b;
-}
-
-inline float4 mul(const float4x4& mat, const float4& vec) noexcept {
-    return mat * vec;
-}
-
 inline float4 mul(const float4& vec, const float4x4& mat) noexcept {
-    return mat * vec;
-}
-
-inline float3 mul(const float4x4& mat, const float3& point) noexcept {
-    return transform_point(mat, point);
+    return vec * mat;
 }
 
 inline float3 mul(const float3& point, const float4x4& mat) noexcept {
     return transform_point(mat, point);
 }
 
-// Static method implementations
-inline float4x4 float4x4::rotation_x(float angle) noexcept {
-    float s = std::sin(angle);
+inline float4x4 float4x4::rotation_x(float angle) noexcept
+{
     float c = std::cos(angle);
-    return float4x4(1.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, c, -s, 0.0f,
-        0.0f, s, c, 0.0f,
-        0.0f, 0.0f, 0.0f, 1.0f);
-}
-
-inline float4x4 float4x4::rotation_y(float angle) noexcept {
     float s = std::sin(angle);
-    float c = std::cos(angle);
-    return float4x4(c, 0.0f, -s, 0.0f,
-        0.0f, 1.0f, 0.0f, 0.0f,
-        s, 0.0f, c, 0.0f,
-        0.0f, 0.0f, 0.0f, 1.0f);
+    return float4x4(1,  0, 0, 0,
+                    0,  c, s, 0,
+                    0, -s, c, 0,
+                    0,  0, 0, 1);
 }
-
-inline float4x4 float4x4::rotation_z(float angle) noexcept {
+inline float4x4 float4x4::rotation_y(float angle) noexcept
+{
+    float c = std::cos(angle);
     float s = std::sin(angle);
-    float c = std::cos(angle);
-    return float4x4(c, -s, 0.0f, 0.0f,
-        s, c, 0.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 1.0f);
+    return float4x4(c, 0, -s, 0,
+                    0, 1,  0, 0,
+                    s, 0,  c, 0,
+                    0, 0,  0, 1);
 }
-
-//inline float4x4 float4x4::rotation_axis(const float3& axis, float angle) noexcept {
-//    return AfterMath::rotation_axis(axis, angle);
-//}
+inline float4x4 float4x4::rotation_z(float angle) noexcept
+{
+    float c = std::cos(angle);
+    float s = std::sin(angle);
+    return float4x4( c, s, 0, 0,
+                    -s, c, 0, 0,
+                     0, 0, 1, 0,
+                     0, 0, 0, 1);
+}
 
 inline float4x4 float4x4::rotation_euler(const float3& angles) noexcept {
     return rotation_z(angles.z) * rotation_y(angles.y) * rotation_x(angles.x);
 }
 
 inline float4x4 float4x4::perspective_lh_zo(float fovY, float aspect, float zNear, float zFar) noexcept {
-    float h = 1.0f / std::tan(fovY * 0.5f);
-    float w = h / aspect;
+    float cot = 1.0f / std::tan(fovY * 0.5f);
     float r = zFar / (zFar - zNear);
-    return float4x4(w, 0.0f, 0.0f, 0.0f,
-        0.0f, h, 0.0f, 0.0f,
-        0.0f, 0.0f, r, 1.0f,
-        0.0f, 0.0f, -r * zNear, 0.0f);
-}
-
-inline float4x4 float4x4::perspective_rh_zo(float fovY, float aspect, float zNear, float zFar) noexcept {
-    float tanHalfFov = std::tan(fovY * 0.5f);
-    float h = 1.0f / tanHalfFov;
-    float w = h / aspect;
-    float range_inv = 1.0f / (zNear - zFar);
-    return float4x4(w, 0.0f, 0.0f, 0.0f,
-        0.0f, h, 0.0f, 0.0f,
-        0.0f, 0.0f, zFar * range_inv, -1.0f,
-        0.0f, 0.0f, -zNear * zFar * range_inv, 0.0f);
+    return float4x4(
+        cot / aspect, 0.0f, 0.0f,       0.0f,
+        0.0f,         cot,  0.0f,       0.0f,
+        0.0f,         0.0f, r,          1.0f,
+        0.0f,         0.0f, -r * zNear, 0.0f
+    );
 }
 
 inline float4x4 float4x4::perspective_lh_no(float fovY, float aspect, float zNear, float zFar) noexcept {
-    float h = 1.0f / std::tan(fovY * 0.5f);
-    float w = h / aspect;
-    return float4x4(w, 0.0f, 0.0f, 0.0f,
-        0.0f, h, 0.0f, 0.0f,
-        0.0f, 0.0f, (zFar + zNear) / (zFar - zNear), 1.0f,
-        0.0f, 0.0f, -2.0f * zNear * zFar / (zFar - zNear), 0.0f);
-}
-
-inline float4x4 float4x4::perspective_rh_no(float fovY, float aspect, float zNear, float zFar) noexcept {
-    float h = 1.0f / std::tan(fovY * 0.5f);
-    float w = h / aspect;
-    return float4x4(w, 0.0f, 0.0f, 0.0f,
-        0.0f, h, 0.0f, 0.0f,
-        0.0f, 0.0f, -(zFar + zNear) / (zFar - zNear), -1.0f,
-        0.0f, 0.0f, -2.0f * zNear * zFar / (zFar - zNear), 0.0f);
+    float cot = 1.0f / std::tan(fovY * 0.5f);
+    float w = cot / aspect;
+    float r = zFar / (zFar - zNear);
+    return float4x4(
+        w,    0.0f, 0.0f,       0.0f,
+        0.0f, cot,  0.0f,       0.0f,
+        0.0f, 0.0f, r,          1.0f,
+        0.0f, 0.0f, -r * zNear, 0.0f
+    );
 }
 
 inline float4x4 float4x4::perspective(float fovY, float aspect, float zNear, float zFar) noexcept {
@@ -683,18 +646,21 @@ inline float4x4 float4x4::perspective(float fovY, float aspect, float zNear, flo
 }
 
 inline float4x4 float4x4::orthographic_lh_zo(float width, float height, float zNear, float zFar) noexcept {
-    float fRange = 1.0f / (zFar - zNear);
-    return float4x4(2.0f / width, 0.0f, 0.0f, 0.0f,
-        0.0f, 2.0f / height, 0.0f, 0.0f,
-        0.0f, 0.0f, fRange, 0.0f,
-        0.0f, 0.0f, -zNear * fRange, 1.0f);
+    float r = 1.0f / (zFar - zNear);
+    return float4x4(
+        2.0f / width, 0.0f,          0.0f,       0.0f,
+        0.0f,         2.0f / height, 0.0f,       0.0f,
+        0.0f,         0.0f,          r,          0.0f,
+        0.0f,         0.0f,          -zNear * r, 1.0f
+    );
 }
 
 inline float4x4 float4x4::orthographic_off_center_lh_zo(float left, float right, float bottom, float top, float zNear, float zFar) noexcept {
     float fRange = 1.0f / (zFar - zNear);
-    return float4x4(2.0f / (right - left), 0.0f, 0.0f, 0.0f,
-        0.0f, 2.0f / (top - bottom), 0.0f, 0.0f,
-        0.0f, 0.0f, fRange, 0.0f,
+    return float4x4(
+        2.0f / (right - left),            0.0f,                             0.0f,            0.0f,
+        0.0f,                             2.0f / (top - bottom),            0.0f,            0.0f,
+        0.0f,                             0.0f,                             fRange,          0.0f,
         -(left + right) / (right - left), -(top + bottom) / (top - bottom), -zNear * fRange, 1.0f);
 }
 
@@ -702,16 +668,95 @@ inline float4x4 float4x4::orthographic(float w, float h, float zn, float zf) noe
     return orthographic_lh_zo(w, h, zn, zf);
 }
 
-inline float4x4 float4x4::look_at_lh(const float3& eye, const float3& target, const float3& up) noexcept {
+inline float4x4 float4x4::look_at_lh(const float3& eye, const float3& target, const float3& up) {
+    float3 zaxis = normalize(target - eye);
+    float3 xaxis = normalize(cross(up, zaxis));
+    float3 yaxis = cross(zaxis, xaxis);
+
+    return float4x4(
+        xaxis.x, xaxis.y, xaxis.z, 0,
+        yaxis.x, yaxis.y, yaxis.z, 0,
+        zaxis.x, zaxis.y, zaxis.z, 0,
+        -dot(xaxis, eye), -dot(yaxis, eye), -dot(zaxis, eye), 1
+    );
+}
+
+inline float4x4 float4x4::look_at(const float3& eye, const float3& target, const float3& up) {
     return look_at_lh(eye, target, up);
 }
 
-inline float4x4 float4x4::look_at_rh(const float3& eye, const float3& target, const float3& up) noexcept {
-    return look_at_rh(eye, target, up);
+// ============================================================================
+// Global Transformation Functions (HLSL Style)
+// ============================================================================
+
+// Translation
+inline float4x4 translation(float x, float y, float z) noexcept {
+    return float4x4::translation(x, y, z);
 }
 
-inline float4x4 float4x4::look_at(const float3& eye, const float3& target, const float3& up) noexcept {
-    return look_at(eye, target, up);
+inline float4x4 translation(const float3& t) noexcept {
+    return float4x4::translation(t);
+}
+
+inline float4x4 translation(float scalar) noexcept
+{
+    return float4x4::translation(scalar, scalar, scalar);
+}
+
+// Scaling
+inline float4x4 scaling(float x, float y, float z) noexcept {
+    return float4x4::scaling(x, y, z);
+}
+
+inline float4x4 scaling(const float3& s) noexcept {
+    return float4x4::scaling(s);
+}
+
+inline float4x4 scaling(float uniformScale) noexcept {
+    return float4x4::scaling(uniformScale);
+}
+
+// Rotation around principal axes
+inline float4x4 rotation_x(float angle) noexcept {
+    return float4x4::rotation_x(angle);
+}
+
+inline float4x4 rotation_y(float angle) noexcept {
+    return float4x4::rotation_y(angle);
+}
+
+inline float4x4 rotation_z(float angle) noexcept {
+    return float4x4::rotation_z(angle);
+}
+
+inline float4x4 rotation_euler(const float3& angles) noexcept {
+    return float4x4::rotation_euler(angles);
+}
+
+// Perspective projections
+inline float4x4 perspective_lh_zo(float fovY, float aspect, float zNear = 0.01f, float zFar = 100.0f) noexcept {
+    return float4x4::perspective_lh_zo(fovY, aspect, zNear, zFar);
+}
+
+inline float4x4 perspective_lh_no(float fovY, float aspect, float zNear = 0.01f, float zFar = 100.0f) noexcept {
+    return float4x4::perspective_lh_no(fovY, aspect, zNear, zFar);
+}
+
+inline float4x4 perspective(float fovY, float aspect, float zNear = 0.01f, float zFar = 100.0f) noexcept {
+    return float4x4::perspective(fovY, aspect, zNear, zFar);
+}
+
+// Orthographic projections
+inline float4x4 orthographic_lh_zo(float width, float height, float zNear = 0.01f, float zFar = 100.0f) noexcept {
+    return float4x4::orthographic_lh_zo(width, height, zNear, zFar);
+}
+
+inline float4x4 orthographic_off_center_lh_zo(float left, float right, float bottom, float top, float zNear = 0.01f, float zFar = 100.0f) noexcept {
+    return float4x4::orthographic_off_center_lh_zo(left, right, bottom, top, zNear, zFar);
+}
+
+inline float4x4 orthographic(float w, float h, float, float zNear = 0.01f, float zFar = 100.0f) noexcept {
+    return float4x4::orthographic(w, h, zNear, zFar);
 }
 
 // Additional global functions
@@ -726,33 +771,17 @@ inline float4x4 rotation_axis(const float3& axis, float angle) noexcept {
     float3 n = normalize(axis);
     float x = n.x, y = n.y, z = n.z;
 
-    return float4x4(t * x * x + c, t * x * y - z * s, t * x * z + y * s, 0.0f,
-        t * x * y + z * s, t * y * y + c, t * y * z - x * s, 0.0f,
-        t * x * z - y * s, t * y * z + x * s, t * z * z + c, 0.0f,
-        0.0f, 0.0f, 0.0f, 1.0f);
+    return float4x4(t * x * x + c, t * x * y + z * s, t * x * z - y * s, 0.0f,
+                    t * x * y - z * s, t * y * y + c, t * y * z + x * s, 0.0f,
+                    t * x * z + y * s, t * y * z - x * s, t * z * z + c, 0.0f,
+                    0.0f,              0.0f,              0.0f,          1.0f);
 }
 
-inline float4x4 look_at_lh(const float3& eye, const float3& target, const float3& up) noexcept {
-    float3 z = normalize(target - eye);
-    float3 x = normalize(cross(up, z));
-    float3 y = cross(z, x);
-    return float4x4(x.x, x.y, x.z, 0.0f,
-        y.x, y.y, y.z, 0.0f,
-        z.x, z.y, z.z, 0.0f,
-        -dot(x, eye), -dot(y, eye), -dot(z, eye), 1.0f);
+inline float4x4 look_at_lh(const float3& eye = float3(0.0f, 0.0f, 0.0f), const float3& target = float3(0.0f, 0.0f, 0.0f), const float3& up = float3(0.0f, 1.0f, 0.0f)) noexcept {
+    return float4x4::look_at_lh(eye, target, up);
 }
 
-inline float4x4 look_at_rh(const float3& eye, const float3& target, const float3& up) noexcept {
-    float3 z = normalize(eye - target);
-    float3 x = normalize(cross(up, z));
-    float3 y = cross(z, x);
-    return float4x4(x.x, x.y, x.z, 0.0f,
-        y.x, y.y, y.z, 0.0f,
-        z.x, z.y, z.z, 0.0f,
-        -dot(x, eye), -dot(y, eye), -dot(z, eye), 1.0f);
-}
-
-inline float4x4 look_at(const float3& eye, const float3& target, const float3& up) noexcept {
+inline float4x4 look_at(const float3& eye = float3(0.0f, 0.0f, 0.0f), const float3& target = float3(0.0f, 0.0f, 0.0f), const float3& up = float3(0.0f, 1.0f, 0.0f)) noexcept {
     return look_at_lh(eye, target, up);
 }
 
