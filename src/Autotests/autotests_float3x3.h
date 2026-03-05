@@ -103,8 +103,8 @@ namespace AfterMathTests
             // Check specific values for 45 degrees
             float sqrt2_2 = std::sqrt(2.0f) / 2.0f;
             float3x3 expectedRotX(1, 0, 0,
-                0, sqrt2_2, -sqrt2_2,
-                0, sqrt2_2, sqrt2_2);
+                     0, sqrt2_2, sqrt2_2,
+                     0, -sqrt2_2, sqrt2_2);
             suite.assert_approximately_equal(rotX, expectedRotX, "rotation_x 45 degrees");
         }
 
@@ -114,7 +114,7 @@ namespace AfterMathTests
 
             // Vector along X axis should transform to vector along Z axis
             float3 vec(1, 0, 0);
-            float3 transformed = rotY * vec;
+            float3 transformed = vec * rotY;
             suite.assert_approximately_equal(transformed, float3(0, 0, -1), "rotation_y 90 degrees transforms (1,0,0)");
         }
 
@@ -124,7 +124,7 @@ namespace AfterMathTests
 
             // Vector (1,0,0) should transform to (-1,0,0)
             float3 vec(1, 0, 0);
-            float3 transformed = rotZ * vec;
+            float3 transformed = vec * rotZ;
             suite.assert_approximately_equal(transformed, float3(-1, 0, 0), "rotation_z 180 degrees");
         }
 
@@ -167,7 +167,7 @@ namespace AfterMathTests
 
             // Multiplying skew-symmetric matrix by vector is equivalent to cross product
             float3 testVec(4, 5, 6);
-            float3 result1 = skew * testVec;
+            float3 result1 = testVec * skew;
             float3 result2 = cross(vec, testVec);
             suite.assert_approximately_equal(result1, result2, "skew_symmetric * v = cross(vec, v)");
         }
@@ -325,13 +325,6 @@ namespace AfterMathTests
 
         float3 v(2, 3, 4);
 
-        // Matrix * vector (right multiplication)
-        {
-            float3 result = M * v;
-            float3 expected(20, 47, 74); // Calculation: (1*2+2*3+3*4, 4*2+5*3+6*4, 7*2+8*3+9*4)
-            suite.assert_equal(result, expected, "Matrix * vector");
-        }
-
         // Vector * matrix (left multiplication)
         {
             float3 result = v * M;
@@ -342,14 +335,14 @@ namespace AfterMathTests
         // Test transform_vector (now global function)
         {
             float3 result = transform_vector(M, v);
-            float3 expected = M * v;
+            float3 expected = v * M;
             suite.assert_equal(result, expected, "transform_vector");
         }
 
         // Test transform_point (should be same as transform_vector for float3x3)
         {
             float3 result = transform_point(M, v);
-            float3 expected = M * v;
+            float3 expected = v * M;
             suite.assert_equal(result, expected, "transform_point");
         }
 
@@ -361,7 +354,7 @@ namespace AfterMathTests
             float3 transformed = transform_normal(rotation, normal);
 
             // For orthonormal matrix, transform_normal is equivalent to multiplication
-            float3 expected = rotation * normal;
+            float3 expected = normal * rotation;
             suite.assert_approximately_equal(transformed, expected, "transform_normal for orthonormal matrix");
 
             // Test with non-orthogonal matrix
@@ -512,13 +505,12 @@ namespace AfterMathTests
             suite.assert_approximately_equal(extracted, scaleVec, "extract_scale from scaling matrix");
 
             // For matrix with rotation and scale
-            float3x3 rotScale = float3x3::rotation_z(PI / 4.0f) *
-                float3x3::scaling(2, 3, 4);
+            float3x3 rotScale = float3x3::rotation_z(PI / 4.0f) * float3x3::scaling(2, 3, 4);
             float3 extracted2 = extract_scale(rotScale);
             // Scale should be extracted as column lengths
-            float3 expected2(length(rotScale.col0()),
-                length(rotScale.col1()),
-                length(rotScale.col2()));
+            float3 expected2(length(rotScale.row0),
+                             length(rotScale.row1),
+                             length(rotScale.row2));
             suite.assert_approximately_equal(extracted2, expected2, "extract_scale from rotation+scaling");
         }
 

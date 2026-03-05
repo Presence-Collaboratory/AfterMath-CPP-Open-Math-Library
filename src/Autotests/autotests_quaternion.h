@@ -294,7 +294,7 @@ namespace AfterMathTests
             quaternion q = quaternion_rotation_y(Constants::PI / 3);
             float3 v(1, 2, 3);
             float3 rotated_q = q * v;
-            float3 rotated_m = quaternion_to_matrix3x3(q) * v;
+            float3 rotated_m = v * quaternion_to_matrix3x3(q);
             suite.assert_approximately_equal(rotated_q, rotated_m,
                 "Quaternion and matrix rotation equivalence", 1e-5f);
         }
@@ -370,9 +370,9 @@ namespace AfterMathTests
             float3x3 m1 = quaternion_to_matrix3x3(q);
 
             // Create rotation matrix directly from Euler angles in Yaw->Pitch->Roll order
-            float3x3 m2 = float3x3::rotation_y(euler.x) *  // yaw (Y)
-                float3x3::rotation_x(euler.y) *  // pitch (X)
-                float3x3::rotation_z(euler.z);   // roll (Z)
+            float3x3 m2 = float3x3::rotation_z(euler.z) *
+                          float3x3::rotation_x(euler.y) *
+                          float3x3::rotation_y(euler.x);
 
             suite.assert_approximately_equal(m1, m2, "Euler to matrix consistency", 1e-4f);
         }
