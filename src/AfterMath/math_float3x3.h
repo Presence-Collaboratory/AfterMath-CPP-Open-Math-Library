@@ -242,24 +242,24 @@ public:
         float s = std::sin(angle);
         float c = std::cos(angle);
         return  float3x3(float3(1.0f, 0.0f, 0.0f),
-                         float3(0.0f, c,    s),
-                         float3(0.0f, -s,   c));
+            float3(0.0f, c, s),
+            float3(0.0f, -s, c));
     }
 
     static float3x3 rotation_y(float angle) noexcept {
         float s = std::sin(angle);
         float c = std::cos(angle);
-        return  float3x3(float3(c,    0.0f, -s),
-                         float3(0.0f, 1.0f, 0.0f),
-                         float3(s,    0.0f, c));
+        return  float3x3(float3(c, 0.0f, -s),
+            float3(0.0f, 1.0f, 0.0f),
+            float3(s, 0.0f, c));
     }
 
     static float3x3 rotation_z(float angle) noexcept {
         float s = std::sin(angle);
         float c = std::cos(angle);
-        return  float3x3(float3(c,    s,    0.0f),
-                         float3(-s,   c,    0.0f),
-                         float3(0.0f, 0.0f, 1.0f));
+        return  float3x3(float3(c, s, 0.0f),
+            float3(-s, c, 0.0f),
+            float3(0.0f, 0.0f, 1.0f));
     }
 
     /*static float3x3 rotation_axis(const float3& axis, float angle) noexcept;*/
@@ -270,16 +270,16 @@ public:
 
     static float3x3 skew_symmetric(const float3& vec) noexcept {
         return  float3x3(
-                float3(0.0f, vec.z, -vec.y),     // row 0: (0, vz, -vy)
-                float3(-vec.z, 0.0f, vec.x),     // row 1: (-vz, 0, vx)
-                float3(vec.y, -vec.x, 0.0f)      // row 2: (vy, -vx, 0)
+            float3(0.0f, vec.z, -vec.y),     // row 0: (0, vz, -vy)
+            float3(-vec.z, 0.0f, vec.x),     // row 1: (-vz, 0, vx)
+            float3(vec.y, -vec.x, 0.0f)      // row 2: (vy, -vx, 0)
         );
     }
 
     static float3x3 outer_product(const float3& u, const float3& v) noexcept {
         return  float3x3(float3(u.x * v.x, u.x * v.y, u.x * v.z),
-                float3(u.y * v.x, u.y * v.y, u.y * v.z),
-                float3(u.z * v.x, u.z * v.y, u.z * v.z));
+            float3(u.y * v.x, u.y * v.y, u.y * v.z),
+            float3(u.z * v.x, u.z * v.y, u.z * v.z));
     }
 };
 
@@ -412,6 +412,45 @@ inline float3x3 symmetric_part(const float3x3& mat) noexcept {
 inline float3x3 skew_symmetric_part(const float3x3& mat) noexcept {
     float3x3 trans = transpose(mat);
     return (mat - trans) * 0.5f;
+}
+
+// ============================================================================
+// Global Transformation Functions (HLSL Style) for float3x3
+// ============================================================================
+
+inline float3x3 scaling(float x, float y, float z) noexcept
+{
+    return float3x3::scaling(x, y, z);
+}
+
+inline float3x3 scaling(const float3& s) noexcept
+{
+    return float3x3::scaling(s);
+}
+
+inline float3x3 scaling(float uniformScale) noexcept
+{
+    return float3x3::scaling(uniformScale);
+}
+
+inline float3x3 rotation_x(float angle) noexcept
+{
+    return float3x3::rotation_x(angle);
+}
+
+inline float3x3 rotation_y(float angle) noexcept
+{
+    return float3x3::rotation_y(angle);
+}
+
+inline float3x3 rotation_z(float angle) noexcept
+{
+    return float3x3::rotation_z(angle);
+}
+
+inline float3x3 rotation_euler(const float3& angles) noexcept
+{
+    return float3x3::rotation_euler(angles);
 }
 
 inline float3 transform_vector(const float3x3& mat, const float3& vec) noexcept {
