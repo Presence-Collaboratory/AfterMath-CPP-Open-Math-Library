@@ -9,6 +9,7 @@
 
 #include <limits>  // std::numeric_limits
 #include <type_traits>  // std::is_floating_point
+#include <cmath>
 
 #include "AfterMathInternal.h"
 
@@ -33,7 +34,7 @@ AFTERMATH_BEGIN
     * precision for float and double types. All values are constexpr for compile-time
     * evaluation.
     */
-namespace Constants {
+    namespace Constants {
 
     // Forward declaration for template specialization
     template<typename T>
