@@ -28,7 +28,7 @@ int main()
     //AfterMathTests::RunFloat3x3Tests();
     //AfterMathTests::RunFloat4x4Tests();
     
-    //AfterMathTests::RunHalfTests();
+    AfterMathTests::RunHalfTests();
     //AfterMathTests::RunHalf2Tests();
     //AfterMathTests::RunHalf3Tests();
     //AfterMathTests::RunHalf4Tests();
