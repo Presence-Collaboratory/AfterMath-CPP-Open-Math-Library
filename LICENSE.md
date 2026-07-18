@@ -1,4 +1,4 @@
-# MIT License with Attribution
+MIT License with Attribution
 
 Copyright (c) 2026 Presence Collaboratory, NSDeathman, DeepSeek & Gemini 3
 
@@ -12,9 +12,17 @@ furnished to do so, subject to the following conditions:
 1. The above copyright notice and this permission notice shall be included in all
    copies or substantial portions of the Software.
 
-2. Any project (commercial, free, open‑source, or closed‑source) using this Software
-   must include attribution to **"Presence AfterMath by Presence Collaboratory"** in its
-   documentation, credits, or about screen.
+2. Any use of the Software, whether in source or binary form, in whole or in part,
+   for any purpose (including but not limited to non‑commercial, commercial,
+   closed‑source, and for‑sale products) must include a clearly visible attribution
+   to **"Presence AfterMath by Presence Collaboratory"** in one or more of the
+   following locations (at your option):
+   - the product's documentation,
+   - the product's credits or about screen,
+   - a text file distributed with the product.
+
+   This attribution requirement applies to derivative works, embedded usage,
+   and any product that incorporates the Software or any part thereof.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -26,5 +34,5 @@ SOFTWARE.
 
 ---
 
-**Developed by:** NSDeathman (Architecture & Core), DeepSeek (Mathematics & HLSL Integration), Gemini 3 (Optimization & Fast Math)  
+**Developed by:** NSDeathman (Architecture & Core), DeepSeek (Mathematics & HLSL Integration), Gemini 3 (Optimization & Fast Math), Nikolay Partas (Half precision data type prototype)  
 **Organization:** Presence Collaboratory
