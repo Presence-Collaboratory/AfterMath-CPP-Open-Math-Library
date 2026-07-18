@@ -2,7 +2,6 @@
 // Unit tests for quaternion class with HLSL-style global functions
 
 #include "AutotestCore.h"
-#include "../AfterMath/math_quaternion.h"
 
 namespace AfterMathTests
 {

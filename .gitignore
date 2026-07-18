@@ -31,6 +31,15 @@
 *.out
 *.app
 
-.vs/*
-bin/*
-intermediate/*
+# Visual Studio temporary files
+.vs/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+
+# CMake
+build/generated*/
+cmake-build*/
+bin/
+intermediate/

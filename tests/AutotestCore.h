@@ -11,7 +11,7 @@
 #include <limits>
 
 // Include the math library
-#include "../AfterMath/AfterMath.h"
+#include "../include/AfterMath.h"
 
 namespace AfterMathTests
 {
@@ -371,6 +371,8 @@ namespace AfterMathTests
                         std::cout << "  - " << result.name << ": " << result.message << std::endl;
                     }
                 }
+                std::cout << "\nPress Enter to continue...";
+                std::cin.get();
             }
 
             std::cout << std::string(70, '=') << std::endl;

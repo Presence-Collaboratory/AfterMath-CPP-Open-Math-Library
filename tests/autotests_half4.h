@@ -1522,19 +1522,19 @@ namespace AfterMathTests
 
         // Test rounding edge values
         {
-            half4 v1(1.4999f, 1.5001f, -1.4999f, -1.5001f);
+            half4 v1(1.49f, 1.51f, -1.49f, -1.51f);
             half4 rounded1 = round(v1);
-            suite.assert_approximately_equal(float(rounded1.x), 1.0f, "round() 1.4999", HALF_EPSILON);
-            suite.assert_approximately_equal(float(rounded1.y), 2.0f, "round() 1.5001", HALF_EPSILON);
-            suite.assert_approximately_equal(float(rounded1.z), -1.0f, "round() -1.4999", HALF_EPSILON);
-            suite.assert_approximately_equal(float(rounded1.w), -2.0f, "round() -1.5001", HALF_EPSILON);
+            suite.assert_approximately_equal(float(rounded1.x), 1.0f, "round() 1.49", HALF_EPSILON);
+            suite.assert_approximately_equal(float(rounded1.y), 2.0f, "round() 1.51", HALF_EPSILON);
+            suite.assert_approximately_equal(float(rounded1.z), -1.0f, "round() -1.49", HALF_EPSILON);
+            suite.assert_approximately_equal(float(rounded1.w), -2.0f, "round() -1.51", HALF_EPSILON);
 
-            half4 v2(-1.5001f, 2.4999f, 2.5001f, -2.4999f);
+            half4 v2(-1.51f, 2.49f, 2.51f, -2.49f);
             half4 rounded2 = round(v2);
-            suite.assert_approximately_equal(float(rounded2.x), -2.0f, "round() -1.5001", HALF_EPSILON);
-            suite.assert_approximately_equal(float(rounded2.y), 2.0f, "round() 2.4999", HALF_EPSILON);
-            suite.assert_approximately_equal(float(rounded2.z), 3.0f, "round() 2.5001", HALF_EPSILON);
-            suite.assert_approximately_equal(float(rounded2.w), -2.0f, "round() -2.4999", HALF_EPSILON);
+            suite.assert_approximately_equal(float(rounded2.x), -2.0f, "round() -1.51", HALF_EPSILON);
+            suite.assert_approximately_equal(float(rounded2.y), 2.0f, "round() 2.49", HALF_EPSILON);
+            suite.assert_approximately_equal(float(rounded2.z), 3.0f, "round() 2.51", HALF_EPSILON);
+            suite.assert_approximately_equal(float(rounded2.w), -2.0f, "round() -2.49", HALF_EPSILON);
         }
 
         // Test floor/ceil edge values
