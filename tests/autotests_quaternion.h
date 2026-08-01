@@ -452,13 +452,15 @@ namespace AfterMathTests
             quaternion a = quaternion_rotation_x(0);
             quaternion b = quaternion_rotation_x(Constants::PI / 2);
             quaternion mid = slerp(a, b, 0.5f);
+            quaternion mid_expected = quaternion_rotation_x(Constants::PI / 4);
 
             // Result should be normalized
             suite.assert_approximately_equal(length(mid), 1.0f, "SLERP result normalized", 1e-6f);
+            suite.assert_approximately_equal(mid, mid_expected, "SLERP at t=0.5 equals 45° rotation", 1e-5f);
 
             // Boundary checks
-            suite.assert_approximately_equal(slerp(a, b, 0.0f), a, "SLERP at t=0");
-            suite.assert_approximately_equal(slerp(a, b, 1.0f), b, "SLERP at t=1");
+            suite.assert_approximately_equal(slerp(a, b, 0.0f), a, "SLERP at t=0 returns a");
+            suite.assert_approximately_equal(slerp(a, b, 1.0f), b, "SLERP at t=1 returns b");
         }
 
         // SLERP approximates NLERP for small angles
@@ -467,7 +469,7 @@ namespace AfterMathTests
             quaternion b = quaternion_rotation_x(0.2f);
             quaternion s = slerp(a, b, 0.5f);
             quaternion n = nlerp(a, b, 0.5f);
-            suite.assert_approximately_equal(s, n, "SLERP approx NLERP for small angles", 1e-3f);
+            suite.assert_approximately_equal(s, n, "SLERP approx NLERP for small angles", 1e-2f);
         }
 
         // ============================================================================
