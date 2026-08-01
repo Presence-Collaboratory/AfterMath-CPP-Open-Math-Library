@@ -134,6 +134,14 @@ namespace AfterMathTests
         }
     }
 
+    inline bool safe_approximately(const quaternion& a, const quaternion& b, float epsilon)
+    {
+        return std::abs(a.x - b.x) <= epsilon &&
+               std::abs(a.y - b.y) <= epsilon &&
+               std::abs(a.z - b.z) <= epsilon &&
+               std::abs(a.w - b.w) <= epsilon;
+    }
+
     template<typename T>
     bool safe_approximately(const TemplateVector2<T>& a, const TemplateVector2<T>& b, float epsilon)
     {
