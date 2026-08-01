@@ -22,19 +22,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Find Visual Studio installation
-        id: vs
-        run: |
-          $vsPath = & "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath
-          echo "VS_PATH=$vsPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          echo "VS_PATH=$vsPath"
-        shell: pwsh
-
-      - name: Setup MSBuild (optional)
+      - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
       - name: Configure CMake
-        run: cmake -S "${{ github.workspace }}" -B "${{ env.BUILD_DIR }}" -G "Visual Studio 17 2022" -A "${{ matrix.platform }}" -DCMAKE_GENERATOR_INSTANCE="${{ env.VS_PATH }}"
+        run: cmake -S "${{ github.workspace }}" -B "${{ env.BUILD_DIR }}" -G "Visual Studio 18 2026" -A "${{ matrix.platform }}"
 
       - name: Build
         run: cmake --build "${{ env.BUILD_DIR }}" --config ${{ matrix.configuration }} --parallel
