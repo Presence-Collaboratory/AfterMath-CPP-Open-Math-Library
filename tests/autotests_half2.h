@@ -5,11 +5,8 @@
 
 namespace AfterMathTests
 {
-    void RunHalf2Tests()
+    void RunHalf2Tests(TestSuite& suite)
     {
-        TestSuite suite("half2 Tests", true);
-        suite.header();
-
         using namespace AfterMath;
 
         // Constants for half tests
@@ -989,7 +986,5 @@ namespace AfterMathTests
             suite.assert_approximately_equal(float(ceiled.x), 2.0f, "ceil() 1.5", HALF_EPSILON);
             suite.assert_approximately_equal(float(ceiled.y), -1.0f, "ceil() -1.5", HALF_EPSILON);
         }
-
-        suite.footer();
     }
 }

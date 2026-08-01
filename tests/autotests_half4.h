@@ -5,11 +5,8 @@
 
 namespace AfterMathTests
 {
-    void RunHalf4Tests()
+    void RunHalf4Tests(TestSuite& suite)
     {
-        TestSuite suite("half4 Tests", true);
-        suite.header();
-
         using namespace AfterMath;
 
         // Constants for half tests
@@ -1649,7 +1646,5 @@ namespace AfterMathTests
             float expected_high = 1.055f * std::pow(0.5f, 1.0f / 2.4f) - 0.055f;
             suite.assert_approximately_equal(float(srgb_high.x), expected_high, "linear_to_srgb() high value x", COLOR_EPSILON);
         }
-
-        suite.footer();
     }
 } // namespace AfterMathTests

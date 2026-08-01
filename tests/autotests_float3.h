@@ -5,11 +5,8 @@
 
 namespace AfterMathTests
 {
-    void RunFloat3Tests()
+    void RunFloat3Tests(TestSuite& suite)
     {
-        TestSuite suite("float3 Tests", true);
-        suite.header();
-
         using namespace AfterMath;
 
         // ============================================================================
@@ -943,7 +940,5 @@ namespace AfterMathTests
             float3 not_orth(1.0f, 1.0f, 0.0f);
             suite.assert_false(are_orthogonal(x, not_orth, 1e-6f), "are_orthogonal() for non-orthogonal vectors");
         }
-
-        suite.footer();
     }
 }

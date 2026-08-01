@@ -7,11 +7,8 @@
 
 namespace AfterMathTests
 {
-    void RunFloat2x2Tests()
+    void RunFloat2x2Tests(TestSuite& suite)
     {
-        TestSuite suite("Float2x2 Tests", true);
-        suite.header();
-
         using namespace AfterMath;
 
         // ============================================================================
@@ -676,7 +673,5 @@ namespace AfterMathTests
             suite.assert_true(is_identity(product, 1e-4f),
                 "complex transformation has valid inverse");
         }
-
-        suite.footer();
     }
 }

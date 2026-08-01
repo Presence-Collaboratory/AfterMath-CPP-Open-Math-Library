@@ -5,11 +5,8 @@
 
 namespace AfterMathTests
 {
-    void RunFloat4Tests()
+    void RunFloat4Tests(TestSuite& suite)
     {
-        TestSuite suite("float4 Tests", true);
-        suite.header();
-
         using namespace AfterMath;
 
         // ============================================================================
@@ -904,7 +901,5 @@ namespace AfterMathTests
             float4 homo3 = to_homogeneous(v3);
             suite.assert_approximately_equal(homo3, float4(2.0f, 3.0f, 4.0f, 1.0f), "to_homogeneous() with w=100");
         }
-
-        suite.footer();
     }
 }

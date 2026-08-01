@@ -5,11 +5,8 @@
 
 namespace AfterMathTests
 {
-    void RunHalf3Tests()
+    void RunHalf3Tests(TestSuite& suite)
     {
-        TestSuite suite("half3 Tests", true);
-        suite.header();
-
         using namespace AfterMath;
 
         // Constants for half tests
@@ -1395,7 +1392,5 @@ namespace AfterMathTests
             // Angle with zero vector is undefined, but implementation returns 0
             suite.assert_approximately_equal(float(angle), 0.0f, "angle_between() with zero vector", HALF_ANGLE_EPSILON);
         }
-
-        suite.footer();
     }
 } // namespace AfterMathTests

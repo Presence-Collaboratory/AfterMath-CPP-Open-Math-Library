@@ -6,7 +6,7 @@
  * Authors:   NSDeathman (Architecture & Core)
  *            DeepSeek (Mathematics & HLSL Integration)
  *            Gemini 3 (Optimization & Fast Math)
- *	      Nikolay Partas (Half precision data type prototype)
+ *			  Nikolay Partas (Half precision data type prototype)
  * License:   MIT License with Attribution — see LICENSE.md for details.
  *
  * https://github.com/Presence-Collaboratory/AfterMath-CPP-Open-Math-Library
@@ -31,18 +31,6 @@
 #include "math_fast_functions.h"
 
 // ============================================================================
-// Matrix Types
-// ============================================================================
-#include "math_float2x2.h"
-#include "math_float3x3.h"
-#include "math_float4x4.h"
-
-// ============================================================================
-// Advanced Types
-// ============================================================================
-#include "math_quaternion.h"
-
-// ============================================================================
 // Vector Types
 // ============================================================================
 #include "math_float2.h"
@@ -58,6 +46,24 @@
 #include "math_template_vector2.h"
 #include "math_template_vector3.h"
 #include "math_template_vector4.h"
+
+// ============================================================================
+// Matrix Types
+// ============================================================================
+#include "math_float2x2.h"
+#include "math_float3x3.h"
+#include "math_float4x4.h"
+
+// ============================================================================
+// Advanced Types
+// ============================================================================
+#include "math_quaternion.h"
+#include "math_rect.h"
+
+// ============================================================================
+// Cross type operations and conversions
+// ============================================================================
+#include "math_type_interop.h"
 
 // ============================================================================
 // Global Using Declarations for Convenience
@@ -109,6 +115,8 @@ using float3x3 = AfterMath::float3x3;
 using float4x4 = AfterMath::float4x4;
 
 using quaternion = AfterMath::quaternion;
+
+using Rect = AfterMath::Rect;
 
 using uint = unsigned int;
 

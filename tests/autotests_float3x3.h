@@ -5,11 +5,8 @@
 
 namespace AfterMathTests
 {
-    void RunFloat3x3Tests()
+    void RunFloat3x3Tests(TestSuite& suite)
     {
-        TestSuite suite("Float3x3 Tests", true);
-        suite.header();
-
         using namespace AfterMath;
 
         // ============================================================================
@@ -735,7 +732,5 @@ namespace AfterMathTests
                 suite.skip_test("Division by zero", "Exception thrown - implementation dependent");
             }
         }
-
-        suite.footer();
     }
 }

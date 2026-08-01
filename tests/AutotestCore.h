@@ -70,11 +70,10 @@ namespace AfterMathTests
     template<typename T>
     bool isinf(T value) noexcept
     {
-        // Только для плавающих типов
         if constexpr (std::is_floating_point_v<T>)
             return std::isinf(value);
         else
-            return false; // Целые числа не могут быть бесконечными
+            return false;
     }
 
     template<typename T>
@@ -83,7 +82,7 @@ namespace AfterMathTests
         if constexpr (std::is_floating_point_v<T>)
             return std::isnan(value);
         else
-            return false; // Целые числа не могут быть NaN
+            return false;
     }
 
     template<typename T>
@@ -92,23 +91,19 @@ namespace AfterMathTests
         if constexpr (std::is_floating_point_v<T>)
             return std::isfinite(value);
         else
-            return true; // Целые числа всегда конечны
+            return true;
     }
 
     // Helper function for safe approximately comparison
     template<typename T>
     bool safe_approximately(const T& a, const T& b, float epsilon)
     {
-        // Для арифметических типов
         if constexpr (std::is_arithmetic_v<T>) {
-            // Для целочисленных типов используем простое сравнение
             if constexpr (std::is_integral_v<T>) {
                 return a == b;
             }
             else {
-                // Для плавающих типов используем signbit и другие проверки
                 if (isinf(a) && isinf(b)) {
-                    // signbit требует плавающий тип, приводим к float
                     return std::signbit(static_cast<float>(a)) == std::signbit(static_cast<float>(b));
                 }
                 if (isnan(a) && isnan(b)) {
@@ -120,14 +115,36 @@ namespace AfterMathTests
                 return std::abs(a - b) <= epsilon;
             }
         }
-        // Для векторных/матричных типов с approximately методом
         else if constexpr (requires { a.approximately(b, epsilon); }) {
             return a.approximately(b, epsilon);
         }
-        // Для других типов (должны иметь operator==)
         else {
             return a == b;
         }
+    }
+
+    template<typename T>
+    bool safe_approximately(const TemplateVector2<T>& a, const TemplateVector2<T>& b, float epsilon)
+    {
+        return safe_approximately(a.x, b.x, epsilon) &&
+            safe_approximately(a.y, b.y, epsilon);
+    }
+
+    template<typename T>
+    bool safe_approximately(const TemplateVector3<T>& a, const TemplateVector3<T>& b, float epsilon)
+    {
+        return safe_approximately(a.x, b.x, epsilon) &&
+            safe_approximately(a.y, b.y, epsilon) &&
+            safe_approximately(a.z, b.z, epsilon);
+    }
+
+    template<typename T>
+    bool safe_approximately(const TemplateVector4<T>& a, const TemplateVector4<T>& b, float epsilon)
+    {
+        return safe_approximately(a.x, b.x, epsilon) &&
+            safe_approximately(a.y, b.y, epsilon) &&
+            safe_approximately(a.z, b.z, epsilon) &&
+            safe_approximately(a.w, b.w, epsilon);
     }
 
     class TestSuite
@@ -159,7 +176,7 @@ namespace AfterMathTests
         // Section management
         void section(const std::string& title)
         {
-            reporter.section(title);
+            if(verbose) reporter.section(title);
         }
 
         // Test lifecycle management
@@ -261,15 +278,13 @@ namespace AfterMathTests
 
         // Alias for assert_equal with more descriptive name for floating-point comparisons
         template<typename T>
-        bool assert_approximately_equal(const T& actual, const T& expected, const std::string& test_name,
-            float epsilon = TestConfig::DEFAULT_EPSILON)
+        bool assert_approximately_equal(const T& actual, const T& expected, const std::string& test_name, float epsilon = TestConfig::DEFAULT_EPSILON)
         {
             return assert_equal(actual, expected, test_name, epsilon);
         }
 
         template<typename T>
-        bool assert_not_equal(const T& actual, const T& expected, const std::string& test_name,
-            float epsilon = TestConfig::DEFAULT_EPSILON)
+        bool assert_not_equal(const T& actual, const T& expected, const std::string& test_name, float epsilon = TestConfig::DEFAULT_EPSILON)
         {
             start_test(test_name);
 
@@ -371,8 +386,6 @@ namespace AfterMathTests
                         std::cout << "  - " << result.name << ": " << result.message << std::endl;
                     }
                 }
-                std::cout << "\nPress Enter to continue...";
-                std::cin.get();
             }
 
             std::cout << std::string(70, '=') << std::endl;

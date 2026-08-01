@@ -5,11 +5,8 @@
 
 namespace AfterMathTests
 {
-    void RunHalfTests()
+    void RunHalfTests(TestSuite& suite)
     {
-        TestSuite suite("half Tests", true);
-        suite.header();
-
         using namespace AfterMath;
 
         // ============================================================================
@@ -652,7 +649,5 @@ namespace AfterMathTests
             suite.assert_approximately_equal(float(i * h), 6.0f, "int * half", 0.002f);
             suite.assert_approximately_equal(float(i / h), 1.5f, "int / half", 0.002f);
         }
-
-        suite.footer();
     }
 }

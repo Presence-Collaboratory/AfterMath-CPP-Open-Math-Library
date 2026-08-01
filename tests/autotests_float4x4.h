@@ -5,11 +5,8 @@
 
 namespace AfterMathTests
 {
-    void RunFloat4x4Tests()
+    void RunFloat4x4Tests(TestSuite& suite)
     {
-        TestSuite suite("Float4x4 Tests", true);
-        suite.header();
-
         using namespace AfterMath;
 
         // ============================================================================
@@ -859,7 +856,5 @@ namespace AfterMathTests
             suite.assert_approximately_equal(projectedNear.y, -1.0f, "ortho: bottom edge projects to -1", 1e-5f);
             suite.assert_approximately_equal(projectedFar.z, 1.0f, "ortho: far plane projects to 1", 1e-5f);
         }
-
-        suite.footer();
     }
 }

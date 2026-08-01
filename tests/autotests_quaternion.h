@@ -5,11 +5,8 @@
 
 namespace AfterMathTests
 {
-    void RunQuaternionTests()
+    void RunQuaternionTests(TestSuite& suite)
     {
-        TestSuite suite("Quaternion Tests");
-        suite.header();
-
         using namespace AfterMath;
 
         // ============================================================================
@@ -654,7 +651,5 @@ namespace AfterMathTests
             suite.assert_approximately_equal(length(normalized), 1.0f,
                 "Normalization of tiny quaternion", 1e-6f);
         }
-
-        suite.footer();
     }
 }

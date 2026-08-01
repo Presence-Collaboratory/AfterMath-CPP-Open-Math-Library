@@ -5,11 +5,8 @@
 
 namespace AfterMathTests
 {
-    void RunFloat2Tests()
+    void RunFloat2Tests(TestSuite& suite)
     {
-        TestSuite suite("float2 Tests (HLSL Syntax)", true);
-        suite.header();
-
         using namespace AfterMath;
 
         const float PI = 3.14159265358979323846f;
@@ -802,7 +799,5 @@ namespace AfterMathTests
             float2 zero(0.0f, 0.0f);
             suite.assert_false(std::abs(length_sq(zero) - 1.0f) <= EPSILON, "Zero vector is not normalized");
         }
-
-        suite.footer();
     }
 }

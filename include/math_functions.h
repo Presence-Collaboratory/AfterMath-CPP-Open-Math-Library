@@ -6,7 +6,7 @@
  * Authors:   NSDeathman (Architecture & Core)
  *            DeepSeek (Mathematics & HLSL Integration)
  *            Gemini 3 (Optimization & Fast Math)
- *	      Nikolay Partas (Half precision data type prototype)
+ *			  Nikolay Partas (Half precision data type prototype)
  * License:   MIT License with Attribution — see LICENSE.md for details.
  *
  * https://github.com/Presence-Collaboratory/AfterMath-CPP-Open-Math-Library
@@ -194,7 +194,7 @@ AFTERMATH_BEGIN
         * @return True if a > b + epsilon
         */
     template<typename T>
-    constexpr bool greater_than(T a, T b, T epsilon = Constants<T>::Epsilon) noexcept {
+    constexpr bool greater_than(T a, T b, T epsilon = Constants::Constants<T>::Epsilon) noexcept {
         static_assert(std::is_floating_point_v<T>, "T must be a floating-point type");
         return a > b + epsilon;
     }
@@ -208,7 +208,7 @@ AFTERMATH_BEGIN
         * @return True if a < b - epsilon
         */
     template<typename T>
-    constexpr bool less_than(T a, T b, T epsilon = Constants<T>::Epsilon) noexcept {
+    constexpr bool less_than(T a, T b, T epsilon = Constants::Constants<T>::Epsilon) noexcept {
         static_assert(std::is_floating_point_v<T>, "T must be a floating-point type");
         return a < b - epsilon;
     }
@@ -222,7 +222,7 @@ AFTERMATH_BEGIN
         * @return True if a >= b - epsilon
         */
     template<typename T>
-    constexpr bool greater_than_or_equal(T a, T b, T epsilon = Constants<T>::Epsilon) noexcept {
+    constexpr bool greater_than_or_equal(T a, T b, T epsilon = Constants::Constants<T>::Epsilon) noexcept {
         static_assert(std::is_floating_point_v<T>, "T must be a floating-point type");
         return a >= b - epsilon;
     }
@@ -236,7 +236,7 @@ AFTERMATH_BEGIN
         * @return True if a <= b + epsilon
         */
     template<typename T>
-    constexpr bool less_than_or_equal(T a, T b, T epsilon = Constants<T>::Epsilon) noexcept {
+    constexpr bool less_than_or_equal(T a, T b, T epsilon = Constants::Constants<T>::Epsilon) noexcept {
         static_assert(std::is_floating_point_v<T>, "T must be a floating-point type");
         return a <= b + epsilon;
     }
