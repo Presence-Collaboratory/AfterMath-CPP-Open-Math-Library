@@ -15,17 +15,23 @@ jobs:
       fail-fast: false
       matrix:
         configuration: [Debug, Release]
-        platform: [x64, Win32]          # x86-64 and x86
-    runs-on: windows-latest             # Visual Studio 2022, Windows Server 2022
+        platform: [x64, Win32]
+    runs-on: windows-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Visual Studio environment
-        uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: ${{ matrix.platform == 'Win32' && 'x86' || 'amd64' }}
+      - name: Find Visual Studio installation
+        id: vs
+        run: |
+          $vsPath = & "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath
+          echo "VS_PATH=$vsPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          echo "VS_PATH=$vsPath"
+        shell: pwsh
+
+      - name: Setup MSBuild (optional)
+        uses: microsoft/setup-msbuild@v2
 
       - name: Configure CMake
         run: >
@@ -33,6 +39,7 @@ jobs:
                 -B "${{ env.BUILD_DIR }}"
                 -G "Visual Studio 17 2022"
                 -A "${{ matrix.platform }}"
+                -DCMAKE_GENERATOR_INSTANCE="${{ env.VS_PATH }}"
 
       - name: Build
         run: cmake --build "${{ env.BUILD_DIR }}" --config ${{ matrix.configuration }} --parallel
@@ -41,7 +48,7 @@ jobs:
         working-directory: ${{ env.BUILD_DIR }}
         run: ctest -C ${{ matrix.configuration }} --output-on-failure
 
-      - name: Upload test executable (artifact)
+      - name: Upload test executable
         if: always()
         uses: actions/upload-artifact@v4
         with:
