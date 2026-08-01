@@ -9,6 +9,7 @@
 #include <chrono>
 #include <sstream>
 #include <limits>
+#include <type_traits>
 
 // Include the math library
 #include "../include/AfterMath.h"
@@ -16,6 +17,20 @@
 namespace AfterMathTests
 {
     using namespace AfterMath;
+
+    namespace detail {
+        template<typename T, typename = void>
+        struct has_to_string : std::false_type {};
+
+        template<typename T>
+        struct has_to_string<T, std::void_t<decltype(std::declval<const T&>().to_string())>> : std::true_type {};
+
+        template<typename T, typename = void>
+        struct has_ostream_output : std::false_type {};
+
+        template<typename T>
+        struct has_ostream_output<T, std::void_t<decltype(std::declval<std::ostream&>() << std::declval<const T&>())>> : std::true_type {};
+    }
 
     // ============================================================================
     // Test Configuration
@@ -94,7 +109,6 @@ namespace AfterMathTests
             return true;
     }
 
-    // Helper function for safe approximately comparison
     template<typename T>
     bool safe_approximately(const T& a, const T& b, float epsilon)
     {
@@ -114,9 +128,6 @@ namespace AfterMathTests
                 }
                 return std::abs(a - b) <= epsilon;
             }
-        }
-        else if constexpr (requires { a.approximately(b, epsilon); }) {
-            return a.approximately(b, epsilon);
         }
         else {
             return a == b;
@@ -240,11 +251,11 @@ namespace AfterMathTests
                     oss << value;
                 }
             }
-            else if constexpr (requires { value.to_string(); })
+            else if constexpr (detail::has_to_string<T>::value)
             {
                 oss << value.to_string();
             }
-            else if constexpr (requires { oss << value; })
+            else if constexpr (detail::has_ostream_output<T>::value)
             {
                 oss << value;
             }
