@@ -2,7 +2,6 @@
 
 ![C++](https://img.shields.io/badge/C%2B%2B-23-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Discord](https://img.shields.io/discord/1447254294763012271?style=for-the-badge)
 
 
 **AfterMath** is a fully open-source mathematics library with HLSL-like syntax and SSE acceleration, available for commercial use.  
