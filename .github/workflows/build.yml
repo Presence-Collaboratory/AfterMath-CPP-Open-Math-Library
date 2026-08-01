@@ -34,12 +34,7 @@ jobs:
         uses: microsoft/setup-msbuild@v2
 
       - name: Configure CMake
-        run: >
-          cmake -S "${{ github.workspace }}"
-                -B "${{ env.BUILD_DIR }}"
-                -G "Visual Studio 17 2022"
-                -A "${{ matrix.platform }}"
-                -DCMAKE_GENERATOR_INSTANCE="${{ env.VS_PATH }}"
+        run: cmake -S "${{ github.workspace }}" -B "${{ env.BUILD_DIR }}" -G "Visual Studio 17 2022" -A "${{ matrix.platform }}" -DCMAKE_GENERATOR_INSTANCE="${{ env.VS_PATH }}"
 
       - name: Build
         run: cmake --build "${{ env.BUILD_DIR }}" --config ${{ matrix.configuration }} --parallel
