@@ -22,8 +22,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v2
+      - name: Setup Visual Studio environment
+        uses: ilammy/msvc-dev-cmd@v1
+  	with:
+    	  arch: ${{ matrix.platform == 'Win32' && 'x86' || 'amd64' }}
 
       - name: Configure CMake
         run: >
