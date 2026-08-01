@@ -2,6 +2,7 @@
 
 ![C++](https://img.shields.io/badge/C%2B%2B-23-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
+![GitHub repo file or directory count](https://img.shields.io/github/directory-file-count/:user/https%3A%2F%2Fgithub.com%2FPresence-Collaboratory%2FAfterMath-CPP-Open-Math-Library)
 
 
 **AfterMath** is a fully open-source mathematics library with HLSL-like syntax and SSE acceleration, available for commercial use.  
