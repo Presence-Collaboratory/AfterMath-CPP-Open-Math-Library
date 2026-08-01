@@ -1,0 +1,42 @@
+name: Daily Tests
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+env:
+  BUILD_DIR: ${{ github.workspace }}/build
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration: [Debug, Release]
+        platform: [x64, Win32]   # x86-64 и x86
+    runs-on: windows-latest      # Visual Studio 2022
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure CMake
+        run: cmake -S "${{ github.workspace }}" -B "${{ env.BUILD_DIR }}" -G "Visual Studio 17 2022" -A "${{ matrix.platform }}"
+
+      - name: Build
+        run: cmake --build "${{ env.BUILD_DIR }}" --config ${{ matrix.configuration }} --parallel
+
+      - name: Test
+        working-directory: ${{ env.BUILD_DIR }}
+        run: ctest -C ${{ matrix.configuration }} --output-on-failure
+
+      - name: Upload test executable (artifact)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: AfterMathTests-Daily-${{ matrix.platform }}-${{ matrix.configuration }}
+          path: ${{ env.BUILD_DIR }}/tests/${{ matrix.configuration }}/AfterMathTests.exe
+          if-no-files-found: ignore

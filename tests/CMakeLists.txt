@@ -38,3 +38,6 @@ set_source_files_properties(
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX "Tests" FILES ${TEST_SOURCES_CPP} ${TEST_HEADERS})
 
 source_group(TREE ${CMAKE_SOURCE_DIR}/include PREFIX "AfterMath" FILES ${AFTERMATH_HEADERS})
+
+enable_testing()
+add_test(NAME AfterMathTests COMMAND AfterMathTests)
