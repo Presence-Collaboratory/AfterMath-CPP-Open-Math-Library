@@ -1,10 +1,18 @@
 # AfterMath
 
-![C++](https://img.shields.io/badge/C%2B%2B-23-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
-![Build](https://img.shields.io/badge/cmake-green?logo=cmake)
-
-
+<p align="center">
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="License"></a>
+  <img src="https://img.shields.io/badge/C%2B%2B-23-blue" alt="C++ Standard">
+  <a href="https://github.com/Presence-Collaboratory/AfterMath-CPP-Open-Math-Library/actions/workflows/build.yml">
+    <img src="https://github.com/Presence-Collaboratory/AfterMath-CPP-Open-Math-Library/actions/workflows/build.yml/badge.svg" alt="Build Status">
+  </a>
+  <a href="https://github.com/Presence-Collaboratory/AfterMath-CPP-Open-Math-Library/stargazers">
+    <img src="https://img.shields.io/github/stars/Presence-Collaboratory/AfterMath-CPP-Open-Math-Library?style=social" alt="Stars">
+  </a>
+  <a href="https://discord.gg/XXvxtnDbBP">
+    <img src="https://img.shields.io/discord/308323056592486420?logo=discord&logoColor=white" alt="Discord">
+  </a>
+</p>
 
 **AfterMath** is a fully open-source mathematics library with HLSL-like syntax and SSE acceleration, available for commercial use.  
 The library supports C++14, C++17, and C++20 standards and requires SSE4.2 instructions.
