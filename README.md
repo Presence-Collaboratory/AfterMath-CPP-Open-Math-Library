@@ -2,7 +2,7 @@
 
 ![C++](https://img.shields.io/badge/C%2B%2B-23-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![GitHub repo file or directory count](https://img.shields.io/github/directory-file-count/https%3A%2F%2Fgithub.com%2FNSDeathman/https%3A%2F%2Fgithub.com%2FPresence-Collaboratory%2FAfterMath-CPP-Open-Math-Library)
+![Build](https://img.shields.io/badge/cmake-green?logo=cmake)
 
 
 
