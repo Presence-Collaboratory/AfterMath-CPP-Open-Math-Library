@@ -25,8 +25,8 @@ jobs:
 
       - name: Setup Visual Studio environment
         uses: ilammy/msvc-dev-cmd@v1
-  	with:
-    	  arch: ${{ matrix.platform == 'Win32' && 'x86' || 'amd64' }}
+        with:
+          arch: ${{ matrix.platform == 'Win32' && 'x86' || 'amd64' }}
 
       - name: Configure CMake
         run: cmake -S "${{ github.workspace }}" -B "${{ env.BUILD_DIR }}" -G "Visual Studio 17 2022" -A "${{ matrix.platform }}"

@@ -24,8 +24,8 @@ jobs:
 
       - name: Setup Visual Studio environment
         uses: ilammy/msvc-dev-cmd@v1
-  	with:
-    	  arch: ${{ matrix.platform == 'Win32' && 'x86' || 'amd64' }}
+        with:
+          arch: ${{ matrix.platform == 'Win32' && 'x86' || 'amd64' }}
 
       - name: Configure CMake
         run: >
