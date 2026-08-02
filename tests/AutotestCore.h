@@ -302,6 +302,18 @@ namespace AfterMathTests
             return assert_equal(actual, expected, test_name, epsilon);
         }
 
+        bool assert_approximately_equal(const TemplateVector2<float>& actual, const float2& expected,
+            const std::string& test_name, float epsilon = TestConfig::DEFAULT_EPSILON)
+        {
+            return assert_approximately_equal(actual, TemplateVector2<float>(expected.x, expected.y), test_name, epsilon);
+        }
+
+        bool assert_approximately_equal(const float2& actual, const TemplateVector2<float>& expected,
+            const std::string& test_name, float epsilon = TestConfig::DEFAULT_EPSILON)
+        {
+            return assert_approximately_equal(TemplateVector2<float>(actual.x, actual.y), expected, test_name, epsilon);
+        }
+
         template<typename T>
         bool assert_not_equal(const T& actual, const T& expected, const std::string& test_name, float epsilon = TestConfig::DEFAULT_EPSILON)
         {
